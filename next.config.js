@@ -20,6 +20,25 @@ const nextConfig = {
     // Allow function props in client components (they're safe between client components)
     ignoreBuildErrors: false,
   },
+  
+  // Webpack configuration to handle chunk loading errors
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Handle chunk loading errors on client side
+      config.optimization = {
+        ...config.optimization,
+        moduleIds: 'deterministic',
+        runtimeChunk: 'single',
+      };
+    }
+    return config;
+  },
+  
+  // Generate stable build IDs to prevent chunk mismatches
+  generateBuildId: async () => {
+    // Use a consistent build ID based on git commit or timestamp
+    return process.env.VERCEL_GIT_COMMIT_SHA || `build-${Date.now()}`;
+  },
 };
 
 module.exports = nextConfig;

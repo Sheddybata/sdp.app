@@ -5,6 +5,7 @@ import { AppShell } from "@/components/AppShell";
 import { TrustSignals } from "@/components/TrustSignals";
 import { LanguageProvider } from "@/lib/i18n/context";
 import { ServiceWorkerRegistration } from "./sw-register";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 
 export const metadata: Metadata = {
   title: "SDP Member Portal",
@@ -35,15 +36,18 @@ export default function RootLayout({
   return (
     <html lang="en" dir="ltr">
       <body className="min-h-screen bg-neutral-50 text-neutral-900 antialiased flex flex-col">
-        <LanguageProvider>
-          <AppShell />
-          <div className="flex-1 flex flex-col">{children}</div>
-          <footer className="border-t border-neutral-200 bg-white py-4 text-center" role="contentinfo">
-            <TrustSignals compact />
-          </footer>
-          <OfflineBanner />
-          <ServiceWorkerRegistration />
-        </LanguageProvider>
+        <ChunkErrorHandler />
+        <ErrorBoundary>
+          <LanguageProvider>
+            <AppShell />
+            <div className="flex-1 flex flex-col">{children}</div>
+            <footer className="border-t border-neutral-200 bg-white py-4 text-center" role="contentinfo">
+              <TrustSignals compact />
+            </footer>
+            <OfflineBanner />
+            <ServiceWorkerRegistration />
+          </LanguageProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
