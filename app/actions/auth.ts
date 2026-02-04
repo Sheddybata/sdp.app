@@ -2,6 +2,7 @@
 
 import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 
 // Read environment variables dynamically (not at module level to avoid caching issues)
 function getAdminEmail() {
@@ -33,6 +34,43 @@ const SESSION_COOKIE_NAME = "admin_session";
 
 function getSessionSecret() {
   return process.env.SESSION_SECRET?.trim() || "change-this-secret-in-production";
+}
+
+function signSessionPayload(payload: string): string {
+  const secret = getSessionSecret();
+  return crypto.createHmac("sha256", secret).update(payload).digest("hex");
+}
+
+function createSessionToken(email: string): string {
+  const timestamp = Date.now();
+  const payload = `${email}:${timestamp}`;
+  const signature = signSessionPayload(payload);
+  return Buffer.from(`${payload}:${signature}`).toString("base64");
+}
+
+function verifySessionToken(token: string | undefined): boolean {
+  if (!token) return false;
+  try {
+    const decoded = Buffer.from(token, "base64").toString("utf-8");
+    const [emailRaw, tsRaw, signature] = decoded.split(":");
+    if (!emailRaw || !tsRaw || !signature) return false;
+
+    const payload = `${emailRaw}:${tsRaw}`;
+    const expectedSignature = signSessionPayload(payload);
+
+    const sigA = Buffer.from(signature, "hex");
+    const sigB = Buffer.from(expectedSignature, "hex");
+    if (sigA.length !== sigB.length) return false;
+
+    if (!crypto.timingSafeEqual(sigA, sigB)) return false;
+
+    const ts = Number(tsRaw);
+    if (!Number.isFinite(ts)) return false;
+
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 export interface LoginResult {
@@ -101,8 +139,8 @@ export async function login(email: string, password: string): Promise<LoginResul
       console.log('[AUTH] ✅ Password hash matched');
     }
 
-    // Create session token (simple implementation)
-    const sessionToken = Buffer.from(`${email}:${Date.now()}`).toString("base64");
+    // Create signed session token
+    const sessionToken = createSessionToken(email);
     console.log('[AUTH] Session token created');
     
     // Set cookie
@@ -140,14 +178,13 @@ export async function isAuthenticated(): Promise<boolean> {
       return false;
     }
 
-    // Verify session token format
-    try {
-      const decoded = Buffer.from(session.value, "base64").toString("utf-8");
-      const [email] = decoded.split(":");
-      return email === ADMIN_EMAIL;
-    } catch {
+    if (!verifySessionToken(session.value)) {
       return false;
     }
+
+    const decoded = Buffer.from(session.value, "base64").toString("utf-8");
+    const [email] = decoded.split(":");
+    return email?.trim().toLowerCase() === ADMIN_EMAIL.trim().toLowerCase();
   } catch {
     return false;
   }

@@ -15,15 +15,34 @@ function getAdminEmail(): string {
   return (process.env.ADMIN_EMAIL || "admin@sdp.org").trim().toLowerCase();
 }
 
+function getSessionSecret(): string {
+  return (process.env.SESSION_SECRET || "change-this-secret-in-production").trim();
+}
+
 const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
 
-function isValidSessionToken(token: string | undefined): boolean {
+async function hmacSha256Hex(secret: string, data: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secret),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(data));
+  return Array.from(new Uint8Array(signature))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+async function isValidSessionToken(token: string | undefined): Promise<boolean> {
   if (!token) return false;
   const decoded = decodeBase64(token);
   if (!decoded || !decoded.includes(":")) return false;
 
-  const [emailRaw, tsRaw] = decoded.split(":");
-  if (!emailRaw || !tsRaw) return false;
+  const [emailRaw, tsRaw, signature] = decoded.split(":");
+  if (!emailRaw || !tsRaw || !signature) return false;
 
   const email = emailRaw.trim().toLowerCase();
   const expectedEmail = getAdminEmail();
@@ -34,6 +53,10 @@ function isValidSessionToken(token: string | undefined): boolean {
 
   const ageSeconds = (Date.now() - ts) / 1000;
   if (ageSeconds < 0 || ageSeconds > SESSION_MAX_AGE_SECONDS) return false;
+
+  const payload = `${emailRaw}:${tsRaw}`;
+  const expectedSignature = await hmacSha256Hex(getSessionSecret(), payload);
+  if (signature !== expectedSignature) return false;
 
   return true;
 }
@@ -51,7 +74,7 @@ export async function middleware(request: NextRequest) {
     // Basic validation - full validation happens in server actions
     // Just check that cookie exists and has a value
     try {
-      if (!isValidSessionToken(sessionCookie.value)) {
+      if (!(await isValidSessionToken(sessionCookie.value))) {
         // Invalid session format or expired, redirect to login
         const response = NextResponse.redirect(new URL("/admin/login", request.url));
         response.cookies.delete("admin_session");
@@ -71,7 +94,7 @@ export async function middleware(request: NextRequest) {
     
     if (sessionCookie?.value) {
       try {
-        if (isValidSessionToken(sessionCookie.value)) {
+        if (await isValidSessionToken(sessionCookie.value)) {
           // Session exists, redirect to dashboard
           return NextResponse.redirect(new URL("/admin", request.url));
         }
