@@ -36,8 +36,13 @@ const nextConfig = {
   
   // Generate stable build IDs to prevent chunk mismatches
   generateBuildId: async () => {
-    // Use a consistent build ID based on git commit or timestamp
-    return process.env.VERCEL_GIT_COMMIT_SHA || `build-${Date.now()}`;
+    // Use Vercel's git commit SHA if available, otherwise let Next.js generate one
+    // This ensures consistent chunk names across deployments
+    if (process.env.VERCEL_GIT_COMMIT_SHA) {
+      return process.env.VERCEL_GIT_COMMIT_SHA.substring(0, 12); // Use first 12 chars
+    }
+    // Let Next.js generate a build ID automatically for local builds
+    return null;
   },
 };
 

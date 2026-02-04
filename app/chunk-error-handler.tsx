@@ -19,10 +19,28 @@ export function ChunkErrorHandler() {
         errorString.includes("ChunkLoadError") ||
         errorString.includes("Failed to fetch dynamically imported module")
       ) {
-        console.warn("Chunk loading error detected, reloading page...", error);
+        console.warn("Chunk loading error detected, clearing cache and reloading...", error);
         event.preventDefault();
         
-        // Reload after a short delay to allow error to be logged
+        // Clear all caches to remove stale chunks
+        if (typeof caches !== "undefined") {
+          caches.keys().then((cacheNames) => {
+            cacheNames.forEach((cacheName) => {
+              caches.delete(cacheName);
+            });
+          });
+        }
+        
+        // Unregister service worker to force fresh fetch
+        if (navigator.serviceWorker) {
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            registrations.forEach((registration) => {
+              registration.unregister();
+            });
+          });
+        }
+        
+        // Reload after a short delay to allow cache clearing
         setTimeout(() => {
           window.location.reload();
         }, 1000);
@@ -45,8 +63,26 @@ export function ChunkErrorHandler() {
         errorString.includes("Loading chunk") ||
         errorString.includes("ChunkLoadError")
       ) {
-        console.warn("Chunk loading promise rejection detected, reloading page...", reason);
+        console.warn("Chunk loading promise rejection detected, clearing cache and reloading...", reason);
         event.preventDefault();
+        
+        // Clear all caches to remove stale chunks
+        if (typeof caches !== "undefined") {
+          caches.keys().then((cacheNames) => {
+            cacheNames.forEach((cacheName) => {
+              caches.delete(cacheName);
+            });
+          });
+        }
+        
+        // Unregister service worker to force fresh fetch
+        if (navigator.serviceWorker) {
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            registrations.forEach((registration) => {
+              registration.unregister();
+            });
+          });
+        }
         
         setTimeout(() => {
           window.location.reload();

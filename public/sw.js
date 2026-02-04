@@ -1,14 +1,14 @@
 // Service Worker for SDP Member Portal PWA
 // Provides offline caching and improved performance
 
-const CACHE_NAME = 'sdp-portal-v1';
-const RUNTIME_CACHE = 'sdp-runtime-v1';
+const CACHE_NAME = 'sdp-portal-v2'; // Updated version to force cache refresh
+const RUNTIME_CACHE = 'sdp-runtime-v2';
 
 // Assets to cache immediately on install
+// Note: Excluding /admin routes as they require authentication and redirects
 const STATIC_ASSETS = [
   '/',
   '/enroll',
-  '/admin',
   '/icon-192.png',
   '/icon-512.png',
   '/sdplogo.jpg',
@@ -62,16 +62,49 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
+  const url = new URL(event.request.url);
+  
+  // Skip admin routes - they require authentication and redirects
+  // Service workers can't properly handle redirects, so always use network
+  if (url.pathname.startsWith('/admin')) {
+    return; // Let browser handle it normally
+  }
+
+  // Skip Next.js chunks and build files - always use network to prevent stale chunks
+  if (url.pathname.startsWith('/_next/static/') || url.pathname.startsWith('/_next/webpack')) {
+    return; // Always fetch fresh chunks from network
+  }
+
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
+      // For navigation requests, prefer network first to get latest content
+      if (event.request.mode === 'navigate') {
+        return fetch(event.request, { redirect: 'follow' })
+          .then((response) => {
+            // Only cache successful navigation responses
+            if (response && response.status === 200 && response.type === 'basic') {
+              const responseToCache = response.clone();
+              caches.open(RUNTIME_CACHE).then((cache) => {
+                cache.put(event.request, responseToCache);
+              });
+            }
+            return response;
+          })
+          .catch(() => {
+            // If network fails, try cache
+            return cachedResponse || caches.match('/');
+          });
+      }
+
+      // For other requests, use cache first
       if (cachedResponse) {
         return cachedResponse;
       }
 
-      return fetch(event.request)
+      return fetch(event.request, { redirect: 'follow' })
         .then((response) => {
-          // Don't cache non-successful responses
-          if (!response || response.status !== 200 || response.type !== 'basic') {
+          // Don't cache redirects or non-successful responses
+          if (!response || response.status !== 200 || response.type !== 'basic' || response.redirected) {
             return response;
           }
 

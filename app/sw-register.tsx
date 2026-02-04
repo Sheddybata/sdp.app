@@ -13,10 +13,32 @@ export function ServiceWorkerRegistration() {
       "serviceWorker" in navigator &&
       process.env.NODE_ENV === "production"
     ) {
+      // Unregister old service workers first to clear stale caches
+      navigator.serviceWorker.getRegistrations().then((registrations) => {
+        registrations.forEach((registration) => {
+          // Check if this is an old version
+          if (registration.scope.includes(window.location.origin)) {
+            registration.unregister().then(() => {
+              console.log("Old service worker unregistered");
+              // Clear all caches
+              caches.keys().then((cacheNames) => {
+                cacheNames.forEach((cacheName) => {
+                  caches.delete(cacheName);
+                });
+              });
+            });
+          }
+        });
+      });
+
+      // Register new service worker
       navigator.serviceWorker
-        .register("/sw.js")
+        .register("/sw.js", { updateViaCache: "none" }) // Always check for updates
         .then((registration) => {
           console.log("Service Worker registered:", registration.scope);
+
+          // Force immediate update check
+          registration.update();
 
           // Check for updates periodically
           setInterval(() => {
@@ -28,12 +50,24 @@ export function ServiceWorkerRegistration() {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener("statechange", () => {
-                if (newWorker.state === "installed" && navigator.serviceWorker.controller) {
-                  // New service worker available, prompt user to refresh
-                  console.log("New service worker available");
+                if (newWorker.state === "installed") {
+                  if (navigator.serviceWorker.controller) {
+                    // New service worker available, reload to activate
+                    console.log("New service worker available, reloading...");
+                    window.location.reload();
+                  } else {
+                    // First time installation
+                    console.log("Service worker installed for the first time");
+                  }
                 }
               });
             }
+          });
+
+          // Handle controller change (new service worker activated)
+          navigator.serviceWorker.addEventListener("controllerchange", () => {
+            console.log("Service worker controller changed, reloading...");
+            window.location.reload();
           });
         })
         .catch((error) => {
