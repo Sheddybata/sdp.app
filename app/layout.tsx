@@ -6,6 +6,12 @@ import { TrustSignals } from "@/components/TrustSignals";
 import { LanguageProvider } from "@/lib/i18n/context";
 import { ServiceWorkerRegistration } from "./sw-register";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import dynamic from "next/dynamic";
+
+// Dynamically import chunk error handler to avoid SSR issues
+const ChunkErrorHandler = dynamic(() => import("./chunk-error-handler").then(mod => ({ default: mod.ChunkErrorHandler })), {
+  ssr: false,
+});
 
 export const metadata: Metadata = {
   title: "SDP Member Portal",
