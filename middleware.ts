@@ -11,6 +11,33 @@ function decodeBase64(str: string): string {
   }
 }
 
+function getAdminEmail(): string {
+  return (process.env.ADMIN_EMAIL || "admin@sdp.org").trim().toLowerCase();
+}
+
+const SESSION_MAX_AGE_SECONDS = 60 * 60 * 24 * 7; // 7 days
+
+function isValidSessionToken(token: string | undefined): boolean {
+  if (!token) return false;
+  const decoded = decodeBase64(token);
+  if (!decoded || !decoded.includes(":")) return false;
+
+  const [emailRaw, tsRaw] = decoded.split(":");
+  if (!emailRaw || !tsRaw) return false;
+
+  const email = emailRaw.trim().toLowerCase();
+  const expectedEmail = getAdminEmail();
+  if (email !== expectedEmail) return false;
+
+  const ts = Number(tsRaw);
+  if (!Number.isFinite(ts)) return false;
+
+  const ageSeconds = (Date.now() - ts) / 1000;
+  if (ageSeconds < 0 || ageSeconds > SESSION_MAX_AGE_SECONDS) return false;
+
+  return true;
+}
+
 export async function middleware(request: NextRequest) {
   // Only protect /admin routes (except /admin/login)
   if (request.nextUrl.pathname.startsWith("/admin") && !request.nextUrl.pathname.startsWith("/admin/login")) {
@@ -24,9 +51,8 @@ export async function middleware(request: NextRequest) {
     // Basic validation - full validation happens in server actions
     // Just check that cookie exists and has a value
     try {
-      const decoded = decodeBase64(sessionCookie.value);
-      if (!decoded || !decoded.includes(":")) {
-        // Invalid session format, redirect to login
+      if (!isValidSessionToken(sessionCookie.value)) {
+        // Invalid session format or expired, redirect to login
         const response = NextResponse.redirect(new URL("/admin/login", request.url));
         response.cookies.delete("admin_session");
         return response;
@@ -45,9 +71,8 @@ export async function middleware(request: NextRequest) {
     
     if (sessionCookie?.value) {
       try {
-        const decoded = decodeBase64(sessionCookie.value);
-        if (decoded && decoded.includes(":")) {
-          // Session exists, redirect to dashboard (full validation happens server-side)
+        if (isValidSessionToken(sessionCookie.value)) {
+          // Session exists, redirect to dashboard
           return NextResponse.redirect(new URL("/admin", request.url));
         }
       } catch {
