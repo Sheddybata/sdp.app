@@ -1,6 +1,32 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+
+  // Prevent CDN/browser from caching HTML so users always get current chunk references
+  async headers() {
+    return [
+      // Static chunks are content-hashed; long cache is safe
+      {
+        source: "/_next/static/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      // HTML and data: do not cache so deploy always serves current chunk names
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-store, must-revalidate",
+          },
+        ],
+      },
+    ];
+  },
   // PWA configuration
   // Service worker is registered client-side in sw-register.tsx
   // Static assets are served from public/ directory

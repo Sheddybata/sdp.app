@@ -1,14 +1,12 @@
 // Service Worker for SDP Member Portal PWA
 // Provides offline caching and improved performance
 
-const CACHE_NAME = 'sdp-portal-v2'; // Updated version to force cache refresh
-const RUNTIME_CACHE = 'sdp-runtime-v2';
+const CACHE_NAME = 'sdp-portal-v3';
+const RUNTIME_CACHE = 'sdp-runtime-v3';
 
 // Assets to cache immediately on install
-// Note: Excluding /admin routes as they require authentication and redirects
+// Do NOT cache "/" or any HTML - they reference chunk filenames that change per deploy
 const STATIC_ASSETS = [
-  '/',
-  '/enroll',
   '/icon-192.png',
   '/icon-512.png',
   '/sdplogo.jpg',
@@ -77,22 +75,18 @@ self.addEventListener('fetch', (event) => {
 
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
-      // For navigation requests, prefer network first to get latest content
+      // For navigation (HTML document): always use network, never cache
+      // Cached HTML would reference old chunk filenames and cause ChunkLoadError after deploy
       if (event.request.mode === 'navigate') {
         return fetch(event.request, { redirect: 'follow' })
           .then((response) => {
-            // Only cache successful navigation responses
-            if (response && response.status === 200 && response.type === 'basic') {
-              const responseToCache = response.clone();
-              caches.open(RUNTIME_CACHE).then((cache) => {
-                cache.put(event.request, responseToCache);
-              });
-            }
             return response;
           })
           .catch(() => {
-            // If network fails, try cache
-            return cachedResponse || caches.match('/');
+            return cachedResponse || caches.match('/icon-192.png').then(() => new Response(
+              '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Offline</title></head><body><p>You are offline. Try again when connected.</p><button onclick="location.reload()">Retry</button></body></html>',
+              { headers: { 'Content-Type': 'text/html' } }
+            ));
           });
       }
 
