@@ -1,0 +1,51 @@
+Copy these values EXACTLY into Vercel Environment Variables:
+
+========================================
+1. NEXT_PUBLIC_SUPABASE_URL
+========================================
+https://soynrliuukpmnslljvrp.supabase.co
+
+========================================
+2. NEXT_PUBLIC_SUPABASE_ANON_KEY
+========================================
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNveW5ybGl1dWtwbW5zbGxqdnJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAyMDYwNDQsImV4cCI6MjA4NTc4MjA0NH0.bTlGWCAF9RVwZDgVBEOJu_umwBFhrgfbigms9-Wr9-0
+
+========================================
+3. SUPABASE_SERVICE_ROLE_KEY
+========================================
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNveW5ybGl1dWtwbW5zbGxqdnJwIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc3MDIwNjA0NCwiZXhwIjoyMDg1NzgyMDQ0fQ.QSeTcZ54EYCrWIT0_hFOuyeCbs4B-q6YG8Hqpi68F9s
+
+========================================
+4. ADMIN_EMAIL
+========================================
+admin@sdp.org
+
+========================================
+5. ADMIN_PASSWORD_HASH
+⚠️ IMPORTANT: Copy WITHOUT backslashes!
+========================================
+$2b$10$C6jwSH3NMLQIPQUsTs2sOOYdI6680uHYQ10rho8wAEr54RuOi0rd.
+
+========================================
+6. SESSION_SECRET
+========================================
+4ed2c8bb1d68c5775e49d9bccad960bd28f1feaa055f5eaa598e8d07c890db98
+
+========================================
+INSTRUCTIONS:
+========================================
+1. Go to: https://vercel.com/dashboard
+2. Select your project: sdp.app
+3. Go to: Settings → Environment Variables
+4. Add each variable above (one at a time)
+5. For each variable:
+   - Name: Copy the name exactly (e.g., ADMIN_PASSWORD_HASH)
+   - Value: Copy the value exactly (for ADMIN_PASSWORD_HASH, use $2b$... NOT \$2b$...)
+   - Environment: Select "Production", "Preview", and "Development"
+6. After adding all variables, go to Deployments → Redeploy
+
+========================================
+TEST CREDENTIALS:
+========================================
+Email: admin@sdp.org
+Password: Hermit@19

@@ -17,9 +17,12 @@ function getAdminPasswordHash() {
   const hash = process.env.ADMIN_PASSWORD_HASH;
   console.log('[getAdminPasswordHash] Raw env value exists:', !!hash);
   console.log('[getAdminPasswordHash] Length:', hash?.length || 0);
-  const trimmed = hash?.trim() || "";
-  console.log('[getAdminPasswordHash] Returning length:', trimmed.length);
-  return trimmed;
+  console.log('[getAdminPasswordHash] First 20 chars:', hash?.substring(0, 20) || 'N/A');
+  // Remove any escape characters that might have been added
+  const cleaned = hash?.replace(/\\\$/g, '$').trim() || "";
+  console.log('[getAdminPasswordHash] Cleaned length:', cleaned.length);
+  console.log('[getAdminPasswordHash] Cleaned first 20 chars:', cleaned.substring(0, 20) || 'N/A');
+  return cleaned;
 }
 
 // If no hash is set, we'll use a default password "admin123" hash
