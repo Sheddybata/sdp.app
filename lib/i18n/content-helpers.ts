@@ -1,6 +1,6 @@
 import type { Language } from "./languages";
 import type { EventRecord, AnnouncementRecord, MultilingualText } from "@/lib/db/content";
-import { getLocalizedText } from "@/lib/db/content";
+import { getLocalizedText } from "@/lib/i18n/localize";
 
 export function getLocalizedEvent(event: EventRecord, lang: Language): {
   title: string;

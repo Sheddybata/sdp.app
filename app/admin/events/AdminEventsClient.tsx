@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { EventRecord, AnnouncementRecord } from "@/lib/db/content";
-import { getLocalizedText } from "@/lib/db/content";
+import { getLocalizedText } from "@/lib/i18n/localize";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
