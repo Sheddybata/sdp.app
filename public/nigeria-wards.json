@@ -1,0 +1,316 @@
+{
+  "ABIA": {
+    "Umuahia North": [
+      "Ibeku East I",
+      "Ibeku East II",
+      "Umuahia Urban I"
+    ],
+    "Aba South": [
+      "Eziukwu",
+      "Asa",
+      "Aba Town Hall"
+    ]
+  },
+  "ADAMAWA": {
+    "Yola North": [
+      "Alkalawa",
+      "Doubeli",
+      "Jambutu"
+    ],
+    "Mubi North": [
+      "Bahuli",
+      "Kolere",
+      "Yelwa"
+    ]
+  },
+  "AKWA IBOM": {
+    "Uyo": [
+      "Uyo Urban I",
+      "Uyo Urban II",
+      "Uyo Urban III"
+    ],
+    "Etinan": [
+      "Etinan Urban I",
+      "Etinan Urban II"
+    ]
+  },
+  "ANAMBRA": {
+    "Awka South": [
+      "Awka I",
+      "Awka II",
+      "Awka III"
+    ],
+    "Onitsha North": [
+      "GRA",
+      "Inland Town I",
+      "Inland Town II"
+    ]
+  },
+  "BAUCHI": {
+    "Bauchi": [
+      "Bauchi Central",
+      "Dawaki",
+      "Gwallaga"
+    ],
+    "Toro": [
+      "Toro North",
+      "Toro South"
+    ]
+  },
+  "BAYELSA": {
+    "Yenagoa": [
+      "Amassoma I",
+      "Amassoma II",
+      "Epie I"
+    ]
+  },
+  "BENUE": {
+    "Makurdi": [
+      "North Bank I",
+      "North Bank II",
+      "Modern Market"
+    ],
+    "Gboko": [
+      "Gboko Central",
+      "Gboko East"
+    ]
+  },
+  "BORNO": {
+    "Maiduguri": [
+      "Gwange I",
+      "Gwange II",
+      "Hausari"
+    ],
+    "Jere": [
+      "Bulumkutu",
+      "Mashamari"
+    ]
+  },
+  "CROSS RIVER": {
+    "Calabar Municipality": [
+      "I",
+      "II",
+      "III"
+    ]
+  },
+  "DELTA": {
+    "Warri North": [
+      "Koko",
+      "Ogheye"
+    ],
+    "Ughelli North": [
+      "Ughelli I",
+      "Ughelli II"
+    ]
+  },
+  "EBONYI": {
+    "Abakaliki": [
+      "Abakpa",
+      "Kpirikpiri",
+      "Ndieze"
+    ]
+  },
+  "EDO": {
+    "Oredo (Benin City)": [
+      "GRA/Etete",
+      "New Benin I",
+      "New Benin II"
+    ]
+  },
+  "EKITI": {
+    "Ado Ekiti": [
+      "Ado A",
+      "Ado B",
+      "Ado C"
+    ]
+  },
+  "ENUGU": {
+    "Enugu North": [
+      "Abakpa I",
+      "Abakpa II",
+      "Trans Ekulu"
+    ],
+    "Nsukka": [
+      "Nkpunano",
+      "Ihe",
+      "Owerre"
+    ]
+  },
+  "FCT (ABUJA)": {
+    "Abuja Municipal": [
+      "Garki",
+      "Wuse",
+      "Maitama"
+    ],
+    "Bwari": [
+      "Bwari Central",
+      "Kubwa"
+    ]
+  },
+  "GOMBE": {
+    "Gombe": [
+      "Bolari East",
+      "Bolari West",
+      "Pantami"
+    ]
+  },
+  "IMO": {
+    "Owerri Urban": [
+      "Aladimma I",
+      "Aladimma II",
+      "New Owerri I"
+    ]
+  },
+  "JIGAWA": {
+    "Dutse": [
+      "Dutse Central",
+      "Sakwaya"
+    ]
+  },
+  "KADUNA": {
+    "Kaduna North": [
+      "Kawo",
+      "Hayin Banki",
+      "Ungwan Sanusi"
+    ],
+    "Chikun": [
+      "Chikun",
+      "Kakau",
+      "Sabon Tasha"
+    ]
+  },
+  "KANO": {
+    "Kano Municipal": [
+      "Dala",
+      "Gwale",
+      "Nassarawa"
+    ],
+    "Fagge": [
+      "Fagge A",
+      "Fagge B",
+      "Sabon Gari East"
+    ]
+  },
+  "KATSINA": {
+    "Katsina": [
+      "Katsina Central",
+      "Dutsinma"
+    ]
+  },
+  "KEBBI": {
+    "Birnin Kebbi": [
+      "Nassarawa I",
+      "Nassarawa II"
+    ]
+  },
+  "KOGI": {
+    "Lokoja": [
+      "Lokoja A",
+      "Lokoja B",
+      "Lokoja C"
+    ]
+  },
+  "KWARA": {
+    "Ilorin West": [
+      "Akanbi I",
+      "Akanbi II",
+      "Okaka I"
+    ]
+  },
+  "LAGOS": {
+    "Ikeja": [
+      "Anifowoshe",
+      "Ojodu",
+      "Alausa"
+    ],
+    "Lagos Mainland": [
+      "Yaba",
+      "Ebute Metta",
+      "Oyingbo"
+    ]
+  },
+  "NASARAWA": {
+    "Lafia": [
+      "Lafia North",
+      "Lafia South"
+    ]
+  },
+  "NIGER": {
+    "Chanchaga (Minna)": [
+      "Minna Central",
+      "Bosso",
+      "Chanchaga"
+    ]
+  },
+  "OGUN": {
+    "Abeokuta South": [
+      "Ake I",
+      "Ake II",
+      "Itoko"
+    ]
+  },
+  "ONDO": {
+    "Akure South": [
+      "Oda",
+      "Isinkan",
+      "Oba Ile"
+    ]
+  },
+  "OSUN": {
+    "Osogbo": [
+      "Egbedore",
+      "Ede North",
+      "Ejigbo"
+    ]
+  },
+  "OYO": {
+    "Ibadan North": [
+      "Agodi",
+      "Yemetu",
+      "Oke-Ado"
+    ],
+    "Oyo East": [
+      "Oyo Town I",
+      "Oyo Town II"
+    ]
+  },
+  "PLATEAU": {
+    "Jos North": [
+      "Naraguta A",
+      "Naraguta B",
+      "Tudun Wada"
+    ]
+  },
+  "RIVERS": {
+    "Port Harcourt": [
+      "Diobu I",
+      "Diobu II",
+      "Trans Amadi"
+    ]
+  },
+  "SOKOTO": {
+    "Sokoto North": [
+      "Magajin Gari A",
+      "Magajin Gari B"
+    ]
+  },
+  "TARABA": {
+    "Jalingo": [
+      "Jalingo I",
+      "Jalingo II",
+      "Sintali"
+    ]
+  },
+  "YOBE": {
+    "Damaturu": [
+      "Damaturu Central",
+      "Pompomari"
+    ]
+  },
+  "ZAMFARA": {
+    "Gusau": [
+      "Gusau East",
+      "Gusau West"
+    ]
+  }
+}

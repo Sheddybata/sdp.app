@@ -1,0 +1,12 @@
+{
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true,
+  "typescript.preferences.includePackageJsonAutoImports": "on",
+  "typescript.validate.enable": true,
+  "typescript.preferences.quoteStyle": "double",
+  "files.exclude": {
+    "**/.next": true,
+    "**/node_modules": true
+  },
+  "typescript.preferences.importModuleSpecifier": "non-relative"
+}

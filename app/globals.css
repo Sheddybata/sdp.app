@@ -1,0 +1,117 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Calendar date picker – touch-friendly and SDP colors */
+@import "react-day-picker/dist/style.css";
+
+@layer base {
+  :root {
+    --sdp-primary: #f48735;
+    --sdp-accent: #01a85a;
+    --touch-min: 44px;
+    /* react-day-picker overrides */
+    --rdp-cell-size: 44px;
+    --rdp-accent-color: var(--sdp-primary);
+    --rdp-background-color: #fff5ee;
+    --rdp-selected-color: #fff;
+  }
+  /* WCAG 2.1 focus */
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-sdp-primary;
+  }
+  /* i18n/RTL: use logical properties */
+  html {
+    text-align: start;
+  }
+}
+
+/* Reduced motion: respect user preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Thumb-friendly tap targets */
+@layer components {
+  .btn-touch {
+    @apply min-h-touch min-h-[44px] px-5 py-3;
+  }
+  /* i18n/RTL: logical spacing and alignment */
+  .flow-inline {
+    display: flex;
+    flex-direction: row;
+  }
+  .flow-block {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+/* Print: show only the member card */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0;
+  }
+  html, body {
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white;
+  }
+  body * {
+    visibility: hidden;
+  }
+  #member-card-preview,
+  #member-card-preview * {
+    visibility: visible;
+  }
+  #member-card-preview {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 952px !important;
+    height: 426px !important;
+    max-width: none !important;
+    max-height: none !important;
+    box-shadow: none !important;
+    border: 2px solid #01a85a !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    transform: none !important;
+  }
+
+  /* Ensure the capture card is also styled correctly for print if needed, 
+     though we target the preview one */
+  #member-card-capture {
+    background: white !important;
+  }
+
+  /* Print-only modifications */
+  /* Logo size is already handled by fixed dimensions in MemberCard.tsx */
+  #member-card-preview div.w-20.h-20 {
+    width: 100px !important;
+    height: 100px !important;
+  }
+
+  /* Make header and band text black in print */
+  #member-card-preview .bg-\[\#01a85a\],
+  #member-card-preview .bg-\[\#f48735\] {
+    background-color: transparent !important;
+    border-bottom: 1px solid #eee !important;
+  }
+
+  #member-card-preview .bg-\[\#01a85a\] p,
+  #member-card-preview .bg-\[\#f48735\] p {
+    color: #000000 !important;
+    text-align: center !important;
+  }
+}
