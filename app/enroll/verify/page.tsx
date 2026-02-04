@@ -27,6 +27,7 @@ export default function VerifyPage() {
   const [result, setResult] = useState<MemberRecord | "not-found" | null>(null);
   const [searched, setSearched] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const onVerify = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -34,18 +35,28 @@ export default function VerifyPage() {
     setIsVerifying(true);
     setSearched(true);
     setResult(null);
+    setErrorMessage(null);
 
-    const res =
-      method === "membership-id"
-        ? await verifyByMembershipId(membershipIdInput)
-        : await verifyByVoterId(voterIdInput);
+    try {
+      const res =
+        method === "membership-id"
+          ? await verifyByMembershipId(membershipIdInput)
+          : await verifyByVoterId(voterIdInput);
 
-    if (res.ok) {
-      setResult(res.member);
-    } else {
+      if (res.ok) {
+        setResult(res.member);
+        setErrorMessage(null);
+      } else {
+        setResult("not-found");
+        setErrorMessage(res.error);
+      }
+    } catch (error) {
       setResult("not-found");
+      setErrorMessage("An unexpected error occurred. Please try again.");
+      console.error("[VERIFY] Error:", error);
+    } finally {
+      setIsVerifying(false);
     }
-    setIsVerifying(false);
   };
 
   const reset = () => {
@@ -53,6 +64,7 @@ export default function VerifyPage() {
     setSearched(false);
     setMembershipIdInput("");
     setVoterIdInput("");
+    setErrorMessage(null);
   };
 
   return (
