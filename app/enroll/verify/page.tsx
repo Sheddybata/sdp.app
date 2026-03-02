@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Hash, CreditCard, Loader2, Share2 } from "lucide-react";
@@ -20,7 +20,7 @@ function getStateName(stateId: string): string {
   return NIGERIA_STATES.find((s) => s.id === stateId)?.name ?? stateId;
 }
 
-export default function VerifyPage() {
+function VerifyPageContent() {
   const { t } = useLanguage();
   const searchParams = useSearchParams();
   const [method, setMethod] = useState<VerifyMethod>("membership-id");
@@ -318,5 +318,17 @@ export default function VerifyPage() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function VerifyPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-neutral-50 flex items-center justify-center">
+        <p className="text-neutral-500">Loading…</p>
+      </main>
+    }>
+      <VerifyPageContent />
+    </Suspense>
   );
 }
