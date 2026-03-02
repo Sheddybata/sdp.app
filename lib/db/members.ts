@@ -84,21 +84,13 @@ export async function insertMember(
     };
   }
 
-  const insert = formToDbInsert(data);
-  const DB_TIMEOUT_MS = 15_000;
-
   try {
-    const insertPromise = supabase
+    const insert = formToDbInsert(data);
+    const { data: row, error } = await supabase
       .from("members")
       .insert(insert)
       .select()
       .single();
-
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error("Database request timed out")), DB_TIMEOUT_MS)
-    );
-
-    const { data: row, error } = await Promise.race([insertPromise, timeoutPromise]) as Awaited<ReturnType<typeof insertPromise>>;
 
     if (error) {
       if (error.code === "23505") {
