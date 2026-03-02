@@ -62,6 +62,22 @@ export function Step2Contact({ form, onNext, onBack }: Step2ContactProps) {
       </div>
 
       <div className="space-y-2">
+        <Label htmlFor="address">{t.enrollment.step2.addressLabel}</Label>
+        <p className="text-xs text-neutral-500">{t.enrollment.step2.addressHint}</p>
+        <Input
+          id="address"
+          {...register("address")}
+          autoComplete="street-address"
+          valid={errors.address ? false : watch("address") ? true : undefined}
+          aria-invalid={!!errors.address}
+          placeholder={t.enrollment.step2.addressPlaceholder}
+        />
+        {errors.address && (
+          <p className="text-sm text-red-600" role="alert">{errors.address.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="dateOfBirth">{t.enrollment.step2.dobLabel}</Label>
         <p className="text-xs text-neutral-500">{t.enrollment.step2.dobHint}</p>
         <DatePicker

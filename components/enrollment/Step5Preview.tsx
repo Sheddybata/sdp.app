@@ -62,7 +62,7 @@ export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5Prev
         logging: false,
         backgroundColor: "#ffffff",
         width: 952,
-        height: 426
+        height: 520
       }).then((canvas) => {
         const imgData = canvas.toDataURL("image/png");
         const imgWidth = 280; // mm (landscape)
@@ -93,7 +93,7 @@ export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5Prev
         logging: false,
         backgroundColor: "#ffffff",
         width: 952,
-        height: 426
+        height: 520
       }).then((canvas) => {
         const link = document.createElement("a");
         link.download = `SDP-MemberCard-${formData.voterRegistrationNumber}.png`;
@@ -143,14 +143,14 @@ export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5Prev
         <div 
           style={{ 
             width: `${952 * scale}px`, 
-            height: `${426 * scale}px`,
+            height: `${520 * scale}px`,
             position: "relative"
           }}
         >
           <div 
             style={{ 
               width: "952px", 
-              height: "426px",
+              height: "520px",
               transform: `scale(${scale})`,
               transformOrigin: "top left",
               position: "absolute",

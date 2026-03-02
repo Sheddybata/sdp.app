@@ -5,13 +5,16 @@ export interface DbMember {
   surname: string;
   first_name: string;
   other_names: string | null;
+  nin: string;
   phone: string;
   email: string | null;
   date_of_birth: string | null;
+  address: string | null;
   join_date: string | null;
   state: string;
   lga: string;
   ward: string;
+  polling_unit: string | null;
   voter_registration_number: string;
   membership_id: string | null;
   portrait_data_url: string | null;

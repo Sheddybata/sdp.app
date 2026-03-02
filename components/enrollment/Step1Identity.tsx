@@ -104,6 +104,23 @@ export function Step1Identity({ form, onNext }: Step1IdentityProps) {
         />
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="nin">{t.enrollment.step1.ninLabel}</Label>
+        <p className="text-xs text-neutral-500">{t.enrollment.step1.ninHint}</p>
+        <Input
+          id="nin"
+          inputMode="numeric"
+          maxLength={11}
+          {...register("nin")}
+          autoComplete="off"
+          valid={errors.nin ? false : watch("nin")?.length === 11 ? true : undefined}
+          aria-invalid={!!errors.nin}
+        />
+        {errors.nin && (
+          <p className="text-sm text-red-600" role="alert">{errors.nin.message}</p>
+        )}
+      </div>
+
       <div className="pt-4">
         <Button type="submit" className="w-full min-h-[44px]">
           {t.enrollment.step1.continue}

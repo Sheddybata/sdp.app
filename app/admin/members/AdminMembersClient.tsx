@@ -95,9 +95,9 @@ export function AdminMembersClient({ initialMembers }: { initialMembers: MemberR
   }, []);
 
   const handleExportCSV = useCallback(() => {
-    const headers = ["ID", "Title", "Surname", "FirstName", "OtherNames", "Phone", "Email", "DOB", "JoinDate", "State", "LGA", "Ward", "VoterID", "Gender", "RegisteredBy"];
+    const headers = ["ID", "Title", "Surname", "FirstName", "OtherNames", "NIN", "Phone", "Email", "DOB", "Address", "JoinDate", "State", "LGA", "Ward", "PollingUnit", "VoterID", "Gender", "RegisteredBy"];
     const rows = sorted.map((m) =>
-      [m.id, m.title, m.surname, m.firstName, m.otherNames ?? "", m.phone, m.email ?? "", m.dateOfBirth, m.joinDate ?? "", getStateName(m.state), getLGAName(m.state, m.lga), getWardName(m.state, m.lga, m.ward), m.voterRegistrationNumber, m.gender ?? "", m.registeredBy ?? ""].map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")
+      [m.id, m.title, m.surname, m.firstName, m.otherNames ?? "", m.nin ?? "", m.phone, m.email ?? "", m.dateOfBirth, m.address ?? "", m.joinDate ?? "", getStateName(m.state), getLGAName(m.state, m.lga), getWardName(m.state, m.lga, m.ward), m.pollingUnit ?? "", m.voterRegistrationNumber, m.gender ?? "", m.registeredBy ?? ""].map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")
     );
     const csv = [headers.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -270,9 +270,12 @@ export function AdminMembersClient({ initialMembers }: { initialMembers: MemberR
             <div className="mt-6 space-y-6">
               <MemberCard data={{ ...selectedMember, portraitDataUrl: selectedMember.portraitDataUrl }} showBarcode={true} />
               <dl className="grid grid-cols-2 gap-2 text-sm">
+                <dt className="text-neutral-500">NIN</dt><dd className="font-medium">{selectedMember.nin || "—"}</dd>
                 <dt className="text-neutral-500">Phone</dt><dd className="font-medium">{selectedMember.phone}</dd>
                 <dt className="text-neutral-500">Email</dt><dd className="font-medium">{selectedMember.email || "—"}</dd>
                 <dt className="text-neutral-500">DOB</dt><dd className="font-medium">{selectedMember.dateOfBirth}</dd>
+                <dt className="text-neutral-500">Address</dt><dd className="font-medium">{selectedMember.address || "—"}</dd>
+                <dt className="text-neutral-500">Polling Unit</dt><dd className="font-medium">{selectedMember.pollingUnit || "—"}</dd>
                 <dt className="text-neutral-500">Registered By</dt><dd className="font-medium">{selectedMember.registeredBy ?? "—"}</dd>
               </dl>
             </div>

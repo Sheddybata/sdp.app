@@ -3,8 +3,9 @@
 import { useEffect } from "react";
 import { UseFormReturn } from "react-hook-form";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
-import { useNigeriaGeo } from "@/hooks/useNigeriaGeo";
+import { useInecGeo } from "@/hooks/useInecGeo";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -17,6 +18,8 @@ import { format } from "date-fns";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useLanguage } from "@/lib/i18n/context";
 
+const MANUAL_POLLING_VALUE = "__manual__";
+
 interface Step3GeographyProps {
   form: UseFormReturn<EnrollmentFormData>;
   onNext: () => void;
@@ -25,11 +28,8 @@ interface Step3GeographyProps {
   setFormData: (d: Partial<EnrollmentFormData>) => void;
 }
 
-// Note: Function props (onNext, onBack) are valid between client components.
-// Both EnrollmentWizard and Step3Geography are marked "use client", so this is safe.
-// The Next.js 71007 warnings are false positives and can be ignored.
 export function Step3Geography(props: Step3GeographyProps) {
-  const { form, onNext, onBack, formData } = props;
+  const { form, onNext, onBack } = props;
   const { t } = useLanguage();
   const {
     register,
@@ -37,10 +37,18 @@ export function Step3Geography(props: Step3GeographyProps) {
     watch,
     formState: { errors },
   } = form;
-  const { states: nigeriaStates, loading } = useNigeriaGeo();
 
   const stateId = watch("state");
   const lgaId = watch("lga");
+  const wardId = watch("ward");
+
+  const { states, loading, stateData, stateDataLoading } = useInecGeo(stateId);
+
+  const lgas = stateData?.lgas ?? [];
+  const lga = lgas.find((l) => l.id === lgaId) ?? lgas.find((l) => l.name === lgaId);
+  const wards = lga?.wards ?? [];
+  const ward = wards.find((w) => w.id === wardId) ?? wards.find((w) => w.name === wardId);
+  const pollingUnitOptions = ward?.pollingUnits ?? [];
 
   useEffect(() => {
     setValue("joinDate", format(new Date(), "yyyy-MM-dd"));
@@ -50,32 +58,30 @@ export function Step3Geography(props: Step3GeographyProps) {
     if (!stateId) {
       setValue("lga", "");
       setValue("ward", "");
+      setValue("pollingUnit", "");
       return;
     }
     setValue("lga", "");
     setValue("ward", "");
+    setValue("pollingUnit", "");
   }, [stateId, setValue]);
 
   useEffect(() => {
     if (!lgaId) {
       setValue("ward", "");
+      setValue("pollingUnit", "");
       return;
     }
     setValue("ward", "");
+    setValue("pollingUnit", "");
   }, [lgaId, setValue]);
 
-  const state =
-    nigeriaStates.find((s) => s.id === stateId) ??
-    nigeriaStates.find(
-      (s) => s.name.toLowerCase() === String(stateId).toLowerCase()
-    );
-  const lgas = state?.lgas ?? [];
-  const lga =
-    state?.lgas.find((l) => l.id === lgaId) ??
-    state?.lgas.find(
-      (l) => l.name.toLowerCase() === String(lgaId).toLowerCase()
-    );
-  const wards = lga?.wards ?? [];
+  useEffect(() => {
+    if (!wardId) setValue("pollingUnit", "");
+  }, [wardId, setValue]);
+
+  const loadingWardOrUnits = stateId && stateDataLoading;
+  const showPollingUnitSelect = pollingUnitOptions.length > 0;
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); onNext(); }} className="space-y-6">
@@ -108,7 +114,7 @@ export function Step3Geography(props: Step3GeographyProps) {
             <SelectValue placeholder={loading ? t.common.loading : t.enrollment.step3.statePlaceholder} />
           </SelectTrigger>
           <SelectContent>
-            {nigeriaStates.map((s) => (
+            {states.map((s) => (
               <SelectItem key={s.id} value={s.id}>
                 {s.name}
               </SelectItem>
@@ -125,10 +131,16 @@ export function Step3Geography(props: Step3GeographyProps) {
         <Select
           value={lgaId}
           onValueChange={(v) => setValue("lga", v)}
-          disabled={!stateId}
+          disabled={!stateId || stateDataLoading}
         >
           <SelectTrigger id="lga">
-            <SelectValue placeholder={t.enrollment.step3.lgaPlaceholder} />
+            <SelectValue
+              placeholder={
+                stateId && stateDataLoading
+                  ? t.common.loading
+                  : t.enrollment.step3.lgaPlaceholder
+              }
+            />
           </SelectTrigger>
           <SelectContent>
             {lgas.map((l) => (
@@ -147,7 +159,7 @@ export function Step3Geography(props: Step3GeographyProps) {
         <Label htmlFor="ward">{t.enrollment.step3.wardLabel}</Label>
         <Select
           key={`ward-${lgaId || "none"}`}
-          value={watch("ward")}
+          value={wardId}
           onValueChange={(v) => setValue("ward", v)}
           disabled={!lgaId}
         >
@@ -167,6 +179,78 @@ export function Step3Geography(props: Step3GeographyProps) {
         )}
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="pollingUnit">{t.enrollment.step3.pollingUnitLabel}</Label>
+        {showPollingUnitSelect ? (
+          <>
+            <p className="text-xs text-neutral-500">{t.enrollment.step3.pollingUnitHint}</p>
+            <Select
+              value={
+                (() => {
+                  const current = watch("pollingUnit") ?? "";
+                  const match = pollingUnitOptions.find((u) => u.name === current);
+                  if (match) return match.id;
+                  if (current) return MANUAL_POLLING_VALUE;
+                  return "";
+                })()
+              }
+              onValueChange={(v) => {
+                if (v === MANUAL_POLLING_VALUE) {
+                  setValue("pollingUnit", "", { shouldValidate: true });
+                } else {
+                  const name = pollingUnitOptions.find((u) => u.id === v)?.name ?? v;
+                  setValue("pollingUnit", name, { shouldValidate: true });
+                }
+              }}
+            >
+              <SelectTrigger id="pollingUnit">
+                <SelectValue placeholder={t.enrollment.step3.pollingUnitPlaceholder} />
+              </SelectTrigger>
+              <SelectContent className="max-h-[min(50vh,16rem)]">
+                {pollingUnitOptions.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.name}
+                  </SelectItem>
+                ))}
+                <SelectItem value={MANUAL_POLLING_VALUE}>
+                  {t.enrollment.step3.pollingUnitTypeManually}
+                </SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-neutral-500 mt-1">{t.enrollment.step3.pollingUnitOrType}</p>
+            <Input
+              id="pollingUnitManual"
+              value={
+                pollingUnitOptions.some((u) => u.name === watch("pollingUnit"))
+                  ? ""
+                  : watch("pollingUnit") ?? ""
+              }
+              onChange={(e) => setValue("pollingUnit", e.target.value.trim(), { shouldValidate: true })}
+              placeholder={t.enrollment.step3.pollingUnitPlaceholder}
+              valid={errors.pollingUnit ? false : watch("pollingUnit") ? true : undefined}
+              aria-invalid={!!errors.pollingUnit}
+              className="mt-1"
+            />
+          </>
+        ) : (
+          <>
+            <p className="text-xs text-neutral-500">
+              {loadingWardOrUnits ? t.enrollment.step3.pollingUnitLoading : t.enrollment.step3.pollingUnitHint}
+            </p>
+            <Input
+              id="pollingUnit"
+              {...register("pollingUnit")}
+              placeholder={t.enrollment.step3.pollingUnitPlaceholder}
+              valid={errors.pollingUnit ? false : watch("pollingUnit") ? true : undefined}
+              aria-invalid={!!errors.pollingUnit}
+            />
+          </>
+        )}
+        {errors.pollingUnit && (
+          <p className="text-sm text-red-600" role="alert">{errors.pollingUnit.message}</p>
+        )}
+      </div>
+
       <div className="flex gap-3 pt-4">
         <Button type="button" variant="outline" onClick={onBack} className="flex-1 min-h-[44px]">
           {t.enrollment.step3.back}
@@ -178,4 +262,3 @@ export function Step3Geography(props: Step3GeographyProps) {
     </form>
   );
 }
-

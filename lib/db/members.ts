@@ -13,13 +13,16 @@ function dbToMember(row: DbMember): MemberRecord {
     surname: row.surname,
     firstName: row.first_name,
     otherNames: row.other_names ?? undefined,
+    nin: row.nin,
     phone: row.phone,
     email: row.email ?? undefined,
     dateOfBirth: row.date_of_birth ?? "",
+    address: row.address ?? "",
     joinDate: row.join_date ?? undefined,
     state: row.state,
     lga: row.lga,
     ward: row.ward,
+    pollingUnit: row.polling_unit ?? "",
     voterRegistrationNumber: row.voter_registration_number,
     portraitDataUrl: row.portrait_data_url ?? undefined,
     agreedToConstitution: true,
@@ -43,13 +46,16 @@ function formToDbInsert(data: EnrollmentFormData): DbMemberInsert {
     surname: data.surname,
     first_name: data.firstName,
     other_names: data.otherNames || null,
+    nin: data.nin,
     phone: data.phone,
     email: data.email || null,
     date_of_birth: data.dateOfBirth || null,
+    address: data.address || null,
     join_date: data.joinDate || null,
     state: data.state,
     lga: data.lga,
     ward: data.ward,
+    polling_unit: data.pollingUnit || null,
     voter_registration_number: data.voterRegistrationNumber.replace(/\s/g, ""),
     membership_id: membershipId,
     portrait_data_url: data.portraitDataUrl || null,
@@ -78,13 +84,21 @@ export async function insertMember(
     };
   }
 
+  const insert = formToDbInsert(data);
+  const DB_TIMEOUT_MS = 15_000;
+
   try {
-    const insert = formToDbInsert(data);
-    const { data: row, error } = await supabase
+    const insertPromise = supabase
       .from("members")
       .insert(insert)
       .select()
       .single();
+
+    const timeoutPromise = new Promise<never>((_, reject) =>
+      setTimeout(() => reject(new Error("Database request timed out")), DB_TIMEOUT_MS)
+    );
+
+    const { data: row, error } = await Promise.race([insertPromise, timeoutPromise]) as Awaited<ReturnType<typeof insertPromise>>;
 
     if (error) {
       if (error.code === "23505") {
@@ -116,9 +130,12 @@ export async function insertMember(
     return { ok: true, member: dbToMember(row as DbMember) };
   } catch (err) {
     console.error("[ENROLLMENT] Unexpected error:", err);
-    return { 
-      ok: false, 
-      error: "An unexpected error occurred. Please try again in a few moments. If the problem persists, contact support." 
+    const isTimeout = err instanceof Error && err.message === "Database request timed out";
+    return {
+      ok: false,
+      error: isTimeout
+        ? "The connection is taking too long. Check your internet connection and that Supabase is set up, then try again."
+        : "An unexpected error occurred. Please try again in a few moments. If the problem persists, contact support.",
     };
   }
 }
@@ -292,7 +309,11 @@ export async function getMembers(opts?: {
 
     if (opts?.search) {
       const q = opts.search.toLowerCase().replace(/[%_]/g, "");
-      if (q) query = query.or(`surname.ilike.%${q}%,first_name.ilike.%${q}%,voter_registration_number.ilike.%${q}%,phone.ilike.%${q}%`);
+      if (q) {
+        query = query.or(
+          `surname.ilike.%${q}%,first_name.ilike.%${q}%,voter_registration_number.ilike.%${q}%,phone.ilike.%${q}%,nin.ilike.%${q}%,polling_unit.ilike.%${q}%,address.ilike.%${q}%`
+        );
+      }
     }
     if (opts?.state) query = query.eq("state", opts.state);
     if (opts?.lga) query = query.eq("lga", opts.lga);

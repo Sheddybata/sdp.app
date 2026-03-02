@@ -39,13 +39,16 @@ export function generateMockMembers(count: number): MemberRecord[] {
       surname: randomItem(surnames),
       firstName: randomItem(firstNames),
       otherNames: Math.random() > 0.7 ? "O." : "",
+      nin: String(10000000000 + i).slice(-11),
       phone: `080${Math.floor(10000000 + Math.random() * 89999999)}`,
       email: Math.random() > 0.5 ? `user${i}@example.com` : "",
       dateOfBirth: randomDate(new Date("1970-01-01"), new Date("2005-01-01")),
+      address: `${Math.floor(10 + Math.random() * 90)} Example Street`,
       joinDate: randomDate(start, end),
       state: stateId,
       lga: lga?.id ?? "",
       ward: ward?.id ?? "",
+      pollingUnit: `PU-${Math.floor(100 + Math.random() * 900)}`,
       voterRegistrationNumber: `90F${String(10 ** 16 + i).slice(-17)}`,
       createdAt: new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString(),
       gender,
@@ -77,6 +80,7 @@ export function filterMembers(
         m.surname.toLowerCase().includes(q) ||
         m.firstName.toLowerCase().includes(q) ||
         m.voterRegistrationNumber.toLowerCase().includes(q) ||
+        (m.nin || "").includes(q) ||
         m.phone.includes(q)
     );
   }

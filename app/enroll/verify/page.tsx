@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck, Hash, CreditCard, Loader2, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -21,6 +22,7 @@ function getStateName(stateId: string): string {
 
 export default function VerifyPage() {
   const { t } = useLanguage();
+  const searchParams = useSearchParams();
   const [method, setMethod] = useState<VerifyMethod>("membership-id");
   const [membershipIdInput, setMembershipIdInput] = useState("");
   const [voterIdInput, setVoterIdInput] = useState("");
@@ -66,6 +68,57 @@ export default function VerifyPage() {
     setVoterIdInput("");
     setErrorMessage(null);
   };
+
+  // When opened via QR scan (?voter=... or ?member=...), pre-fill and auto-verify
+  useEffect(() => {
+    const voter = searchParams.get("voter");
+    const member = searchParams.get("member");
+    if (voter) {
+      const cleaned = voter.replace(/\s/g, "").slice(0, 20);
+      if (cleaned.length >= 20) {
+        setMethod("voter-id");
+        setVoterIdInput(cleaned);
+        setResult(null);
+        setSearched(true);
+        setIsVerifying(true);
+        verifyByVoterId(cleaned)
+          .then((res) => {
+            if (res.ok) setResult(res.member);
+            else {
+              setResult("not-found");
+              setErrorMessage(res.error);
+            }
+          })
+          .catch(() => {
+            setResult("not-found");
+            setErrorMessage("An unexpected error occurred. Please try again.");
+          })
+          .finally(() => setIsVerifying(false));
+      }
+    } else if (member) {
+      const cleaned = String(member).trim().toUpperCase();
+      if (cleaned.length >= 10) {
+        setMethod("membership-id");
+        setMembershipIdInput(cleaned);
+        setResult(null);
+        setSearched(true);
+        setIsVerifying(true);
+        verifyByMembershipId(cleaned)
+          .then((res) => {
+            if (res.ok) setResult(res.member);
+            else {
+              setResult("not-found");
+              setErrorMessage(res.error);
+            }
+          })
+          .catch(() => {
+            setResult("not-found");
+            setErrorMessage("An unexpected error occurred. Please try again.");
+          })
+          .finally(() => setIsVerifying(false));
+      }
+    }
+  }, [searchParams]);
 
   return (
     <main className="min-h-screen bg-neutral-50">

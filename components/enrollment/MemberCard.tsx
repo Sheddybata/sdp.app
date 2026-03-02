@@ -18,6 +18,15 @@ function getStateName(stateId: string): string {
   return NIGERIA_STATES.find((s) => s.id === stateId)?.name ?? stateId;
 }
 
+/** Display slug as title case (e.g. "aba-north" → "Aba North") */
+function formatSlugForDisplay(s: string): string {
+  if (!s) return "—";
+  return s
+    .split("-")
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
 /** Member Since label from joinDate (e.g. "January 2026") */
 function getMemberSinceLabel(joinDate?: string): string {
   if (!joinDate) return "2026";
@@ -38,7 +47,8 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
 
   useEffect(() => {
     if (!showBarcode || !voterIdRaw) return;
-    const payload = `SDP-MEMBER:${voterIdRaw}`;
+    const base = typeof window !== "undefined" ? window.location.origin : "";
+    const payload = `${base}/enroll/verify?voter=${encodeURIComponent(voterIdRaw)}`;
     import("qrcode").then((QRCode) => {
       QRCode.toDataURL(payload, {
         width: 160,
@@ -64,9 +74,9 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
       )}
       style={{
         width: "952px",
-        height: "426px",
+        height: "520px",
         minWidth: "952px",
-        minHeight: "426px"
+        minHeight: "520px"
       }}
       aria-label="Digital membership card"
     >
@@ -94,7 +104,7 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
 
       {/* White content area with green borders */}
       <div className="border-x-2 border-b-2 border-[#01a85a] flex-1 flex flex-col min-h-0">
-        <div className="px-6 flex-1 flex items-center">
+        <div className="px-6 py-6 flex-1 flex items-center">
           <div className="grid gap-8 grid-cols-[180px_1fr_180px] items-center w-full">
           {/* Portrait – left, green border */}
           <div className="w-[180px] h-[220px] rounded-md overflow-hidden bg-neutral-200 border-2 border-[#01a85a] shrink-0">
@@ -121,30 +131,36 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
               <span className="text-[#e0762a] font-bold">{membershipId}</span>
             </p>
  
-            <div className="grid grid-cols-2 gap-x-10 gap-y-4 mt-6">
+            <div className="grid grid-cols-2 gap-x-10 gap-y-3 mt-6">
               <div>
                 <p className="text-neutral-500 uppercase text-[10px] font-bold">State</p>
-                <p className="font-bold text-neutral-900 text-lg break-words">{getStateName(data.state)}</p>
-              </div>
-              <div>
-                <p className="text-neutral-500 uppercase text-[10px] font-bold">Tel</p>
-                <p className="font-bold text-neutral-900 text-lg break-words">{data.phone}</p>
+                <p className="font-bold text-neutral-900 text-base break-words">{getStateName(data.state)}</p>
               </div>
               <div>
                 <p className="text-neutral-500 uppercase text-[10px] font-bold">LGA</p>
-                <p className="font-bold text-neutral-900 text-lg leading-tight break-words" title={data.lga}>{data.lga}</p>
-              </div>
-              <div>
-                <p className="text-neutral-500 uppercase text-[10px] font-bold">Member Since</p>
-                <p className="font-bold text-neutral-900 text-lg leading-tight">{memberSince}</p>
+                <p className="font-bold text-neutral-900 text-base leading-tight break-words" title={data.lga}>{formatSlugForDisplay(data.lga)}</p>
               </div>
               <div>
                 <p className="text-neutral-500 uppercase text-[10px] font-bold">Ward</p>
-                <p className="font-bold text-neutral-900 text-lg leading-tight break-words" title={data.ward}>{data.ward}</p>
+                <p className="font-bold text-neutral-900 text-base leading-tight break-words" title={data.ward}>{formatSlugForDisplay(data.ward)}</p>
               </div>
               <div>
+                <p className="text-neutral-500 uppercase text-[10px] font-bold">Polling Unit</p>
+                <p className="font-bold text-neutral-900 text-sm leading-tight break-words line-clamp-3" title={data.pollingUnit}>
+                  {data.pollingUnit || "—"}
+                </p>
+              </div>
+              <div>
+                <p className="text-neutral-500 uppercase text-[10px] font-bold">Tel</p>
+                <p className="font-bold text-neutral-900 text-base break-words">{data.phone}</p>
+              </div>
+              <div>
+                <p className="text-neutral-500 uppercase text-[10px] font-bold">Member Since</p>
+                <p className="font-bold text-neutral-900 text-base leading-tight">{memberSince}</p>
+              </div>
+              <div className="col-span-2 pb-6">
                 <p className="text-neutral-500 uppercase text-[10px] font-bold">Voter Reg No</p>
-                <p className="font-bold text-neutral-900 font-mono tracking-wide whitespace-nowrap text-lg">
+                <p className="font-bold text-neutral-900 font-mono tracking-wide whitespace-nowrap text-base">
                   {formatVoterIdDisplay(data.voterRegistrationNumber)}
                 </p>
               </div>

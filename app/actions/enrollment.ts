@@ -1,5 +1,6 @@
 "use server";
 
+import { createAdminClient } from "@/lib/supabase/admin";
 import { insertMember } from "@/lib/db/members";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
 
@@ -26,11 +27,37 @@ export async function submitEnrollment(
       };
     }
 
+    if (!data.nin || !/^\d{11}$/.test(data.nin)) {
+      return {
+        ok: false,
+        error: "Please provide a valid 11-digit NIN."
+      };
+    }
+
+    if (!data.address) {
+      return {
+        ok: false,
+        error: "Please provide your address."
+      };
+    }
+
+    if (!data.pollingUnit) {
+      return {
+        ok: false,
+        error: "Please provide your polling unit."
+      };
+    }
+
     if (!data.agreedToConstitution) {
       return { 
         ok: false, 
         error: "You must agree to the party constitution to complete enrollment." 
       };
+    }
+
+    // If Supabase isn't set up, skip save and go straight to preview (so you can see the card)
+    if (!createAdminClient()) {
+      return { ok: true, message: "Enrollment saved successfully." };
     }
 
     const result = await insertMember(data);

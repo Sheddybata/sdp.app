@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // Nigerian voter registration number: exactly 20 alphanumeric characters (stored without spaces)
 const voterIdRegex = /^[A-Z0-9]{20}$/i;
+const ninRegex = /^[0-9]{11}$/;
 
 export const enrollmentSchema = z.object({
   // Step 1: Identity — Nigerian titles: Barr., Pst., Amb., military, Hon., Prince, Prophet, etc.
@@ -14,17 +15,22 @@ export const enrollmentSchema = z.object({
   surname: z.string().min(2, "Surname is required (min 2 characters)").max(80),
   firstName: z.string().min(2, "First name is required").max(80),
   otherNames: z.string().max(160).optional(),
+  nin: z
+    .string()
+    .regex(ninRegex, "NIN must be exactly 11 digits"),
 
   // Step 2: Contact & Age
   phone: z.string().min(10, "Valid phone required").max(15).regex(/^[0-9+\-\s()]+$/, "Invalid phone format"),
   email: z.string().email("Valid email required").optional().or(z.literal("")),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
+  address: z.string().min(5, "Address is required").max(200),
 
   // Step 3: Political Geography
   joinDate: z.string().optional(),
   state: z.string().min(1, "State is required"),
   lga: z.string().min(1, "LGA is required"),
   ward: z.string().min(1, "Ward is required"),
+  pollingUnit: z.string().min(2, "Polling unit is required").max(120),
 
   // Step 4: Verification — 20 characters, ATM-style display (XXXX XXXX XXXX XXXX XXXX)
   voterRegistrationNumber: z
