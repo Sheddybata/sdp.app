@@ -19,6 +19,9 @@ export interface DbMember {
   membership_id: string | null;
   portrait_data_url: string | null;
   gender: string | null;
+  phone_verified: boolean | null;
+  phone_verified_at: string | null;
+  phone_normalized: string | null;
   created_at: string;
   registered_by: string | null;
 }

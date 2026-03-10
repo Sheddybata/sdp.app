@@ -5,6 +5,7 @@ import type { MemberRecord } from "@/lib/mock-members";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
 import { getMembershipIdFromData } from "@/lib/enrollment-schema";
 import { MOCK_MEMBERS, filterMembers, getKpis } from "@/lib/mock-members";
+import { normalizePhone } from "@/lib/otp/termii";
 
 function dbToMember(row: DbMember): MemberRecord {
   return {
@@ -26,6 +27,7 @@ function dbToMember(row: DbMember): MemberRecord {
     voterRegistrationNumber: row.voter_registration_number,
     portraitDataUrl: row.portrait_data_url ?? undefined,
     agreedToConstitution: true,
+    phoneVerified: row.phone_verified ?? false,
     gender: (row.gender as "Male" | "Female") ?? undefined,
     createdAt: row.created_at,
     registeredBy: row.registered_by ?? undefined,
@@ -60,6 +62,9 @@ function formToDbInsert(data: EnrollmentFormData): DbMemberInsert {
     membership_id: membershipId,
     portrait_data_url: data.portraitDataUrl || null,
     gender: null,
+    phone_verified: data.phoneVerified ?? false,
+    phone_verified_at: data.phoneVerified ? new Date().toISOString() : null,
+    phone_normalized: normalizePhone(data.phone) || null,
     registered_by: null,
   };
 }

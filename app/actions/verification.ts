@@ -51,10 +51,10 @@ export async function verifyByVoterId(
     }
 
     const raw = normalizeVoterIdInput(trimmed);
-    if (raw.length !== 20) {
+    if (raw.length < 19 || raw.length > 20) {
       return { 
         ok: false, 
-        error: `Voter ID must be exactly 20 characters. You entered ${raw.length} character${raw.length !== 1 ? 's' : ''}. Please check and try again.` 
+        error: `Voter ID must be 19 or 20 characters. You entered ${raw.length} character${raw.length !== 1 ? 's' : ''}. Please check and try again.` 
       };
     }
 

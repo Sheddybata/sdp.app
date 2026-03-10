@@ -41,6 +41,7 @@ export function EnrollmentWizard({
       otherNames: formData.otherNames ?? "",
       nin: formData.nin ?? "",
       phone: formData.phone ?? "",
+      phoneVerified: formData.phoneVerified ?? false,
       email: formData.email ?? "",
       dateOfBirth: formData.dateOfBirth ?? "",
       address: formData.address ?? "",
@@ -71,7 +72,7 @@ export function EnrollmentWizard({
   // Validate only the current step's fields so Continue can proceed
   const stepFields: (keyof EnrollmentFormData)[][] = [
     ["title", "surname", "firstName", "otherNames", "nin"],
-    ["phone", "email", "dateOfBirth", "address"],
+    ["phone", "phoneVerified", "email", "dateOfBirth", "address"],
     ["joinDate", "state", "lga", "ward", "pollingUnit"],
     ["voterRegistrationNumber", "portraitDataUrl", "agreedToConstitution"],
   ];
@@ -133,6 +134,7 @@ export function EnrollmentWizard({
       otherNames: "",
       nin: "",
       phone: "",
+      phoneVerified: false,
       email: "",
       dateOfBirth: "",
       address: "",

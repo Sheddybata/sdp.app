@@ -13,10 +13,14 @@ export async function submitEnrollment(
 ): Promise<EnrollmentResult> {
   try {
     // Validate required fields
-    if (!data.voterRegistrationNumber || data.voterRegistrationNumber.length !== 20) {
+    if (
+      !data.voterRegistrationNumber ||
+      data.voterRegistrationNumber.length < 19 ||
+      data.voterRegistrationNumber.length > 20
+    ) {
       return { 
         ok: false, 
-        error: "Please provide a valid 20-character voter registration number." 
+        error: "Please provide a valid 19 or 20-character voter registration number." 
       };
     }
 

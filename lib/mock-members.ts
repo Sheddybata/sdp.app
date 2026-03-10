@@ -41,6 +41,7 @@ export function generateMockMembers(count: number): MemberRecord[] {
       otherNames: Math.random() > 0.7 ? "O." : "",
       nin: String(10000000000 + i).slice(-11),
       phone: `080${Math.floor(10000000 + Math.random() * 89999999)}`,
+      phoneVerified: true,
       email: Math.random() > 0.5 ? `user${i}@example.com` : "",
       dateOfBirth: randomDate(new Date("1970-01-01"), new Date("2005-01-01")),
       address: `${Math.floor(10 + Math.random() * 90)} Example Street`,

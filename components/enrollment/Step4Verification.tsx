@@ -34,7 +34,8 @@ export function Step4Verification({ form, onNext, onBack, formData, setFormData 
   } = form;
   const voterIdRaw = watch("voterRegistrationNumber") ?? "";
   const normalized = normalizeVoterIdInput(voterIdRaw);
-  const isValidVoterId = normalized.length === 20 && validateVoterId(normalized);
+  const isValidVoterId =
+    (normalized.length === 19 || normalized.length === 20) && validateVoterId(normalized);
   const uploadInputRef = useRef<HTMLInputElement>(null);
 
   const [showCamera, setShowCamera] = useState(false);

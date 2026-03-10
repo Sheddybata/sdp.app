@@ -1,7 +1,7 @@
 import { z } from "zod";
 
-// Nigerian voter registration number: exactly 20 alphanumeric characters (stored without spaces)
-const voterIdRegex = /^[A-Z0-9]{20}$/i;
+// Nigerian voter registration number: 19–20 alphanumeric characters (stored without spaces)
+const voterIdRegex = /^[A-Z0-9]{19,20}$/i;
 const ninRegex = /^[0-9]{11}$/;
 
 export const enrollmentSchema = z.object({
@@ -21,6 +21,7 @@ export const enrollmentSchema = z.object({
 
   // Step 2: Contact & Age
   phone: z.string().min(10, "Valid phone required").max(15).regex(/^[0-9+\-\s()]+$/, "Invalid phone format"),
+  phoneVerified: z.boolean().optional().default(false),
   email: z.string().email("Valid email required").optional().or(z.literal("")),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
   address: z.string().min(5, "Address is required").max(200),
@@ -32,11 +33,12 @@ export const enrollmentSchema = z.object({
   ward: z.string().min(1, "Ward is required"),
   pollingUnit: z.string().min(2, "Polling unit is required").max(120),
 
-  // Step 4: Verification — 20 characters, ATM-style display (XXXX XXXX XXXX XXXX XXXX)
+  // Step 4: Verification — 19–20 characters, ATM-style display (XXXX XXXX XXXX XXXX XXXX)
   voterRegistrationNumber: z
     .string()
-    .length(20, "Voter ID must be exactly 20 characters")
-    .regex(voterIdRegex, "Invalid format (20 letters and numbers only)"),
+    .min(19, "Voter ID must be 19 or 20 characters")
+    .max(20, "Voter ID must be 19 or 20 characters")
+    .regex(voterIdRegex, "Invalid format (letters and numbers only)"),
 
   // Portrait (optional for preview; file handled separately)
   portraitDataUrl: z.string().optional(),
@@ -59,7 +61,7 @@ export function normalizeVoterIdInput(value: string): string {
 
 export function validateVoterId(value: string): boolean {
   const raw = value.replace(/\s/g, "");
-  return voterIdRegex.test(raw) && raw.length === 20;
+  return voterIdRegex.test(raw) && (raw.length === 19 || raw.length === 20);
 }
 
 /** Derive membership ID like SDP-SHE-249891 from surname + voter ID (for lookup/verification). */
