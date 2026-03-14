@@ -19,6 +19,7 @@ export interface DbMember {
   membership_id: string | null;
   portrait_data_url: string | null;
   gender: string | null;
+  ward_serial: string | null;
   phone_verified: boolean | null;
   phone_verified_at: string | null;
   phone_normalized: string | null;

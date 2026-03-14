@@ -27,6 +27,7 @@ function dbToMember(row: DbMember): MemberRecord {
     voterRegistrationNumber: row.voter_registration_number,
     portraitDataUrl: row.portrait_data_url ?? undefined,
     agreedToConstitution: true,
+    wardSerial: row.ward_serial ?? undefined,
     phoneVerified: row.phone_verified ?? false,
     gender: (row.gender as "Male" | "Female") ?? undefined,
     createdAt: row.created_at,
@@ -36,7 +37,7 @@ function dbToMember(row: DbMember): MemberRecord {
   };
 }
 
-function formToDbInsert(data: EnrollmentFormData): DbMemberInsert {
+function formToDbInsert(data: EnrollmentFormData, wardSerial?: string): DbMemberInsert {
   // Compute membership ID and store it (ensure uppercase)
   const membershipId = getMembershipIdFromData({
     surname: data.surname,
@@ -61,12 +62,32 @@ function formToDbInsert(data: EnrollmentFormData): DbMemberInsert {
     voter_registration_number: data.voterRegistrationNumber.replace(/\s/g, ""),
     membership_id: membershipId,
     portrait_data_url: data.portraitDataUrl || null,
+    ward_serial: wardSerial || null,
     gender: null,
     phone_verified: data.phoneVerified ?? false,
     phone_verified_at: data.phoneVerified ? new Date().toISOString() : null,
     phone_normalized: normalizePhone(data.phone) || null,
     registered_by: null,
   };
+}
+
+async function generateWardSerial(
+  supabase: ReturnType<typeof createAdminClient>,
+  state: string,
+  lga: string,
+  ward: string
+): Promise<string | null> {
+  if (!state || !lga || !ward) return null;
+  const { data, error } = await supabase.rpc("next_ward_serial", {
+    _state: state,
+    _lga: lga,
+    _ward: ward,
+  });
+  if (error) {
+    console.error("[ENROLLMENT] Ward serial generation failed:", error);
+    throw new Error("Could not generate ward serial. Please try again.");
+  }
+  return (data as string) ?? null;
 }
 
 /** Check if Supabase is configured */
@@ -90,7 +111,8 @@ export async function insertMember(
   }
 
   try {
-    const insert = formToDbInsert(data);
+    const wardSerial = await generateWardSerial(supabase, data.state, data.lga, data.ward);
+    const insert = formToDbInsert(data, wardSerial || undefined);
     const { data: row, error } = await supabase
       .from("members")
       .insert(insert)
