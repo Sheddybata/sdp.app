@@ -6,6 +6,7 @@ import type { EnrollmentFormData } from "@/lib/enrollment-schema";
 import { getMembershipIdFromData } from "@/lib/enrollment-schema";
 import { MOCK_MEMBERS, filterMembers, getKpis } from "@/lib/mock-members";
 import { normalizePhone } from "@/lib/otp/termii";
+import { getWardCodes } from "@/lib/location-codes";
 
 function dbToMember(row: DbMember): MemberRecord {
   return {
@@ -28,6 +29,7 @@ function dbToMember(row: DbMember): MemberRecord {
     portraitDataUrl: row.portrait_data_url ?? undefined,
     agreedToConstitution: true,
     wardSerial: row.ward_serial ?? undefined,
+    locationMembershipId: row.location_membership_id ?? undefined,
     phoneVerified: row.phone_verified ?? false,
     gender: (row.gender as "Male" | "Female") ?? undefined,
     createdAt: row.created_at,
@@ -37,7 +39,11 @@ function dbToMember(row: DbMember): MemberRecord {
   };
 }
 
-function formToDbInsert(data: EnrollmentFormData, wardSerial?: string): DbMemberInsert {
+function formToDbInsert(
+  data: EnrollmentFormData,
+  wardSerial?: string,
+  locationMembershipId?: string
+): DbMemberInsert {
   // Compute membership ID and store it (ensure uppercase)
   const membershipId = getMembershipIdFromData({
     surname: data.surname,
@@ -61,6 +67,7 @@ function formToDbInsert(data: EnrollmentFormData, wardSerial?: string): DbMember
     polling_unit: data.pollingUnit || null,
     voter_registration_number: data.voterRegistrationNumber.replace(/\s/g, ""),
     membership_id: membershipId,
+    location_membership_id: locationMembershipId || null,
     portrait_data_url: data.portraitDataUrl || null,
     ward_serial: wardSerial || null,
     gender: null,
@@ -112,7 +119,13 @@ export async function insertMember(
 
   try {
     const wardSerial = await generateWardSerial(supabase, data.state, data.lga, data.ward);
-    const insert = formToDbInsert(data, wardSerial || undefined);
+    const codes = getWardCodes(data.state, data.lga, data.ward);
+    const locationMembershipId =
+      codes && wardSerial
+        ? `${codes.stateCode}-${codes.lgaCode}-${codes.wardCode}-${wardSerial}`
+        : null;
+
+    const insert = formToDbInsert(data, wardSerial || undefined, locationMembershipId || undefined);
     const { data: row, error } = await supabase
       .from("members")
       .insert(insert)

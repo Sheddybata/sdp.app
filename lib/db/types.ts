@@ -17,6 +17,7 @@ export interface DbMember {
   polling_unit: string | null;
   voter_registration_number: string;
   membership_id: string | null;
+  location_membership_id: string | null;
   portrait_data_url: string | null;
   gender: string | null;
   ward_serial: string | null;
