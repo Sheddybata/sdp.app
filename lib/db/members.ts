@@ -44,11 +44,11 @@ function formToDbInsert(
   wardSerial?: string,
   locationMembershipId?: string
 ): DbMemberInsert {
-  // Compute membership ID and store it (ensure uppercase)
-  const membershipId = getMembershipIdFromData({
+  // If we have a location-based ID, use it as the primary membership_id; otherwise fall back
+  const fallbackMembershipId = getMembershipIdFromData({
     surname: data.surname,
     voterRegistrationNumber: data.voterRegistrationNumber,
-  }).toUpperCase(); // Double-check it's uppercase
+  }).toUpperCase();
 
   return {
     title: data.title,
@@ -66,7 +66,7 @@ function formToDbInsert(
     ward: data.ward,
     polling_unit: data.pollingUnit || null,
     voter_registration_number: data.voterRegistrationNumber.replace(/\s/g, ""),
-    membership_id: membershipId,
+    membership_id: locationMembershipId || fallbackMembershipId,
     location_membership_id: locationMembershipId || null,
     portrait_data_url: data.portraitDataUrl || null,
     ward_serial: wardSerial || null,
@@ -120,10 +120,22 @@ export async function insertMember(
   try {
     const wardSerial = await generateWardSerial(supabase, data.state, data.lga, data.ward);
     const codes = getWardCodes(data.state, data.lga, data.ward);
+    if (!codes) {
+      console.error("[ENROLLMENT] Location codes not found for", data.state, data.lga, data.ward);
+      return {
+        ok: false,
+        error: "We could not assign a location-based ID for your state/LGA/ward. Please review your selections and try again.",
+      };
+    }
+    if (!wardSerial) {
+      console.error("[ENROLLMENT] Ward serial not generated for", data.state, data.lga, data.ward);
+      return {
+        ok: false,
+        error: "We could not assign a ward serial for your location. Please try again.",
+      };
+    }
     const locationMembershipId =
-      codes && wardSerial
-        ? `${codes.stateCode}-${codes.lgaCode}-${codes.wardCode}-${wardSerial}`
-        : null;
+      `${codes.stateCode}-${codes.lgaCode}-${codes.wardCode}-${wardSerial}`;
 
     const insert = formToDbInsert(data, wardSerial || undefined, locationMembershipId || undefined);
     const { data: row, error } = await supabase

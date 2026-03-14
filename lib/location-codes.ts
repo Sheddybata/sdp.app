@@ -13,12 +13,13 @@ type WardCodeEntry = {
   wardCode: string;
 };
 
-// Cache maps keyed by ids (state|lga|ward)
-const wardLookup = new Map<Key, WardCodeEntry>();
+// Cache maps keyed by ids (state|lga|ward) and by names
+const wardLookupById = new Map<Key, WardCodeEntry>();
+const wardLookupByName = new Map<Key, WardCodeEntry>();
 const stateCodeMap = new Map<string, string>(); // keyed by state id
 
 function loadCsv() {
-  if (wardLookup.size > 0) return;
+  if (wardLookupById.size > 0) return;
   const file = path.join(process.cwd(), "location-codes.csv");
   if (!fs.existsSync(file)) {
     throw new Error("location-codes.csv not found. Run scripts/generate-location-codes.js");
@@ -42,13 +43,20 @@ function loadCsv() {
       wardId,
     ] = parts.slice(0, 9).map((p) => p.replace(/^\"|\"$/g, ""));
 
-    const key = `${stateId}|${lgaId}|${wardId}`.toLowerCase();
-    if (!wardLookup.has(key)) {
-      wardLookup.set(key, { stateCode, lgaCode, wardCode });
+    const keyId = `${stateId}|${lgaId}|${wardId}`.toLowerCase();
+    const keyName = `${stateName}|${lgaName}|${wardName}`.toLowerCase();
+    const entry = { stateCode, lgaCode, wardCode };
+
+    if (stateId) {
+      if (!wardLookupById.has(keyId)) {
+        wardLookupById.set(keyId, entry);
+      }
+      if (!stateCodeMap.has(stateId.toLowerCase())) {
+        stateCodeMap.set(stateId.toLowerCase(), stateCode);
+      }
     }
-    // Also keep state code map keyed by state id
-    if (stateId && !stateCodeMap.has(stateId.toLowerCase())) {
-      stateCodeMap.set(stateId.toLowerCase(), stateCode);
+    if (stateName && lgaName && wardName && !wardLookupByName.has(keyName)) {
+      wardLookupByName.set(keyName, entry);
     }
   }
 }
@@ -56,7 +64,7 @@ function loadCsv() {
 export function getWardCodes(state: string, lga: string, ward: string) {
   loadCsv();
   const key = `${state}|${lga}|${ward}`.toLowerCase();
-  return wardLookup.get(key) || null;
+  return wardLookupById.get(key) || wardLookupByName.get(key) || null;
 }
 
 export function getStateCode(state: string) {

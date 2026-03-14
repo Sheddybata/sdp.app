@@ -131,12 +131,17 @@ export default function EnrollNewPage() {
                     {" "}· {NIGERIA_STATES.find((s) => s.id === formData.state)?.name ?? formData.state}
                   </span>
                 )}
-                {formData.voterRegistrationNumber && formData.surname && (
+                {formData.locationMembershipId && (
                   <span className="text-neutral-600">
-                    {" "}· {formData.locationMembershipId ?? getMembershipIdFromData({ surname: formData.surname, voterRegistrationNumber: formData.voterRegistrationNumber })}
+                    {" "}· {formData.locationMembershipId}
                   </span>
                 )}
               </p>
+              {!formData.locationMembershipId && (
+                <p className="text-xs text-neutral-500 mt-1">
+                  ID will be generated after you complete enrollment.
+                </p>
+              )}
             </div>
           )}
         </div>
