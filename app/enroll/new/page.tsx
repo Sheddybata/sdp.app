@@ -133,7 +133,7 @@ export default function EnrollNewPage() {
                 )}
                 {formData.voterRegistrationNumber && formData.surname && (
                   <span className="text-neutral-600">
-                    {" "}· {getMembershipIdFromData({ surname: formData.surname, voterRegistrationNumber: formData.voterRegistrationNumber })}
+                    {" "}· {formData.locationMembershipId ?? getMembershipIdFromData({ surname: formData.surname, voterRegistrationNumber: formData.voterRegistrationNumber })}
                   </span>
                 )}
               </p>
