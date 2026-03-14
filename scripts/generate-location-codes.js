@@ -67,7 +67,7 @@ function pad(num, width) {
 function main() {
   const index = JSON.parse(fs.readFileSync(INDEX_PATH, "utf8"));
   const rows = [];
-  rows.push("state_code,state_name,lga_code,lga_name,ward_code,ward_name,pu_code,pu_name");
+  rows.push("state_code,state_name,state_id,lga_code,lga_name,lga_id,ward_code,ward_name,ward_id,pu_code,pu_name");
 
   for (const state of index.states) {
     const stateCode = STATE_CODE[state.id];
@@ -91,10 +91,13 @@ function main() {
             [
               stateCode,
               `"${state.name}"`,
+              state.id,
               lgaCode,
               `"${lga.name}"`,
+              lga.id,
               wardCode,
               `"${ward.name}"`,
+              ward.id,
               puCode,
               `"${pu.name}"`,
             ].join(",")
@@ -105,10 +108,13 @@ function main() {
             [
               stateCode,
               `"${state.name}"`,
+              state.id,
               lgaCode,
               `"${lga.name}"`,
+              lga.id,
               wardCode,
               `"${ward.name}"`,
+              ward.id,
               "",
               "",
             ].join(",")
@@ -116,7 +122,21 @@ function main() {
         }
       });
       if (!wards.length) {
-        rows.push([stateCode, `"${state.name}"`, lgaCode, `"${lga.name}"`, "", "", "", ""].join(","));
+        rows.push(
+          [
+            stateCode,
+            `"${state.name}"`,
+            state.id,
+            lgaCode,
+            `"${lga.name}"`,
+            lga.id,
+            "",
+            "",
+            "",
+            "",
+            "",
+          ].join(",")
+        );
       }
     });
   }

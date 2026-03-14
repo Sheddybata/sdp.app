@@ -13,9 +13,9 @@ type WardCodeEntry = {
   wardCode: string;
 };
 
-// Cache maps
+// Cache maps keyed by ids (state|lga|ward)
 const wardLookup = new Map<Key, WardCodeEntry>();
-const stateCodeMap = new Map<string, string>();
+const stateCodeMap = new Map<string, string>(); // keyed by state id
 
 function loadCsv() {
   if (wardLookup.size > 0) return;
@@ -27,19 +27,28 @@ function loadCsv() {
   lines.shift(); // header
   for (const line of lines) {
     if (!line.trim()) continue;
-    // state_code,state_name,lga_code,lga_name,ward_code,ward_name,pu_code,pu_name
+    // state_code,state_name,state_id,lga_code,lga_name,lga_id,ward_code,ward_name,ward_id,pu_code,pu_name
     const parts = line.split(/,(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)/);
-    if (parts.length < 6) continue;
-    const [stateCode, stateName, lgaCode, lgaName, wardCode, wardName] = parts.map((p) =>
-      p.replace(/^\"|\"$/g, "")
-    );
-    const key = `${stateName}|${lgaName}|${wardName}`.toLowerCase();
+    if (parts.length < 11) continue;
+    const [
+      stateCode,
+      stateName,
+      stateId,
+      lgaCode,
+      lgaName,
+      lgaId,
+      wardCode,
+      wardName,
+      wardId,
+    ] = parts.slice(0, 9).map((p) => p.replace(/^\"|\"$/g, ""));
+
+    const key = `${stateId}|${lgaId}|${wardId}`.toLowerCase();
     if (!wardLookup.has(key)) {
       wardLookup.set(key, { stateCode, lgaCode, wardCode });
     }
-    // Also keep state code map
-    if (!stateCodeMap.has(stateName.toLowerCase())) {
-      stateCodeMap.set(stateName.toLowerCase(), stateCode);
+    // Also keep state code map keyed by state id
+    if (stateId && !stateCodeMap.has(stateId.toLowerCase())) {
+      stateCodeMap.set(stateId.toLowerCase(), stateCode);
     }
   }
 }
