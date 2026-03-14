@@ -132,6 +132,13 @@ export function Step4Verification({ form, onNext, onBack, formData, setFormData 
     const result = await submitEnrollment(merged);
     setIsSubmitting(false);
     if (result.ok) {
+      if (result.member) {
+        setFormData({
+          ...merged,
+          locationMembershipId: result.member.locationMembershipId,
+          wardSerial: result.member.wardSerial,
+        });
+      }
       onNext();
     } else {
       setSubmitError(result.error ?? t.enrollment.step4.registrationFailed);

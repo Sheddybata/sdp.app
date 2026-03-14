@@ -29,7 +29,7 @@ export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5Prev
   const [confirmation, setConfirmation] = React.useState<"download" | "print" | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const membershipId = getMembershipIdFromData(formData);
+  const membershipId = formData.locationMembershipId || getMembershipIdFromData(formData);
 
   React.useEffect(() => {
     if (!confirmation) return;

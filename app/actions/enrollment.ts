@@ -4,8 +4,10 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { insertMember } from "@/lib/db/members";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
 
+import type { MemberRecord } from "@/lib/mock-members";
+
 export type EnrollmentResult =
-  | { ok: true; message: string }
+  | { ok: true; message: string; member?: MemberRecord }
   | { ok: false; error: string };
 
 export async function submitEnrollment(
@@ -67,7 +69,7 @@ export async function submitEnrollment(
     const result = await insertMember(data);
 
     if (result.ok) {
-      return { ok: true, message: "Enrollment saved successfully." };
+      return { ok: true, message: "Enrollment saved successfully.", member: result.member };
     }
 
     return { ok: false, error: result.error };

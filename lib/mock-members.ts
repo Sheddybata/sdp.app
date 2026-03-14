@@ -7,6 +7,7 @@ export interface MemberRecord extends EnrollmentFormData {
   gender?: "Male" | "Female";
   registeredBy?: string;
   wardSerial?: string;
+  locationMembershipId?: string;
 }
 
 const states = NIGERIA_STATES.map((s) => s.id);

@@ -42,7 +42,7 @@ function getMemberSinceLabel(joinDate?: string): string {
 export function MemberCard({ data, className, showBarcode = true, id = "member-card" }: MemberCardProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
-  const membershipId = getMembershipIdFromData(data);
+  const membershipId = data.locationMembershipId || getMembershipIdFromData(data);
   const voterIdRaw = (data.voterRegistrationNumber || "").replace(/\s/g, "");
 
   useEffect(() => {

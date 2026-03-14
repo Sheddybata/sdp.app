@@ -45,6 +45,10 @@ export const enrollmentSchema = z.object({
 
   // Consent — AEC-style membership agreement
   agreedToConstitution: z.boolean().refine((v) => v === true, { message: "You must agree to the party constitution to enroll." }),
+
+  // Optional enriched fields (not user-input)
+  locationMembershipId: z.string().optional(),
+  wardSerial: z.string().optional(),
 });
 
 export type EnrollmentFormData = z.infer<typeof enrollmentSchema>;
