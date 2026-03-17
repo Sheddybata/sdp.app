@@ -67,6 +67,7 @@ export function generateMockMembers(count: number): MemberRecord[] {
       ward: ward?.id ?? "",
       pollingUnit: `PU-${Math.floor(100 + Math.random() * 900)}`,
       voterRegistrationNumber: `90F${String(10 ** 16 + i).slice(-17)}`,
+      portraitDataUrl: "",
       createdAt: new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime())).toISOString(),
       gender,
       registeredBy: Math.random() > 0.7 ? "state-admin-lagos" : "state-admin-abuja",

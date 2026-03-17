@@ -9,6 +9,8 @@ import { normalizePhone } from "@/lib/otp/termii";
 import { getWardCodes } from "@/lib/location-codes";
 import { calculateMembershipDues, DEFAULT_MONTHLY_DUE_NGN } from "@/lib/membership/dues";
 
+type AdminSupabaseClient = NonNullable<ReturnType<typeof createAdminClient>>;
+
 function dbToMember(row: DbMember): MemberRecord {
   return {
     id: row.id,
@@ -27,7 +29,7 @@ function dbToMember(row: DbMember): MemberRecord {
     ward: row.ward,
     pollingUnit: row.polling_unit ?? "",
     voterRegistrationNumber: row.voter_registration_number,
-    portraitDataUrl: row.portrait_data_url ?? undefined,
+    portraitDataUrl: row.portrait_data_url ?? "",
     agreedToConstitution: true,
     wardSerial: row.ward_serial ?? undefined,
     locationMembershipId: row.location_membership_id ?? undefined,
@@ -99,7 +101,7 @@ function formToDbInsert(
 }
 
 async function generateWardSerial(
-  supabase: ReturnType<typeof createAdminClient>,
+  supabase: AdminSupabaseClient,
   state: string,
   lga: string,
   ward: string

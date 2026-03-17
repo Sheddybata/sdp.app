@@ -1,5 +1,6 @@
 "use client";
 
+import type React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { enrollmentSchema, type EnrollmentFormData } from "@/lib/enrollment-schema";
@@ -23,7 +24,7 @@ interface EnrollmentWizardProps {
   step: number;
   setStep: (n: number) => void;
   formData: Partial<EnrollmentFormData>;
-  setFormData: (d: Partial<EnrollmentFormData>) => void;
+  setFormData: React.Dispatch<React.SetStateAction<Partial<EnrollmentFormData>>>;
 }
 
 export function EnrollmentWizard({
