@@ -137,6 +137,7 @@ export function Step4Verification({ form, onNext, onBack, formData, setFormData 
           ...merged,
           locationMembershipId: result.member.locationMembershipId,
           wardSerial: result.member.wardSerial,
+          membershipId: result.member.membershipId,
         });
       }
       onNext();
@@ -274,6 +275,11 @@ export function Step4Verification({ form, onNext, onBack, formData, setFormData 
                   {t.enrollment.step4.removePhoto}
                 </Button>
               </div>
+            )}
+            {!portraitDataUrl && errors.portraitDataUrl && (
+              <p className="text-sm text-red-600" role="alert">
+                {errors.portraitDataUrl.message}
+              </p>
             )}
           </>
         )}

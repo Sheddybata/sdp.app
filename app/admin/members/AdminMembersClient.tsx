@@ -95,9 +95,57 @@ export function AdminMembersClient({ initialMembers }: { initialMembers: MemberR
   }, []);
 
   const handleExportCSV = useCallback(() => {
-    const headers = ["ID", "Title", "Surname", "FirstName", "OtherNames", "NIN", "Phone", "Email", "DOB", "Address", "JoinDate", "State", "LGA", "Ward", "PollingUnit", "VoterID", "Gender", "RegisteredBy"];
+    const headers = [
+      "ID",
+      "Title",
+      "Surname",
+      "FirstName",
+      "OtherNames",
+      "NIN",
+      "Phone",
+      "Email",
+      "DOB",
+      "Address",
+      "JoinDate",
+      "State",
+      "LGA",
+      "Ward",
+      "PollingUnit",
+      "VoterID",
+      "Gender",
+      "RegisteredBy",
+      "MembershipStatus",
+      "MonthsOwed",
+      "AmountOwed",
+      "MonthlyDue",
+    ];
     const rows = sorted.map((m) =>
-      [m.id, m.title, m.surname, m.firstName, m.otherNames ?? "", m.nin ?? "", m.phone, m.email ?? "", m.dateOfBirth, m.address ?? "", m.joinDate ?? "", getStateName(m.state), getLGAName(m.state, m.lga), getWardName(m.state, m.lga, m.ward), m.pollingUnit ?? "", m.voterRegistrationNumber, m.gender ?? "", m.registeredBy ?? ""].map((c) => `"${String(c).replace(/"/g, '""')}"`).join(",")
+      [
+        m.id,
+        m.title,
+        m.surname,
+        m.firstName,
+        m.otherNames ?? "",
+        m.nin ?? "",
+        m.phone,
+        m.email ?? "",
+        m.dateOfBirth,
+        m.address ?? "",
+        m.joinDate ?? "",
+        getStateName(m.state),
+        getLGAName(m.state, m.lga),
+        getWardName(m.state, m.lga, m.ward),
+        m.pollingUnit ?? "",
+        m.voterRegistrationNumber,
+        m.gender ?? "",
+        m.registeredBy ?? "",
+        m.membershipStatus ?? "",
+        m.monthsOwed ?? "",
+        m.amountOwed ?? "",
+        m.monthlyDue ?? "",
+      ]
+        .map((c) => `"${String(c).replace(/"/g, '""')}"`)
+        .join(",")
     );
     const csv = [headers.join(","), ...rows].join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -207,12 +255,14 @@ export function AdminMembersClient({ initialMembers }: { initialMembers: MemberR
                 <th className="px-4 py-3 font-semibold text-neutral-700">LGA / Ward</th>
                 <th className="px-4 py-3 font-semibold text-neutral-700"><button type="button" onClick={() => toggleSort("voterRegistrationNumber")} className="hover:text-sdp-primary">Voter ID {sortBy === "voterRegistrationNumber" && (sortDir === "asc" ? "↑" : "↓")}</button></th>
                 <th className="px-4 py-3 font-semibold text-neutral-700"><button type="button" onClick={() => toggleSort("joinDate")} className="hover:text-sdp-primary">Join Date {sortBy === "joinDate" && (sortDir === "asc" ? "↑" : "↓")}</button></th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Status</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Owed (₦)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-100">
               {sorted.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center">
+                  <td colSpan={8} className="px-4 py-12 text-center">
                     <p className="font-medium text-neutral-900">No members found</p>
                     <p className="mt-1 text-sm text-neutral-600">Enrollment will populate this list. Try adjusting your filters.</p>
                   </td>
@@ -225,6 +275,8 @@ export function AdminMembersClient({ initialMembers }: { initialMembers: MemberR
                   <td className="px-4 py-3 text-neutral-600">{getLGAName(m.state, m.lga)} / {getWardName(m.state, m.lga, m.ward)}</td>
                   <td className="px-4 py-3 font-mono text-neutral-700">{m.voterRegistrationNumber}</td>
                   <td className="px-4 py-3 text-neutral-600">{m.joinDate ?? "—"}</td>
+                  <td className="px-4 py-3 text-neutral-600">{m.membershipStatus ?? "—"}</td>
+                  <td className="px-4 py-3 text-neutral-600">{m.amountOwed != null ? m.amountOwed : "—"}</td>
                 </tr>
               ))}
             </tbody>

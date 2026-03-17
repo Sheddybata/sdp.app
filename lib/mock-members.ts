@@ -1,5 +1,6 @@
 import type { EnrollmentFormData } from "./enrollment-schema";
 import { NIGERIA_STATES } from "./nigeria-geo";
+import { calculateMembershipDues, DEFAULT_MONTHLY_DUE_NGN } from "@/lib/membership/dues";
 
 export interface MemberRecord extends EnrollmentFormData {
   id: string;
@@ -8,6 +9,13 @@ export interface MemberRecord extends EnrollmentFormData {
   registeredBy?: string;
   wardSerial?: string;
   locationMembershipId?: string;
+  membershipId?: string;
+  monthlyDue?: number;
+  monthsOwed?: number;
+  amountOwed?: number;
+  duesCalculatedAt?: string;
+  hasPaidMembership?: boolean;
+  membershipStatus?: string;
 }
 
 const states = NIGERIA_STATES.map((s) => s.id);
@@ -35,6 +43,12 @@ export function generateMockMembers(count: number): MemberRecord[] {
     const ward = lga?.wards[Math.floor(Math.random() * (lga.wards.length || 1))];
     const gender = Math.random() > 0.5 ? "Male" : "Female";
     const title = gender === "Male" ? randomItem(["Mr", "Dr", "Alh", "Chief"]) : randomItem(["Mrs", "Miss", "Ms", "Dr"]);
+    const joinDate = randomDate(start, end);
+    const dues = calculateMembershipDues({
+      joinDateISO: joinDate,
+      monthlyDue: DEFAULT_MONTHLY_DUE_NGN,
+    });
+
     members.push({
       id: `mem-${1000 + i}`,
       title: title as MemberRecord["title"],
@@ -47,7 +61,7 @@ export function generateMockMembers(count: number): MemberRecord[] {
       email: Math.random() > 0.5 ? `user${i}@example.com` : "",
       dateOfBirth: randomDate(new Date("1970-01-01"), new Date("2005-01-01")),
       address: `${Math.floor(10 + Math.random() * 90)} Example Street`,
-      joinDate: randomDate(start, end),
+      joinDate,
       state: stateId,
       lga: lga?.id ?? "",
       ward: ward?.id ?? "",
@@ -57,6 +71,12 @@ export function generateMockMembers(count: number): MemberRecord[] {
       gender,
       registeredBy: Math.random() > 0.7 ? "state-admin-lagos" : "state-admin-abuja",
       agreedToConstitution: true,
+      monthlyDue: dues.monthlyDue,
+      monthsOwed: dues.monthsOwed,
+      amountOwed: dues.amountOwed,
+      duesCalculatedAt: new Date().toISOString(),
+      hasPaidMembership: false,
+      membershipStatus: "unpaid",
     });
   }
   return members;

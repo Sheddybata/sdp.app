@@ -272,7 +272,7 @@ function VerifyPageContent() {
                     <p className="mt-1 text-sm text-neutral-600">
                       <span className="text-[#f48735] font-semibold">{t.memberCard.membershipId}: </span>
                       <span className="text-[#e0762a] font-bold font-mono">
-                        {getMembershipIdFromData(result)}
+                        {result.locationMembershipId || result.membershipId || getMembershipIdFromData(result)}
                       </span>
                     </p>
                   </div>
@@ -300,7 +300,8 @@ function VerifyPageContent() {
                   <Button
                     variant="outline"
                     onClick={async () => {
-                      const text = `Verified SDP member: ${getMembershipIdFromData(result)}. Official SDP Portal.`;
+                      const id = result.locationMembershipId || result.membershipId || getMembershipIdFromData(result);
+                      const text = `Verified SDP member: ${id}. Official SDP Portal.`;
                       if (navigator.share) {
                         try { await navigator.share({ title: "SDP Member Verified", text }); } catch { navigator.clipboard?.writeText(text); }
                       } else { navigator.clipboard?.writeText(text); }

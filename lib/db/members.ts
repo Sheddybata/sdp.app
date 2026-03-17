@@ -7,6 +7,7 @@ import { getMembershipIdFromData } from "@/lib/enrollment-schema";
 import { MOCK_MEMBERS, filterMembers, getKpis } from "@/lib/mock-members";
 import { normalizePhone } from "@/lib/otp/termii";
 import { getWardCodes } from "@/lib/location-codes";
+import { calculateMembershipDues, DEFAULT_MONTHLY_DUE_NGN } from "@/lib/membership/dues";
 
 function dbToMember(row: DbMember): MemberRecord {
   return {
@@ -30,8 +31,15 @@ function dbToMember(row: DbMember): MemberRecord {
     agreedToConstitution: true,
     wardSerial: row.ward_serial ?? undefined,
     locationMembershipId: row.location_membership_id ?? undefined,
+    membershipId: row.membership_id ?? undefined,
     phoneVerified: row.phone_verified ?? false,
     gender: (row.gender as "Male" | "Female") ?? undefined,
+    monthlyDue: row.monthly_due ?? undefined,
+    monthsOwed: row.months_owed ?? undefined,
+    amountOwed: row.amount_owed ?? undefined,
+    duesCalculatedAt: row.dues_calculated_at ?? undefined,
+    hasPaidMembership: row.has_paid_membership ?? undefined,
+    membershipStatus: row.membership_status ?? undefined,
     createdAt: row.created_at,
     registeredBy: row.registered_by ?? undefined,
     // Note: membership_id is stored but we still compute it for consistency
@@ -50,6 +58,12 @@ function formToDbInsert(
     voterRegistrationNumber: data.voterRegistrationNumber,
   }).toUpperCase();
 
+  const joinDateISO = data.joinDate || new Date().toISOString().slice(0, 10);
+  const dues = calculateMembershipDues({
+    joinDateISO,
+    monthlyDue: DEFAULT_MONTHLY_DUE_NGN,
+  });
+
   return {
     title: data.title,
     surname: data.surname,
@@ -60,7 +74,7 @@ function formToDbInsert(
     email: data.email || null,
     date_of_birth: data.dateOfBirth || null,
     address: data.address || null,
-    join_date: data.joinDate || null,
+    join_date: joinDateISO || null,
     state: data.state,
     lga: data.lga,
     ward: data.ward,
@@ -75,6 +89,12 @@ function formToDbInsert(
     phone_verified_at: data.phoneVerified ? new Date().toISOString() : null,
     phone_normalized: normalizePhone(data.phone) || null,
     registered_by: null,
+    monthly_due: dues.monthlyDue,
+    months_owed: dues.monthsOwed,
+    amount_owed: dues.amountOwed,
+    dues_calculated_at: new Date().toISOString(),
+    has_paid_membership: false,
+    membership_status: "unpaid",
   };
 }
 
@@ -146,9 +166,53 @@ export async function insertMember(
 
     if (error) {
       if (error.code === "23505") {
-        return { 
-          ok: false, 
-          error: "This voter registration number is already registered. If you believe this is an error, please contact support." 
+        const msg = String((error as unknown as { message?: string }).message ?? "");
+        const constraint = String((error as unknown as { constraint?: string }).constraint ?? "");
+        const combined = `${constraint} ${msg}`.toLowerCase();
+
+        if (combined.includes("idx_members_voter_unique") || combined.includes("voter_registration_number")) {
+          return {
+            ok: false,
+            error:
+              "This voter registration number is already registered. If you believe this is an error, please contact support.",
+          };
+        }
+        if (combined.includes("idx_members_nin_unique") || combined.includes(" nin")) {
+          return {
+            ok: false,
+            error:
+              "This NIN is already registered. Please double-check the number or contact support if you believe this is an error.",
+          };
+        }
+        if (combined.includes("idx_members_phone_normalized_unique") || combined.includes("phone_normalized")) {
+          return {
+            ok: false,
+            error:
+              "This phone number is already registered. Please use a different phone number or contact support if you believe this is an error.",
+          };
+        }
+        if (combined.includes("idx_members_membership_id_unique") || combined.includes("membership_id")) {
+          return {
+            ok: false,
+            error:
+              "A member with these details already exists. Please double-check your voter registration number and surname, or contact support.",
+          };
+        }
+        if (
+          combined.includes("idx_members_location_membership_id_unique") ||
+          combined.includes("location_membership_id")
+        ) {
+          return {
+            ok: false,
+            error:
+              "A member with these location details already exists. Please contact support so we can resolve this.",
+          };
+        }
+
+        return {
+          ok: false,
+          error:
+            "This member is already registered (duplicate record). Please double-check your details or contact support if you believe this is an error.",
         };
       }
       if (error.code === "23503") {

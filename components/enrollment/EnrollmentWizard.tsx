@@ -59,7 +59,7 @@ export function EnrollmentWizard({
 
   const onNext = () => {
     const values = form.getValues();
-    setFormData(values);
+    setFormData((prev) => ({ ...prev, ...values }));
     setStep(Math.min(5, step + 1));
     if (typeof window !== "undefined") window.scrollTo(0, 0);
   };

@@ -18,6 +18,12 @@ export interface DbMember {
   voter_registration_number: string;
   membership_id: string | null;
   location_membership_id: string | null;
+  monthly_due: number | null;
+  months_owed: number | null;
+  amount_owed: number | null;
+  dues_calculated_at: string | null;
+  has_paid_membership: boolean | null;
+  membership_status: string | null;
   portrait_data_url: string | null;
   gender: string | null;
   ward_serial: string | null;

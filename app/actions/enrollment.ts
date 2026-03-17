@@ -40,6 +40,13 @@ export async function submitEnrollment(
       };
     }
 
+    if (!data.portraitDataUrl) {
+      return {
+        ok: false,
+        error: "Please add a portrait photo to continue."
+      };
+    }
+
     if (!data.address) {
       return {
         ok: false,

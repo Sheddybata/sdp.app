@@ -40,8 +40,8 @@ export const enrollmentSchema = z.object({
     .max(20, "Voter ID must be 19 or 20 characters")
     .regex(voterIdRegex, "Invalid format (letters and numbers only)"),
 
-  // Portrait (optional for preview; file handled separately)
-  portraitDataUrl: z.string().optional(),
+  // Portrait (required)
+  portraitDataUrl: z.string().min(1, "Portrait is required"),
 
   // Consent — AEC-style membership agreement
   agreedToConstitution: z.boolean().refine((v) => v === true, { message: "You must agree to the party constitution to enroll." }),
@@ -49,6 +49,7 @@ export const enrollmentSchema = z.object({
   // Optional enriched fields (not user-input)
   locationMembershipId: z.string().optional(),
   wardSerial: z.string().optional(),
+  membershipId: z.string().optional(),
 });
 
 export type EnrollmentFormData = z.infer<typeof enrollmentSchema>;

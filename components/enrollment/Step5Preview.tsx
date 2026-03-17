@@ -16,6 +16,7 @@ import {
 import { jsPDF } from "jspdf";
 import { Download, Printer, ArrowLeft, CheckCircle2, Share2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/context";
+import { calculateMembershipDues, DEFAULT_MONTHLY_DUE_NGN } from "@/lib/membership/dues";
 
 interface Step5PreviewProps {
   formData: EnrollmentFormData;
@@ -29,7 +30,13 @@ export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5Prev
   const [confirmation, setConfirmation] = React.useState<"download" | "print" | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const containerRef = React.useRef<HTMLDivElement>(null);
-  const membershipId = formData.locationMembershipId || getMembershipIdFromData(formData);
+  const membershipId = formData.locationMembershipId || formData.membershipId || getMembershipIdFromData(formData);
+  const dues = React.useMemo(() => {
+    return calculateMembershipDues({
+      joinDateISO: formData.joinDate || new Date().toISOString().slice(0, 10),
+      monthlyDue: DEFAULT_MONTHLY_DUE_NGN,
+    });
+  }, [formData.joinDate]);
 
   React.useEffect(() => {
     if (!confirmation) return;
@@ -62,7 +69,7 @@ export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5Prev
         logging: false,
         backgroundColor: "#ffffff",
         width: 952,
-        height: 520
+        height: 560
       }).then((canvas) => {
         const imgData = canvas.toDataURL("image/png");
         const imgWidth = 280; // mm (landscape)
@@ -93,7 +100,7 @@ export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5Prev
         logging: false,
         backgroundColor: "#ffffff",
         width: 952,
-        height: 520
+        height: 560
       }).then((canvas) => {
         const link = document.createElement("a");
         link.download = `SDP-MemberCard-${formData.voterRegistrationNumber}.png`;
@@ -143,14 +150,14 @@ export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5Prev
         <div 
           style={{ 
             width: `${952 * scale}px`, 
-            height: `${520 * scale}px`,
+            height: `${560 * scale}px`,
             position: "relative"
           }}
         >
           <div 
             style={{ 
               width: "952px", 
-              height: "520px",
+              height: "560px",
               transform: `scale(${scale})`,
               transformOrigin: "top left",
               position: "absolute",
@@ -189,6 +196,21 @@ export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5Prev
         </p>
         <p className="text-sm text-neutral-700">{t.enrollment.step5.membershipIdLabel}: <span className="font-mono font-medium">{membershipId}</span></p>
         <p className="text-xs text-neutral-600">{t.enrollment.step5.nextSteps}</p>
+      </div>
+
+      <div className="rounded-xl border border-neutral-200 bg-white p-4 space-y-2 shadow-sm">
+        <p className="text-sm font-semibold text-neutral-900">Membership dues</p>
+        <dl className="grid grid-cols-2 gap-2 text-sm">
+          <dt className="text-neutral-500">Monthly due</dt>
+          <dd className="font-medium text-neutral-900">₦{dues.monthlyDue}</dd>
+          <dt className="text-neutral-500">Months owed</dt>
+          <dd className="font-medium text-neutral-900">{dues.monthsOwed}</dd>
+          <dt className="text-neutral-500">Total owed</dt>
+          <dd className="font-semibold text-neutral-900">₦{dues.amountOwed}</dd>
+        </dl>
+        <p className="text-xs text-neutral-600">
+          You can pay later. A representative may contact you to complete payment.
+        </p>
       </div>
 
       <div className="flex flex-col gap-3">

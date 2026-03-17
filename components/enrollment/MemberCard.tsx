@@ -42,7 +42,7 @@ function getMemberSinceLabel(joinDate?: string): string {
 export function MemberCard({ data, className, showBarcode = true, id = "member-card" }: MemberCardProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
-  const membershipId = data.locationMembershipId || getMembershipIdFromData(data);
+  const membershipId = data.locationMembershipId || data.membershipId || getMembershipIdFromData(data);
   const voterIdRaw = (data.voterRegistrationNumber || "").replace(/\s/g, "");
 
   useEffect(() => {
@@ -74,9 +74,9 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
       )}
       style={{
         width: "952px",
-        height: "520px",
+        height: "560px",
         minWidth: "952px",
-        minHeight: "520px"
+        minHeight: "560px"
       }}
       aria-label="Digital membership card"
     >
@@ -146,7 +146,7 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
               </div>
               <div>
                 <p className="text-neutral-500 uppercase text-[10px] font-bold">Polling Unit</p>
-                <p className="font-bold text-neutral-900 text-sm leading-tight break-words line-clamp-3" title={data.pollingUnit}>
+                <p className="font-bold text-neutral-900 text-sm leading-tight break-words" title={data.pollingUnit}>
                   {data.pollingUnit || "—"}
                 </p>
               </div>
