@@ -18,11 +18,33 @@ const wardLookupById = new Map<Key, WardCodeEntry>();
 const wardLookupByName = new Map<Key, WardCodeEntry>();
 const stateCodeMap = new Map<string, string>(); // keyed by state id
 
+function resolveCodesCsvPath(): string | null {
+  const candidates = [
+    // Preferred: public asset in repo
+    path.join(process.cwd(), "public", "location-codes.csv"),
+    // Fallbacks for different runtime layouts
+    path.join(process.cwd(), "location-codes.csv"),
+    path.join(process.cwd(), ".next", "server", "public", "location-codes.csv"),
+    path.join(process.cwd(), ".next", "standalone", "public", "location-codes.csv"),
+  ];
+  for (const p of candidates) {
+    try {
+      if (fs.existsSync(p)) return p;
+    } catch {
+      // ignore
+    }
+  }
+  return null;
+}
+
 function loadCsv() {
   if (wardLookupById.size > 0) return;
-  const file = path.join(process.cwd(), "public", "location-codes.csv");
-  if (!fs.existsSync(file)) {
-    throw new Error("location-codes.csv not found. Run scripts/generate-location-codes.js");
+  const file = resolveCodesCsvPath();
+  if (!file) {
+    throw new Error(
+      "location-codes.csv not found (expected at public/location-codes.csv). " +
+        "Ensure it is committed and deployed."
+    );
   }
   const lines = fs.readFileSync(file, "utf8").split(/\r?\n/);
   lines.shift(); // header

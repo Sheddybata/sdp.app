@@ -1,6 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  experimental: {
+    // Ensure location codes CSV is included in the serverless bundle on Vercel.
+    outputFileTracingIncludes: {
+      "*": ["./public/location-codes.csv"],
+    },
+  },
 
   // Prevent CDN/browser from caching HTML so users always get current chunk references
   async headers() {
