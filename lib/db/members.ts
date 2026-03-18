@@ -241,6 +241,14 @@ export async function insertMember(
   } catch (err) {
     console.error("[ENROLLMENT] Unexpected error:", err);
     const isTimeout = err instanceof Error && err.message === "Database request timed out";
+    if (err instanceof Error && err.message && !isTimeout) {
+      // Surface known, user-safe messages thrown by our own code paths.
+      // This avoids masking real causes as a generic error.
+      return {
+        ok: false,
+        error: err.message,
+      };
+    }
     return {
       ok: false,
       error: isTimeout
