@@ -20,7 +20,7 @@ const stateCodeMap = new Map<string, string>(); // keyed by state id
 
 function loadCsv() {
   if (wardLookupById.size > 0) return;
-  const file = path.join(process.cwd(), "location-codes.csv");
+  const file = path.join(process.cwd(), "public", "location-codes.csv");
   if (!fs.existsSync(file)) {
     throw new Error("location-codes.csv not found. Run scripts/generate-location-codes.js");
   }

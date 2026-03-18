@@ -57,7 +57,7 @@ const STATE_CODE = {
 };
 
 const INDEX_PATH = path.join(__dirname, "..", "public", "inec-data", "index.json");
-const OUT_PATH = path.join(__dirname, "..", "location-codes.csv");
+const OUT_PATH = path.join(__dirname, "..", "public", "location-codes.csv");
 
 function pad(num, width) {
   const s = String(num);
