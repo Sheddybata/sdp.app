@@ -31,11 +31,43 @@ export interface DbMember {
   phone_verified_at: string | null;
   phone_normalized: string | null;
   created_at: string;
+  /** self | agent | cluster */
+  registered_via: string;
   registered_by: string | null;
 }
 
 /** Insert shape (omit id, created_at - auto-generated) */
 export type DbMemberInsert = Omit<DbMember, "id" | "created_at"> & {
+  id?: string;
+  created_at?: string;
+};
+
+/** Diaspora supporter row (no PVC / ward; separate from `members`) */
+export interface DbDiasporaSupporter {
+  id: string;
+  surname: string;
+  first_name: string;
+  email: string;
+  phone_e164: string;
+  phone_country_iso2: string;
+  residence_country_iso2: string;
+  residence_city: string;
+  residence_address: string;
+  nigeria_state_id: string;
+  nigeria_lga_id: string;
+  nigeria_state_name: string;
+  nigeria_lga_name: string;
+  vin: string | null;
+  portrait_data_url: string | null;
+  id_document_data_url: string | null;
+  created_at: string;
+  registered_via: string;
+}
+
+export type DbDiasporaSupporterInsert = Omit<
+  DbDiasporaSupporter,
+  "id" | "created_at"
+> & {
   id?: string;
   created_at?: string;
 };

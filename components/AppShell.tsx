@@ -11,7 +11,7 @@ export function AppShell() {
         <Link
           href="/"
           className="flex items-center shrink-0 text-neutral-900 hover:opacity-80 transition-opacity min-h-[44px] min-w-[44px] -ms-2"
-          aria-label="SDP Member Portal - Home"
+          aria-label="SDP Registration Gateway - Home"
         >
           <Image 
             src="/sdplogo.jpg" 

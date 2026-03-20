@@ -5,9 +5,32 @@ import type { EventRecord, AnnouncementRecord } from "@/lib/db/content";
 import { useLanguage } from "@/lib/i18n/context";
 import { getLocalizedEvent, getLocalizedAnnouncement } from "@/lib/i18n/content-helpers";
 
-const MOCK_EVENTS: { title: string; date: string; location: string }[] = [
-  { title: "State Chapter Meeting", date: "Feb 15, 2026", location: "Lagos" },
-  { title: "National Convention", date: "Mar 1, 2026", location: "Abuja" },
+/** Shown when Supabase has no upcoming events (same copy as migration 013). */
+const MOCK_EVENTS_FALLBACK: EventRecord[] = [
+  {
+    id: "mock-ev-1",
+    title: "National Convention",
+    eventDate: "2026-04-27",
+    location: null,
+    description: "April 27th – April 28th, 2026",
+    createdAt: "",
+  },
+  {
+    id: "mock-ev-2",
+    title: "National Congress",
+    eventDate: "2026-04-27",
+    location: null,
+    description: "April 27 – May 1st, 2026",
+    createdAt: "",
+  },
+  {
+    id: "mock-ev-3",
+    title: "Primaries",
+    eventDate: "2026-04-27",
+    location: null,
+    description: "April 27th – May 1st, 2026",
+    createdAt: "",
+  },
 ];
 
 const MOCK_ANNOUNCEMENTS: { text: string; date: string }[] = [
@@ -42,7 +65,7 @@ export function EventsAnnouncements({ events = [], announcements = [] }: EventsA
   };
   const locale = localeMap[language] || "en-NG";
 
-  const displayEvents = events.length > 0 ? events : MOCK_EVENTS.map((e) => ({ id: "", title: e.title, eventDate: e.date, location: e.location, description: null, createdAt: "" } as EventRecord));
+  const displayEvents = events.length > 0 ? events : MOCK_EVENTS_FALLBACK;
   const displayAnnouncements = announcements.length > 0 ? announcements : MOCK_ANNOUNCEMENTS.map((a) => ({ id: "", text: a.text, publishedAt: a.date, createdAt: "" } as AnnouncementRecord));
 
   return (
@@ -60,7 +83,11 @@ export function EventsAnnouncements({ events = [], announcements = [] }: EventsA
               <li key={e.id || `e-${i}`} className="flex flex-col gap-0.5 text-sm">
                 <span className="font-medium text-neutral-900">{localized.title}</span>
                 <span className="text-xs text-neutral-600">
-                  {e.eventDate?.length === 10 ? formatDate(e.eventDate, locale) : e.eventDate}
+                  {localized.description?.trim()
+                    ? localized.description.trim()
+                    : e.eventDate?.length === 10
+                      ? formatDate(e.eventDate, locale)
+                      : e.eventDate}
                   {localized.location ? ` · ${localized.location}` : ""}
                 </span>
               </li>

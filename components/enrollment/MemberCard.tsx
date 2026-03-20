@@ -43,12 +43,13 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   const membershipId = data.locationMembershipId || data.membershipId || getMembershipIdFromData(data);
-  const voterIdRaw = (data.voterRegistrationNumber || "").replace(/\s/g, "");
 
   useEffect(() => {
-    if (!showBarcode || !voterIdRaw) return;
+    if (!showBarcode) return;
     const base = typeof window !== "undefined" ? window.location.origin : "";
-    const payload = `${base}/enroll/verify?voter=${encodeURIComponent(voterIdRaw)}`;
+    const regId = encodeURIComponent(membershipId.replace(/\s/g, ""));
+    if (!regId) return;
+    const payload = `${base}/enroll/verify?member=${regId}`;
     import("qrcode").then((QRCode) => {
       QRCode.toDataURL(payload, {
         width: 160,
@@ -58,7 +59,7 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
         .then(setQrDataUrl)
         .catch(() => {});
     });
-  }, [showBarcode, voterIdRaw]);
+  }, [showBarcode, membershipId]);
 
 
   const fullName = [data.surname, data.firstName, data.otherNames].filter(Boolean).join(" ").toUpperCase();
@@ -168,7 +169,7 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
           </div>
 
           {/* QR code – right */}
-          {showBarcode && data.voterRegistrationNumber && (
+          {showBarcode && membershipId && (
             <div className="w-[180px] h-[180px] border-2 border-[#f48735] rounded bg-white flex items-center justify-center shrink-0" aria-hidden>
               {qrDataUrl ? (
                 <img

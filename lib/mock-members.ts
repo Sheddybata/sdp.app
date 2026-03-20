@@ -7,6 +7,8 @@ export interface MemberRecord extends EnrollmentFormData {
   createdAt: string;
   gender?: "Male" | "Female";
   registeredBy?: string;
+  /** self | agent | cluster */
+  registeredVia?: string;
   wardSerial?: string;
   locationMembershipId?: string;
   membershipId?: string;

@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { DbMember, DbMemberInsert } from "./types";
 import type { MemberRecord } from "@/lib/mock-members";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
-import { getMembershipIdFromData } from "@/lib/enrollment-schema";
+import { getMembershipIdFromData, getMembershipIdDisplayForRecord } from "@/lib/enrollment-schema";
 import { MOCK_MEMBERS, filterMembers, getKpis } from "@/lib/mock-members";
 import { normalizePhone } from "@/lib/otp/termii";
 import { getWardCodes } from "@/lib/location-codes";
@@ -20,7 +20,7 @@ function dbToMember(row: DbMember): MemberRecord {
     otherNames: row.other_names ?? undefined,
     nin: row.nin,
     phone: row.phone,
-    email: row.email ?? undefined,
+    email: row.email ?? "",
     dateOfBirth: row.date_of_birth ?? "",
     address: row.address ?? "",
     joinDate: row.join_date ?? undefined,
@@ -44,6 +44,7 @@ function dbToMember(row: DbMember): MemberRecord {
     membershipStatus: row.membership_status ?? undefined,
     createdAt: row.created_at,
     registeredBy: row.registered_by ?? undefined,
+    registeredVia: row.registered_via ?? "self",
     // Note: membership_id is stored but we still compute it for consistency
     // The stored value is used for lookups, computed value for display
   };
@@ -52,7 +53,8 @@ function dbToMember(row: DbMember): MemberRecord {
 function formToDbInsert(
   data: EnrollmentFormData,
   wardSerial?: string,
-  locationMembershipId?: string
+  locationMembershipId?: string,
+  registration?: { registered_via: string; registered_by: string | null }
 ): DbMemberInsert {
   // If we have a location-based ID, use it as the primary membership_id; otherwise fall back
   const fallbackMembershipId = getMembershipIdFromData({
@@ -90,7 +92,8 @@ function formToDbInsert(
     phone_verified: data.phoneVerified ?? false,
     phone_verified_at: data.phoneVerified ? new Date().toISOString() : null,
     phone_normalized: normalizePhone(data.phone) || null,
-    registered_by: null,
+    registered_via: registration?.registered_via ?? "self",
+    registered_by: registration?.registered_by ?? null,
     monthly_due: dues.monthlyDue,
     months_owed: dues.monthsOwed,
     amount_owed: dues.amountOwed,
@@ -129,7 +132,8 @@ export function isSupabaseConfigured(): boolean {
 
 /** Insert a new member (enrollment). Returns member or error. */
 export async function insertMember(
-  data: EnrollmentFormData
+  data: EnrollmentFormData,
+  registration?: { registered_via: string; registered_by: string | null }
 ): Promise<{ ok: true; member: MemberRecord } | { ok: false; error: string }> {
   const supabase = createAdminClient();
   if (!supabase) {
@@ -159,7 +163,12 @@ export async function insertMember(
     const locationMembershipId =
       `${codes.stateCode}-${codes.lgaCode}-${codes.wardCode}-${wardSerial}`;
 
-    const insert = formToDbInsert(data, wardSerial || undefined, locationMembershipId || undefined);
+    const insert = formToDbInsert(
+      data,
+      wardSerial || undefined,
+      locationMembershipId || undefined,
+      registration
+    );
     const { data: row, error } = await supabase
       .from("members")
       .insert(insert)
@@ -224,9 +233,15 @@ export async function insertMember(
         };
       }
       console.error("[ENROLLMENT] Database error:", error);
-      return { 
-        ok: false, 
-        error: "We couldn't save your enrollment. Please check your internet connection and try again. If the problem continues, contact support." 
+      const hint =
+        process.env.NODE_ENV === "development" && error.message
+          ? ` (${error.message})`
+          : "";
+      return {
+        ok: false,
+        error:
+          "We couldn't save your enrollment. Please check your internet connection and try again. If the problem continues, contact support." +
+          hint,
       };
     }
 
@@ -313,98 +328,111 @@ export async function getMemberByVoterId(
   return dbToMember(data as DbMember);
 }
 
-/** Find member by membership ID (SDP-XXX-NNNNNN). */
+/** Match mock member by any stored or display membership identifier. */
+function findMockMemberByMembershipLookup(normalized: string): MemberRecord | null {
+  return (
+    MOCK_MEMBERS.find((m) => {
+      const candidates = [
+        m.membershipId,
+        m.locationMembershipId,
+        getMembershipIdDisplayForRecord(m),
+        getMembershipIdFromData(m),
+      ]
+        .filter(Boolean)
+        .map((s) => String(s).replace(/\s/g, "").toUpperCase());
+      return candidates.includes(normalized);
+    }) ?? null
+  );
+}
+
+type MembersTableClient = {
+  from(table: string): {
+    select: (cols: string) => {
+      eq: (
+        col: string,
+        val: string
+      ) => { maybeSingle: () => Promise<{ data: unknown; error: unknown }> };
+      ilike: (
+        col: string,
+        val: string
+      ) => { maybeSingle: () => Promise<{ data: unknown; error: unknown }> };
+    };
+  };
+};
+
+async function fetchMemberRowByMembershipKeys(
+  supabase: MembersTableClient,
+  normalized: string
+): Promise<DbMember | null> {
+  for (const column of ["membership_id", "location_membership_id"] as const) {
+    const { data, error } = await supabase
+      .from("members")
+      .select("*")
+      .eq(column, normalized)
+      .maybeSingle();
+    if (error) {
+      console.error("[VERIFY] Error fetching member:", column, error);
+      return null;
+    }
+    if (data) return data as DbMember;
+
+    const ilike = await supabase
+      .from("members")
+      .select("*")
+      .ilike(column, normalized)
+      .maybeSingle();
+    if (ilike.error) {
+      console.error("[VERIFY] Error fetching member (ilike):", column, ilike.error);
+      return null;
+    }
+    if (ilike.data) return ilike.data as DbMember;
+  }
+  return null;
+}
+
+/**
+ * Find member by membership registration number: `membership_id` or `location_membership_id`
+ * (legacy SDP-XXX-NNNNNN or location format e.g. 17-09-11-AA123).
+ */
 export async function getMemberByMembershipId(
   membershipId: string
 ): Promise<MemberRecord | null> {
   const normalized = membershipId.replace(/\s/g, "").toUpperCase().trim();
-  if (!normalized || normalized.length < 6) {
-    console.log("[VERIFY] Invalid membership ID format:", membershipId);
+  if (!normalized || normalized.length < 6 || normalized.length > 96) {
+    console.log("[VERIFY] Invalid membership ID length:", membershipId);
     return null;
   }
 
-  // Validate format: SDP-XXX-NNNNNN
-  const parts = normalized.split("-");
-  if (parts.length !== 3 || parts[0] !== "SDP") {
-    console.log("[VERIFY] Invalid membership ID format:", normalized);
-    return null;
-  }
-
-  // Use admin client for more reliable access (bypasses RLS)
-  // This is safe for verification as we're only doing SELECT queries
   const supabase = createAdminClient();
   if (!supabase) {
-    // Fallback to anon client
     const anonSupabase = await createClient();
     if (!anonSupabase) {
       console.warn("[VERIFY] Supabase not configured, using mock data");
-      return MOCK_MEMBERS.find(
-        (m) => getMembershipIdFromData(m) === normalized
-      ) ?? null;
+      return findMockMemberByMembershipLookup(normalized);
     }
 
-    // Case-insensitive lookup - try exact match first, then ilike
-    let { data, error } = await anonSupabase
-      .from("members")
-      .select("*")
-      .eq("membership_id", normalized)
-      .maybeSingle();
-    
-    // If not found, try case-insensitive match
-    if (!data && !error) {
-      const result = await anonSupabase
-        .from("members")
-        .select("*")
-        .ilike("membership_id", normalized)
-        .maybeSingle();
-      data = result.data;
-      error = result.error;
-    }
-
-    if (error) {
-      console.error("[VERIFY] Error fetching member by membership ID (anon):", error);
-      return null;
-    }
-
+    const data = await fetchMemberRowByMembershipKeys(
+      anonSupabase as unknown as MembersTableClient,
+      normalized
+    );
     if (!data) {
       console.log("[VERIFY] No member found with membership ID:", normalized);
       return null;
     }
-
     console.log("[VERIFY] Member found:", data.id);
-    return dbToMember(data as DbMember);
+    return dbToMember(data);
   }
 
-  // Case-insensitive lookup - try exact match first, then ilike
-  let { data, error } = await supabase
-    .from("members")
-    .select("*")
-    .eq("membership_id", normalized)
-    .maybeSingle();
-  
-  // If not found, try case-insensitive match
-  if (!data && !error) {
-    const result = await supabase
-      .from("members")
-      .select("*")
-      .ilike("membership_id", normalized)
-      .maybeSingle();
-    data = result.data;
-    error = result.error;
-  }
-
-  if (error) {
-    console.error("[VERIFY] Error fetching member by membership ID:", error);
-    return null;
-  }
-
+  const data = await fetchMemberRowByMembershipKeys(
+    supabase as unknown as MembersTableClient,
+    normalized
+  );
   if (!data) {
     console.log("[VERIFY] No member found with membership ID:", normalized);
     return null;
   }
-
   console.log("[VERIFY] Member found:", data.id);
-  return dbToMember(data as DbMember);
+  return dbToMember(data);
 }
 
 /** Get all members for admin. Returns empty array if Supabase not configured or error occurs. */

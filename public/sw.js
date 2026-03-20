@@ -1,4 +1,4 @@
-// Service Worker for SDP Member Portal PWA
+// Service Worker for SDP Registration Gateway PWA
 // Provides offline caching and improved performance
 
 const CACHE_NAME = 'sdp-portal-v3';

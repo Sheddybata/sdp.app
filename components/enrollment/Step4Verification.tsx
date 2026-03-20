@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Check, Camera, Upload, X, Loader2 } from "lucide-react";
-import { submitEnrollment } from "@/app/actions/enrollment";
+import { submitEnrollment, type EnrollmentSource } from "@/app/actions/enrollment";
 import { useLanguage } from "@/lib/i18n/context";
 
 interface Step4VerificationProps {
@@ -21,11 +21,19 @@ interface Step4VerificationProps {
   onBack: () => void;
   formData: Partial<EnrollmentFormData>;
   setFormData: (d: Partial<EnrollmentFormData>) => void;
+  enrollmentSource?: EnrollmentSource;
 }
 
 const STEP4_FIELDS = ["voterRegistrationNumber", "portraitDataUrl", "agreedToConstitution"] as const;
 
-export function Step4Verification({ form, onNext, onBack, formData, setFormData }: Step4VerificationProps) {
+export function Step4Verification({
+  form,
+  onNext,
+  onBack,
+  formData,
+  setFormData,
+  enrollmentSource = "public",
+}: Step4VerificationProps) {
   const { t } = useLanguage();
   const {
     formState: { errors },
@@ -129,7 +137,7 @@ export function Step4Verification({ form, onNext, onBack, formData, setFormData 
     setFormData(values);
     setIsSubmitting(true);
     const merged = { ...formData, ...values } as EnrollmentFormData;
-    const result = await submitEnrollment(merged);
+    const result = await submitEnrollment(merged, enrollmentSource);
     setIsSubmitting(false);
     if (result.ok) {
       if (result.member) {

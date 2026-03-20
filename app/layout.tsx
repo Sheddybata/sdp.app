@@ -14,8 +14,8 @@ const ChunkErrorHandler = dynamic(() => import("./chunk-error-handler").then(mod
 });
 
 export const metadata: Metadata = {
-  title: "SDP Member Portal",
-  description: "Social Democratic Party - Member Enrollment & Admin",
+  title: "SDP Registration Gateway",
+  description: "Social Democratic Party - Registration gateway, enrollment & admin",
   icons: {
     icon: [
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },

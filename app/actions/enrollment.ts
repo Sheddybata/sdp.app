@@ -3,15 +3,19 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import { insertMember } from "@/lib/db/members";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
+import { getPortalSession } from "@/app/actions/portalAuth";
 
 import type { MemberRecord } from "@/lib/mock-members";
+
+export type EnrollmentSource = "public" | "agent" | "cluster";
 
 export type EnrollmentResult =
   | { ok: true; message: string; member?: MemberRecord }
   | { ok: false; error: string };
 
 export async function submitEnrollment(
-  data: EnrollmentFormData
+  data: EnrollmentFormData,
+  enrollmentSource: EnrollmentSource = "public"
 ): Promise<EnrollmentResult> {
   try {
     // Validate required fields
@@ -68,12 +72,37 @@ export async function submitEnrollment(
       };
     }
 
+    let registration: { registered_via: string; registered_by: string | null };
+    if (enrollmentSource === "public") {
+      registration = { registered_via: "self", registered_by: null };
+    } else if (enrollmentSource === "agent") {
+      const session = await getPortalSession();
+      if (!session.ok || session.role !== "agent") {
+        return {
+          ok: false,
+          error:
+            "Your agent session has expired or is invalid. Please sign in again from the agent portal.",
+        };
+      }
+      registration = { registered_via: "agent", registered_by: session.email };
+    } else {
+      const session = await getPortalSession();
+      if (!session.ok || session.role !== "cluster") {
+        return {
+          ok: false,
+          error:
+            "Your cluster session has expired or is invalid. Please sign in again from the cluster portal.",
+        };
+      }
+      registration = { registered_via: "cluster", registered_by: session.email };
+    }
+
     // If Supabase isn't set up, skip save and go straight to preview (so you can see the card)
     if (!createAdminClient()) {
       return { ok: true, message: "Enrollment saved successfully." };
     }
 
-    const result = await insertMember(data);
+    const result = await insertMember(data, registration);
 
     if (result.ok) {
       return { ok: true, message: "Enrollment saved successfully.", member: result.member };

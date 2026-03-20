@@ -66,6 +66,26 @@ Value: 4ed2c8bb1d68c5775e49d9bccad960bd28f1feaa055f5eaa598e8d07c890db98
 Environment: Production, Preview, Development
 ```
 
+#### 3. Agent & cluster portals (multi-user)
+
+Agents and cluster leads **sign up** with an invitation code from **Admin → Portal invites** (national secretariat workflow). Passwords are hashed in the app with bcrypt — you do **not** set per-user hashes in the environment.
+
+Apply Supabase migration `010_portal_users_and_invites.sql` so tables `portal_users` and `portal_invite_tokens` exist.
+
+Use the **same** `SESSION_SECRET` as admin; portal cookies (`sdp_portal_session`) are HMAC-signed with it. Only one portal role can be signed in per browser at a time.
+
+Optional but recommended in production:
+
+```
+PORTAL_INVITE_PEPPER
+Value: <long random string; keep stable — changing it invalidates unused invite hashes>
+Environment: Production, Preview, Development
+```
+
+If `PORTAL_INVITE_PEPPER` is empty, invite codes are still hashed (SHA-256 of the normalized code only).
+
+**Deprecated (no longer used):** `AGENT_PORTAL_EMAIL`, `AGENT_PORTAL_PASSWORD_HASH`, `CLUSTER_PORTAL_EMAIL`, `CLUSTER_PORTAL_PASSWORD_HASH`.
+
 ### Step 3: Verify Password Hash
 
 If login still fails, regenerate the password hash:
@@ -121,6 +141,9 @@ ADMIN_EMAIL=admin@sdp.org
 ADMIN_PASSWORD_HASH=$2b$10$C6jwSH3NMLQIPQUsTs2sOOYdI6680uHYQ10rho8wAEr54RuOi0rd.
 
 SESSION_SECRET=4ed2c8bb1d68c5775e49d9bccad960bd28f1feaa055f5eaa598e8d07c890db98
+
+# Optional: harden stored invite hashes (do not change once invites are issued)
+# PORTAL_INVITE_PEPPER=<random long string>
 ```
 
 **Remember:** For `ADMIN_PASSWORD_HASH`, use `$2b$...` NOT `\$2b$...`

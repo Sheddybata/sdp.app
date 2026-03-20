@@ -14,14 +14,77 @@ function getAdminEmail() {
   return trimmed;
 }
 
-function getAdminPasswordHash() {
+/** bcrypt modular crypt is always 60 chars: $2[a/b/x/y]$ + cost + $ + 53 chars from [./A-Za-z0-9] */
+const BCRYPT_60_RE = /(\$2[abxy]\$\d{2}\$[./A-Za-z0-9]{53})/;
+
+function stripEnvQuotes(s: string): string {
+  const t = s.trim();
+  if (t.length >= 2 && t.startsWith('"') && t.endsWith('"')) return t.slice(1, -1).trim();
+  if (t.length >= 2 && t.startsWith("'") && t.endsWith("'")) return t.slice(1, -1).trim();
+  return t;
+}
+
+function extractBcryptHash(s: string): string | null {
+  const cleaned = stripEnvQuotes(s.replace(/\\\$/g, "$").replace(/\r?\n/g, "").trim());
+  const m = cleaned.match(BCRYPT_60_RE);
+  return m ? m[1] : null;
+}
+
+function getAdminPasswordHash(): string {
+  // Prefer ADMIN_PASSWORD_HASH_B64 (no `$` in .env — avoids loader truncation).
+  const b64 = process.env.ADMIN_PASSWORD_HASH_B64?.trim();
+  if (b64) {
+    try {
+      const decoded = Buffer.from(b64, "base64").toString("utf8").trim();
+      const hash = extractBcryptHash(decoded);
+      if (hash) return hash;
+      console.warn(
+        "[AUTH] ADMIN_PASSWORD_HASH_B64 decoded but no valid 60-char bcrypt found inside."
+      );
+    } catch {
+      console.warn("[AUTH] ADMIN_PASSWORD_HASH_B64 is invalid base64.");
+    }
+  }
+
   const raw = process.env.ADMIN_PASSWORD_HASH ?? "";
-  // Clean: unescape $, trim, remove newlines/carriage returns (common .env paste issues)
-  const cleaned = raw
-    .replace(/\\\$/g, "$")
-    .replace(/\r?\n/g, "")
-    .trim();
-  return cleaned || "";
+  const cleaned = raw.replace(/\\\$/g, "$").replace(/\r?\n/g, "").trim();
+
+  const fromPlain = extractBcryptHash(cleaned);
+  if (fromPlain) return fromPlain;
+
+  // Common mistake: paste Option B (base64) into ADMIN_PASSWORD_HASH instead of _B64.
+  const noDollar = stripEnvQuotes(cleaned);
+  if (noDollar.length >= 40 && !noDollar.includes("$")) {
+    try {
+      const compact = noDollar.replace(/\s/g, "");
+      const decoded = Buffer.from(compact, "base64").toString("utf8").trim();
+      const hash = extractBcryptHash(decoded);
+      if (hash) {
+        console.warn(
+          "[AUTH] ADMIN_PASSWORD_HASH looked like base64; decoded OK. Put it in ADMIN_PASSWORD_HASH_B64=... instead."
+        );
+        return hash;
+      }
+    } catch {
+      /* ignore */
+    }
+  }
+
+  if (cleaned.length > 0 && cleaned.length < 55) {
+    console.warn(
+      "[AUTH] ADMIN_PASSWORD_HASH looks truncated (length " +
+        cleaned.length +
+        ', expected 60). Use ADMIN_PASSWORD_HASH_B64 from `node scripts/generate-password-hash.js`, or double-quote the full hash.'
+    );
+  } else if (cleaned.length > 60) {
+    console.warn(
+      "[AUTH] ADMIN_PASSWORD_HASH length " +
+        cleaned.length +
+        " — expected a single 60-char bcrypt. Remove duplicates/extra text, or use ADMIN_PASSWORD_HASH_B64 only."
+    );
+  }
+
+  return "";
 }
 
 // If no hash is set, we'll use a default password "admin123" hash

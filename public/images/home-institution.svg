@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 540" role="img" aria-labelledby="title desc">
+  <title id="title">Institutional graphic</title>
+  <desc id="desc">Abstract representation of headquarters architecture in party colours</desc>
+  <defs>
+    <linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#e8f5ef"/>
+      <stop offset="100%" style="stop-color:#f4f4f5"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="540" fill="url(#sky)"/>
+  <rect x="0" y="380" width="960" height="160" fill="#01a85a" opacity="0.12"/>
+  <rect x="120" y="140" width="280" height="300" rx="4" fill="#fff" stroke="#01a85a" stroke-width="3"/>
+  <rect x="140" y="170" width="56" height="72" fill="#f48735" opacity="0.35"/>
+  <rect x="220" y="170" width="56" height="72" fill="#01a85a" opacity="0.25"/>
+  <rect x="300" y="170" width="56" height="72" fill="#f48735" opacity="0.25"/>
+  <rect x="140" y="270" width="56" height="72" fill="#01a85a" opacity="0.2"/>
+  <rect x="220" y="270" width="56" height="72" fill="#f48735" opacity="0.2"/>
+  <rect x="300" y="270" width="56" height="72" fill="#01a85a" opacity="0.2"/>
+  <rect x="440" y="80" width="400" height="360" rx="4" fill="#fff" stroke="#f48735" stroke-width="3"/>
+  <rect x="470" y="120" width="100" height="90" fill="#01a85a" opacity="0.2"/>
+  <rect x="590" y="120" width="100" height="90" fill="#f48735" opacity="0.2"/>
+  <rect x="710" y="120" width="100" height="90" fill="#01a85a" opacity="0.2"/>
+  <rect x="470" y="230" width="100" height="90" fill="#f48735" opacity="0.15"/>
+  <rect x="590" y="230" width="100" height="90" fill="#01a85a" opacity="0.15"/>
+  <rect x="710" y="230" width="100" height="90" fill="#f48735" opacity="0.15"/>
+  <rect x="470" y="340" width="340" height="72" fill="#008751" opacity="0.08"/>
+  <line x1="0" y1="380" x2="960" y2="380" stroke="#01a85a" stroke-width="2" opacity="0.35"/>
+</svg>

@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Users, Calendar } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, Ticket, Upload } from "lucide-react";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { LogoutButton } from "@/components/admin/LogoutButton";
 
@@ -37,6 +37,20 @@ export default function AdminLayout({
               >
                 <Calendar className="h-4 w-4" />
                 Events & News
+              </Link>
+              <Link
+                href="/admin/portal-invites"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+              >
+                <Ticket className="h-4 w-4" />
+                Portal invites
+              </Link>
+              <Link
+                href="/admin/portal-uploads"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+              >
+                <Upload className="h-4 w-4" />
+                Bulk uploads
               </Link>
             </nav>
             <LogoutButton />

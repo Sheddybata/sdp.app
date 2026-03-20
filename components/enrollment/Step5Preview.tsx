@@ -17,14 +17,21 @@ import { jsPDF } from "jspdf";
 import { Download, Printer, ArrowLeft, CheckCircle2, Share2 } from "lucide-react";
 import { useLanguage } from "@/lib/i18n/context";
 import { calculateMembershipDues, DEFAULT_MONTHLY_DUE_NGN } from "@/lib/membership/dues";
+import { cn } from "@/lib/utils";
 
 interface Step5PreviewProps {
   formData: EnrollmentFormData;
   onBack: () => void;
   onBackToEnrollment?: () => void;
+  portalContext?: "agent" | "cluster";
 }
 
-export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5PreviewProps) {
+export function Step5Preview({
+  formData,
+  onBack,
+  onBackToEnrollment,
+  portalContext,
+}: Step5PreviewProps) {
   const { t } = useLanguage();
   const [scale, setScale] = React.useState(1);
   const [confirmation, setConfirmation] = React.useState<"download" | "print" | null>(null);
@@ -140,6 +147,24 @@ export function Step5Preview({ formData, onBack, onBackToEnrollment }: Step5Prev
       <p className="text-sm font-medium text-sdp-accent">
         {t.enrollment.step5.registrationComplete}
       </p>
+
+      {portalContext && (
+        <div
+          className={cn(
+            "rounded-lg border px-3 py-2 text-xs",
+            portalContext === "agent"
+              ? "border-sdp-primary/30 bg-sdp-primary/5 text-neutral-800"
+              : "border-sdp-accent/30 bg-sdp-accent/5 text-neutral-800"
+          )}
+        >
+          <strong>
+            {portalContext === "agent" ? "Agent portal" : "Cluster portal"}:
+          </strong>{" "}
+          This member was enrolled using the same full form as the public site. When
+          server support is added, the record will be linked to your signed-in{" "}
+          {portalContext === "agent" ? "agent" : "cluster"} account.
+        </div>
+      )}
 
       <h2 className="text-base font-semibold text-neutral-900">
         {t.enrollment.step5.previewTitle}

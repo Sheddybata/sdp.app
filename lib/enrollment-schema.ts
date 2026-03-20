@@ -22,7 +22,16 @@ export const enrollmentSchema = z.object({
   // Step 2: Contact & Age
   phone: z.string().min(10, "Valid phone required").max(15).regex(/^[0-9+\-\s()]+$/, "Invalid phone format"),
   phoneVerified: z.boolean().optional().default(false),
-  email: z.string().email("Valid email required").optional().or(z.literal("")),
+  // Empty string = no email (bulk CSV / optional field). Invalid non-empty must fail.
+  email: z
+    .string()
+    .refine(
+      (val) => {
+        const s = val.trim();
+        return s === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+      },
+      { message: "Valid email required" }
+    ),
   dateOfBirth: z.string().min(1, "Date of birth is required"),
   address: z.string().min(5, "Address is required").max(200),
 
@@ -81,4 +90,21 @@ export function getMembershipIdFromData(data: {
     .padEnd(3, "X");
   const suffix = (data.voterRegistrationNumber || "").replace(/\s/g, "").slice(-6);
   return `SDP-${prefix}-${suffix || "------"}`;
+}
+
+/**
+ * Same ID string shown on the digital card, enrollment preview, downloads, and admin.
+ * Prefers location-based ID (e.g. 17-09-11-AA123), then stored membership_id, then derived SDP-XXX-NNNNNN.
+ */
+export function getMembershipIdDisplayForRecord(data: {
+  locationMembershipId?: string;
+  membershipId?: string;
+  surname: string;
+  voterRegistrationNumber?: string;
+}): string {
+  const loc = data.locationMembershipId?.trim();
+  const mid = data.membershipId?.trim();
+  if (loc) return loc;
+  if (mid) return mid;
+  return getMembershipIdFromData(data);
 }

@@ -19,12 +19,17 @@ import { Step2Contact } from "./Step2Contact";
 import { Step3Geography } from "./Step3Geography";
 import { Step4Verification } from "./Step4Verification";
 import { Step5Preview } from "./Step5Preview";
+import type { EnrollmentSource } from "@/app/actions/enrollment";
 
 interface EnrollmentWizardProps {
   step: number;
   setStep: (n: number) => void;
   formData: Partial<EnrollmentFormData>;
   setFormData: React.Dispatch<React.SetStateAction<Partial<EnrollmentFormData>>>;
+  /** When set, Step 5 shows portal copy for agent/cluster. */
+  portalContext?: "agent" | "cluster";
+  /** Drives server-side registered_via / registered_by on submit. */
+  enrollmentSource?: EnrollmentSource;
 }
 
 export function EnrollmentWizard({
@@ -32,6 +37,8 @@ export function EnrollmentWizard({
   setStep,
   formData,
   setFormData,
+  portalContext,
+  enrollmentSource = "public",
 }: EnrollmentWizardProps) {
   const form = useForm<EnrollmentFormData>({
     resolver: zodResolver(enrollmentSchema),
@@ -124,6 +131,7 @@ export function EnrollmentWizard({
         onBack={onBack}
         formData={formData}
         setFormData={setFormData}
+        enrollmentSource={enrollmentSource}
       />
     );
   }
@@ -157,6 +165,7 @@ export function EnrollmentWizard({
       formData={{ ...formData, ...form.getValues() } as EnrollmentFormData}
       onBack={onBack}
       onBackToEnrollment={onBackToEnrollment}
+      portalContext={portalContext}
     />
   );
 }

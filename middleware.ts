@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { PORTAL_SESSION_COOKIE_NAME } from "@/lib/portal-session-constants";
 
 // Simple base64 decode for Edge Runtime
 function decodeBase64(str: string): string {
   try {
-    // Use atob which is available in Edge Runtime
     return atob(str);
   } catch {
     return "";
@@ -61,45 +61,162 @@ async function isValidSessionToken(token: string | undefined): Promise<boolean> 
   return true;
 }
 
+const PORTAL_USER_ID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
+/** Portal token: base64(email:role:userId:timestamp:signatureHex) */
+async function isValidPortalSessionToken(
+  token: string | undefined,
+  requiredRole: "agent" | "cluster"
+): Promise<boolean> {
+  if (!token) return false;
+  const decoded = decodeBase64(token);
+  if (!decoded) return false;
+  const parts = decoded.split(":");
+  if (parts.length < 5) return false;
+
+  const signature = parts[parts.length - 1]!;
+  const tsRaw = parts[parts.length - 2]!;
+  const userId = parts[parts.length - 3]!;
+  const roleRaw = parts[parts.length - 4]!;
+  const email = parts.slice(0, -4).join(":").trim().toLowerCase();
+
+  if (roleRaw !== "agent" && roleRaw !== "cluster") return false;
+  if (roleRaw !== requiredRole) return false;
+  if (!PORTAL_USER_ID_RE.test(userId)) return false;
+
+  const ts = Number(tsRaw);
+  if (!Number.isFinite(ts)) return false;
+
+  const ageSeconds = (Date.now() - ts) / 1000;
+  if (ageSeconds < 0 || ageSeconds > SESSION_MAX_AGE_SECONDS) return false;
+
+  const payload = `${email}:${roleRaw}:${userId}:${ts}`;
+  const expectedSignature = await hmacSha256Hex(getSessionSecret(), payload);
+  if (signature !== expectedSignature) return false;
+
+  return true;
+}
+
 export async function middleware(request: NextRequest) {
-  // Only protect /admin routes (except /admin/login)
-  if (request.nextUrl.pathname.startsWith("/admin") && !request.nextUrl.pathname.startsWith("/admin/login")) {
+  const path = request.nextUrl.pathname;
+
+  // --- Admin ---
+  if (path.startsWith("/admin") && !path.startsWith("/admin/login")) {
     const sessionCookie = request.cookies.get("admin_session");
-    
+
     if (!sessionCookie?.value) {
-      // Redirect to login if no session
       return NextResponse.redirect(new URL("/admin/login", request.url));
     }
 
-    // Basic validation - full validation happens in server actions
-    // Just check that cookie exists and has a value
     try {
       if (!(await isValidSessionToken(sessionCookie.value))) {
-        // Invalid session format or expired, redirect to login
         const response = NextResponse.redirect(new URL("/admin/login", request.url));
         response.cookies.delete("admin_session");
         return response;
       }
     } catch {
-      // Invalid session format, redirect to login
       const response = NextResponse.redirect(new URL("/admin/login", request.url));
       response.cookies.delete("admin_session");
       return response;
     }
   }
 
-  // If accessing /admin/login while already authenticated, redirect to admin dashboard
-  if (request.nextUrl.pathname === "/admin/login") {
+  if (path === "/admin/login") {
     const sessionCookie = request.cookies.get("admin_session");
-    
     if (sessionCookie?.value) {
       try {
         if (await isValidSessionToken(sessionCookie.value)) {
-          // Session exists, redirect to dashboard
           return NextResponse.redirect(new URL("/admin", request.url));
         }
       } catch {
-        // Invalid session, allow login page
+        // allow login page
+      }
+    }
+  }
+
+  // --- Agent portal ---
+  const agentLoginPath = "/agent/login";
+  const agentSignupPath = "/agent/signup";
+  const isAgentPublic = path === agentLoginPath || path === agentSignupPath;
+  const isAgentProtected = path.startsWith("/agent") && !isAgentPublic;
+
+  if (isAgentProtected) {
+    const portalCookie = request.cookies.get(PORTAL_SESSION_COOKIE_NAME);
+    try {
+      if (!(await isValidPortalSessionToken(portalCookie?.value, "agent"))) {
+        const response = NextResponse.redirect(
+          new URL(`${agentLoginPath}?next=${encodeURIComponent(path)}`, request.url)
+        );
+        response.cookies.delete(PORTAL_SESSION_COOKIE_NAME);
+        return response;
+      }
+    } catch {
+      const response = NextResponse.redirect(
+        new URL(`${agentLoginPath}?next=${encodeURIComponent(path)}`, request.url)
+      );
+      response.cookies.delete(PORTAL_SESSION_COOKIE_NAME);
+      return response;
+    }
+  }
+
+  if (path === agentLoginPath || path === agentSignupPath) {
+    const portalCookie = request.cookies.get(PORTAL_SESSION_COOKIE_NAME);
+    if (portalCookie?.value) {
+      try {
+        if (await isValidPortalSessionToken(portalCookie.value, "agent")) {
+          const next = request.nextUrl.searchParams.get("next");
+          const safe =
+            next && next.startsWith("/agent") && !next.startsWith(agentLoginPath)
+              ? next
+              : "/agent";
+          return NextResponse.redirect(new URL(safe, request.url));
+        }
+      } catch {
+        // allow login / signup page
+      }
+    }
+  }
+
+  // --- Cluster portal ---
+  const clusterLoginPath = "/cluster/login";
+  const clusterSignupPath = "/cluster/signup";
+  const isClusterPublic = path === clusterLoginPath || path === clusterSignupPath;
+  const isClusterProtected = path.startsWith("/cluster") && !isClusterPublic;
+
+  if (isClusterProtected) {
+    const portalCookie = request.cookies.get(PORTAL_SESSION_COOKIE_NAME);
+    try {
+      if (!(await isValidPortalSessionToken(portalCookie?.value, "cluster"))) {
+        const response = NextResponse.redirect(
+          new URL(`${clusterLoginPath}?next=${encodeURIComponent(path)}`, request.url)
+        );
+        response.cookies.delete(PORTAL_SESSION_COOKIE_NAME);
+        return response;
+      }
+    } catch {
+      const response = NextResponse.redirect(
+        new URL(`${clusterLoginPath}?next=${encodeURIComponent(path)}`, request.url)
+      );
+      response.cookies.delete(PORTAL_SESSION_COOKIE_NAME);
+      return response;
+    }
+  }
+
+  if (path === clusterLoginPath || path === clusterSignupPath) {
+    const portalCookie = request.cookies.get(PORTAL_SESSION_COOKIE_NAME);
+    if (portalCookie?.value) {
+      try {
+        if (await isValidPortalSessionToken(portalCookie.value, "cluster")) {
+          const next = request.nextUrl.searchParams.get("next");
+          const safe =
+            next && next.startsWith("/cluster") && !next.startsWith(clusterLoginPath)
+              ? next
+              : "/cluster";
+          return NextResponse.redirect(new URL(safe, request.url));
+        }
+      } catch {
+        // allow login / signup page
       }
     }
   }
@@ -108,5 +225,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/agent/:path*", "/cluster/:path*"],
 };
