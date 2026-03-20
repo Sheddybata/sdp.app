@@ -27,7 +27,7 @@ export const yo = {
     leadershipSubheading:
       "Words from the National Chairman and National Secretary on membership, integrity, and service to Nigerians at home and abroad.",
     chairmanQuote:
-      "Membership is the foundation of democratic participation. This portal reflects our commitment to transparent, accountable enrollment for every Nigerian who chooses the Social Democratic Party.",
+      "Welcome to the gateway to a new Nigeria rooted in social justice, peace and progress. Rebuilding Nigeria is a collective task. Join SDP, the credible alternative.",
     chairmanName: "Dr. Sadiq Umar Abubakar Gombe",
     chairmanRole: "National Chairman, Social Democratic Party",
     secretaryQuote:
@@ -48,13 +48,18 @@ export const yo = {
     clusterPortal: "Cluster portal",
     clusterPortalDesc: "Cluster leads — sign in and upload member lists",
     diasporaRegistration: "Diaspora registration",
-    diasporaRegistrationDesc: "Join SDP from outside Nigeria (preview flow)",
+    diasporaRegistrationDesc: "Join SDP from outside Nigeria.",
     upcomingAndNews: "Awọn n ṣe ati Awọn Iroyin",
     upcomingEvents: "Awọn iṣẹlẹ n ṣe",
     announcements: "Awọn iwifunni",
     pwaDescription: "PWA tuntun, akọkọ ni foonu. Fi sori ẹrọ fun lilo laisi intanẹẹti.",
     initializing: "N bẹrẹ Forukọsilẹ Aabo...",
     enterPortal: "Wọ Portal",
+    contactHeading: "Contact",
+    contactIntro: "For enquiries or more information, contact:",
+    contactDeskOfficer: "Desk Officer",
+    contactOrganizingManager: "Organizing manager",
+    contactNationalLine: "National secretariat",
   },
   enrollment: {
     step1: {

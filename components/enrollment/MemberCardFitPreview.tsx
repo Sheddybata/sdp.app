@@ -2,23 +2,26 @@
 
 import { useEffect, useRef, useState } from "react";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
+import { MEMBER_CARD_H, MEMBER_CARD_W } from "@/lib/member-card-back-content";
 import { MemberCard } from "./MemberCard";
-
-/** MemberCard is 952×560px; scale down to fit the parent width (no horizontal scroll). */
-const MEMBER_CARD_W = 952;
-const MEMBER_CARD_H = 560;
+import { MemberCardBack } from "./MemberCardBack";
+import { Button } from "@/components/ui/button";
 
 export type MemberCardFitPreviewData = EnrollmentFormData & { portraitDataUrl?: string };
 
 export function MemberCardFitPreview({
   data,
   showBarcode = true,
+  showBackToggle = true,
 }: {
   data: MemberCardFitPreviewData;
   showBarcode?: boolean;
+  /** Show Front / Back tabs (verify & admin preview). */
+  showBackToggle?: boolean;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [scale, setScale] = useState(1);
+  const [side, setSide] = useState<"front" | "back">("front");
 
   useEffect(() => {
     const el = containerRef.current;
@@ -35,7 +38,29 @@ export function MemberCardFitPreview({
   }, []);
 
   return (
-    <div ref={containerRef} className="w-full min-w-0 max-w-full">
+    <div ref={containerRef} className="w-full min-w-0 max-w-full space-y-3">
+      {showBackToggle ? (
+        <div className="flex flex-wrap justify-center gap-2">
+          <Button
+            type="button"
+            variant={side === "front" ? "default" : "outline"}
+            size="sm"
+            className={side === "front" ? "bg-sdp-accent hover:bg-[#018f4e]" : ""}
+            onClick={() => setSide("front")}
+          >
+            Front
+          </Button>
+          <Button
+            type="button"
+            variant={side === "back" ? "default" : "outline"}
+            size="sm"
+            className={side === "back" ? "bg-sdp-accent hover:bg-[#018f4e]" : ""}
+            onClick={() => setSide("back")}
+          >
+            Back
+          </Button>
+        </div>
+      ) : null}
       <div
         className="mx-auto overflow-hidden rounded-lg border border-neutral-200 bg-neutral-50 shadow-inner"
         style={{
@@ -51,10 +76,14 @@ export function MemberCardFitPreview({
             transformOrigin: "top left",
           }}
         >
-          <MemberCard
-            data={{ ...data, portraitDataUrl: data.portraitDataUrl }}
-            showBarcode={showBarcode}
-          />
+          {!showBackToggle || side === "front" ? (
+            <MemberCard
+              data={{ ...data, portraitDataUrl: data.portraitDataUrl }}
+              showBarcode={showBarcode}
+            />
+          ) : (
+            <MemberCardBack />
+          )}
         </div>
       </div>
     </div>

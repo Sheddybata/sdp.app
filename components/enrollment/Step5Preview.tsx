@@ -5,6 +5,8 @@ import type { EnrollmentFormData } from "@/lib/enrollment-schema";
 import { getMembershipIdFromData } from "@/lib/enrollment-schema";
 import { Button } from "@/components/ui/button";
 import { MemberCard } from "./MemberCard";
+import { MemberCardBack } from "./MemberCardBack";
+import { MEMBER_CARD_H, MEMBER_CARD_W } from "@/lib/member-card-back-content";
 import {
   Dialog,
   DialogContent,
@@ -36,6 +38,7 @@ export function Step5Preview({
   const [scale, setScale] = React.useState(1);
   const [confirmation, setConfirmation] = React.useState<"download" | "print" | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [cardSide, setCardSide] = React.useState<"front" | "back">("front");
   const containerRef = React.useRef<HTMLDivElement>(null);
   const membershipId = formData.locationMembershipId || formData.membershipId || getMembershipIdFromData(formData);
   const dues = React.useMemo(() => {
@@ -55,7 +58,7 @@ export function Step5Preview({
     const updateScale = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        const newScale = Math.min(containerWidth / 952, 1);
+        const newScale = Math.min(containerWidth / MEMBER_CARD_W, 1);
         setScale(newScale);
       }
     };
@@ -65,61 +68,74 @@ export function Step5Preview({
     return () => window.removeEventListener("resize", updateScale);
   }, []);
 
+  const html2canvasOpts = React.useMemo(
+    () => ({
+      scale: 2 as const,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+      width: MEMBER_CARD_W,
+      height: MEMBER_CARD_H,
+    }),
+    []
+  );
+
   const handleDownloadPDF = useCallback(() => {
-    const card = document.getElementById("member-card-capture");
-    if (!card) return;
+    const front = document.getElementById("member-card-capture");
+    const back = document.getElementById("member-card-back-capture");
+    if (!front || !back) return;
 
     import("html2canvas").then(({ default: html2canvas }) => {
-      html2canvas(card, { 
-        scale: 2, 
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-        width: 952,
-        height: 560
-      }).then((canvas) => {
-        const imgData = canvas.toDataURL("image/png");
-        const imgWidth = 280; // mm (landscape)
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        
-        const pdf = new jsPDF({
-          orientation: "landscape",
-          unit: "mm",
-          format: [imgWidth, imgHeight]
-        });
-        
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-        pdf.save(`SDP-MemberCard-${formData.voterRegistrationNumber}.pdf`);
-        setConfirmation("download");
-      });
-    }).catch((err) => {
-      console.error("PDF generation failed:", err);
-    });
-  }, [formData]);
+      Promise.all([html2canvas(front, html2canvasOpts), html2canvas(back, html2canvasOpts)])
+        .then(([cFront, cBack]) => {
+          const imgWidth = 280;
+          const imgHeight = (cFront.height * imgWidth) / cFront.width;
+          const pdf = new jsPDF({
+            orientation: "landscape",
+            unit: "mm",
+            format: [imgWidth, imgHeight],
+          });
+          pdf.addImage(cFront.toDataURL("image/png"), "PNG", 0, 0, imgWidth, imgHeight);
+          pdf.addPage();
+          pdf.addImage(cBack.toDataURL("image/png"), "PNG", 0, 0, imgWidth, imgHeight);
+          pdf.save(`SDP-MemberCard-${formData.voterRegistrationNumber}.pdf`);
+          setConfirmation("download");
+        })
+        .catch((err) => console.error("PDF generation failed:", err));
+    }).catch((err) => console.error("PDF generation failed:", err));
+  }, [formData.voterRegistrationNumber, html2canvasOpts]);
 
   const handleDownloadImage = useCallback(() => {
-    const card = document.getElementById("member-card-capture");
-    if (!card) return;
+    const front = document.getElementById("member-card-capture");
+    const back = document.getElementById("member-card-back-capture");
+    if (!front || !back) return;
     import("html2canvas").then(({ default: html2canvas }) => {
-      html2canvas(card, { 
-        scale: 3, 
-        useCORS: true,
-        logging: false,
-        backgroundColor: "#ffffff",
-        width: 952,
-        height: 560
-      }).then((canvas) => {
-        const link = document.createElement("a");
-        link.download = `SDP-MemberCard-${formData.voterRegistrationNumber}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-        setConfirmation("download");
-      });
-    }).catch((err) => {
-      console.error("Image download failed:", err);
-      handleDownloadPDF();
+      const opts = { ...html2canvasOpts, scale: 3 as const };
+      Promise.all([html2canvas(front, opts), html2canvas(back, opts)])
+        .then(([cFront, cBack]) => {
+          const w = MEMBER_CARD_W;
+          const h = MEMBER_CARD_H;
+          const stacked = document.createElement("canvas");
+          stacked.width = w * 3;
+          stacked.height = h * 3 * 2;
+          const ctx = stacked.getContext("2d");
+          if (!ctx) return;
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, stacked.width, stacked.height);
+          ctx.drawImage(cFront, 0, 0, stacked.width, h * 3);
+          ctx.drawImage(cBack, 0, h * 3, stacked.width, h * 3);
+          const link = document.createElement("a");
+          link.download = `SDP-MemberCard-${formData.voterRegistrationNumber}.png`;
+          link.href = stacked.toDataURL("image/png");
+          link.click();
+          setConfirmation("download");
+        })
+        .catch((err) => {
+          console.error("Image download failed:", err);
+          handleDownloadPDF();
+        });
     });
-  }, [formData.voterRegistrationNumber, handleDownloadPDF]);
+  }, [formData.voterRegistrationNumber, handleDownloadPDF, html2canvasOpts]);
 
   const handlePrint = useCallback(() => {
     window.print();
@@ -170,42 +186,68 @@ export function Step5Preview({
         {t.enrollment.step5.previewTitle}
       </h2>
 
+      <div className="flex flex-wrap justify-center gap-2">
+        <Button
+          type="button"
+          variant={cardSide === "front" ? "default" : "outline"}
+          size="sm"
+          className={cardSide === "front" ? "bg-sdp-accent hover:bg-[#018f4e]" : ""}
+          onClick={() => setCardSide("front")}
+        >
+          Front of card
+        </Button>
+        <Button
+          type="button"
+          variant={cardSide === "back" ? "default" : "outline"}
+          size="sm"
+          className={cardSide === "back" ? "bg-sdp-accent hover:bg-[#018f4e]" : ""}
+          onClick={() => setCardSide("back")}
+        >
+          Back of card
+        </Button>
+      </div>
+
       {/* Visible Preview (Scaled for screen) */}
       <div className="w-full flex justify-center py-4 overflow-hidden" ref={containerRef}>
-        <div 
-          style={{ 
-            width: `${952 * scale}px`, 
-            height: `${560 * scale}px`,
-            position: "relative"
+        <div
+          style={{
+            width: `${MEMBER_CARD_W * scale}px`,
+            height: `${MEMBER_CARD_H * scale}px`,
+            position: "relative",
           }}
         >
-          <div 
-            style={{ 
-              width: "952px", 
-              height: "560px",
+          <div
+            style={{
+              width: MEMBER_CARD_W,
+              height: MEMBER_CARD_H,
               transform: `scale(${scale})`,
               transformOrigin: "top left",
               position: "absolute",
               top: 0,
-              left: 0
+              left: 0,
             }}
           >
-            <MemberCard
-              data={formData}
-              showBarcode={true}
-              className="ring-2 ring-sdp-primary/20"
-            />
+            {cardSide === "front" ? (
+              <MemberCard
+                data={formData}
+                showBarcode={true}
+                className="ring-2 ring-sdp-primary/20"
+              />
+            ) : (
+              <MemberCardBack className="ring-2 ring-sdp-primary/20" />
+            )}
           </div>
         </div>
       </div>
 
-      {/* Hidden Capture Card (Always 1:1 for perfect downloads) */}
-      <div style={{ position: "absolute", left: "-9999px", top: 0 }}>
-        <MemberCard
-          data={formData}
-          showBarcode={true}
-          id="member-card-capture"
-        />
+      {/* Hidden captures — front + back for PNG/PDF (off-screen) */}
+      <div
+        id="member-cards-capture-stack"
+        className="member-cards-capture-stack pointer-events-none fixed left-[-10000px] top-0 z-[-1] flex flex-col gap-0 print:static print:left-auto print:top-auto print:z-auto"
+        aria-hidden
+      >
+        <MemberCard data={formData} showBarcode={true} id="member-card-capture" />
+        <MemberCardBack id="member-card-back-capture" />
       </div>
 
       {confirmation && (

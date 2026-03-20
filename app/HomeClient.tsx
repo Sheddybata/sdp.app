@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { UserPlus, ShieldCheck, LayoutDashboard, Briefcase, Network, Globe } from "lucide-react";
 import { EventsAnnouncements } from "@/components/EventsAnnouncements";
 import { InstallPrompt } from "@/components/InstallPrompt";
 import { VideoSplashScreen } from "@/components/VideoSplashScreen";
@@ -94,12 +93,12 @@ export function HomeClient({ events, announcements }: { events: EventRecord[]; a
                 {t.home.memberServicesDescription}
               </p>
               <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                <ActionCard href="/enroll/new" icon={UserPlus} title={t.home.newEnrollment} description={t.home.newEnrollmentDesc} primary aria-label="Start new member enrollment" />
-                <ActionCard href="/enroll/verify" icon={ShieldCheck} title={t.home.verifyMembership} description={t.home.verifyMembershipDesc} aria-label="Verify existing membership" />
-                <ActionCard href="/admin/login" icon={LayoutDashboard} title={t.home.adminCommand} description={t.home.adminCommandDesc} aria-label="Go to Admin Command Center" />
-                <ActionCard href="/agent/login" icon={Briefcase} title={t.home.agentPortal} description={t.home.agentPortalDesc} aria-label="Open agent portal login" />
-                <ActionCard href="/cluster/login" icon={Network} title={t.home.clusterPortal} description={t.home.clusterPortalDesc} aria-label="Open cluster portal login" />
-                <ActionCard href="/enroll/diaspora" icon={Globe} title={t.home.diasporaRegistration} description={t.home.diasporaRegistrationDesc} aria-label="Start diaspora registration preview" />
+                <ActionCard href="/enroll/new" imageSrc="/images/enrollement.png" title={t.home.newEnrollment} description={t.home.newEnrollmentDesc} primary aria-label="Start new member enrollment" />
+                <ActionCard href="/enroll/verify" imageSrc="/images/verification.png" title={t.home.verifyMembership} description={t.home.verifyMembershipDesc} aria-label="Verify existing membership" />
+                <ActionCard href="/admin/login" imageSrc="/images/admin.png" title={t.home.adminCommand} description={t.home.adminCommandDesc} aria-label="Go to Admin Command Center" />
+                <ActionCard href="/agent/login" imageSrc="/images/agent.png" title={t.home.agentPortal} description={t.home.agentPortalDesc} aria-label="Open agent portal login" />
+                <ActionCard href="/cluster/login" imageSrc="/images/cluster.png" title={t.home.clusterPortal} description={t.home.clusterPortalDesc} aria-label="Open cluster portal login" />
+                <ActionCard href="/enroll/diaspora" imageSrc="/images/diaspora.png" title={t.home.diasporaRegistration} description={t.home.diasporaRegistrationDesc} aria-label="Start diaspora registration" />
               </div>
             </section>
             <section className="mx-auto max-w-content-narrow border-t border-neutral-200 pt-12 sm:pt-14">

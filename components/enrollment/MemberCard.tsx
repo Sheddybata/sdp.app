@@ -1,11 +1,51 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { format } from "date-fns";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
-import { formatVoterIdDisplay, getMembershipIdFromData } from "@/lib/enrollment-schema";
+import { getMembershipIdFromData } from "@/lib/enrollment-schema";
 import { NIGERIA_STATES } from "@/lib/nigeria-geo";
 import { cn } from "@/lib/utils";
+
+/** Fixed card — spacing derived from reference (~5% side margins on 952px) */
+const CARD_W = 952;
+const CARD_H = 560;
+/** ~5% horizontal inset; aligns logo, name, QR to same left edge */
+const INSET_X = 48;
+/** Space from red banner (right column) to member name */
+const AFTER_BANNER_TO_NAME = 24;
+/** Name → first location row */
+const NAME_TO_LOCATION = 6;
+/** Tight stack between State/LG row, Ward */
+const LOCATION_TIGHT = 2;
+/** Breathing room around membership No */
+const NO_BLOCK_PAD_Y = 4;
+/** Tighter line height for member body copy */
+const MEMBER_BODY_LINE_HEIGHT = 1.08;
+/** QR ↔ Tel block */
+const QR_TO_TEL = 18;
+/** Logo column ↔ party / banner column */
+const LOGO_TO_PARTY_GAP = 20;
+/** Layout slot for logo (px) — keep fixed so party text + red bar position never shift */
+const LOGO_LAYOUT_SLOT = 156;
+/** Visual scale for logo only (does not change grid / body layout) */
+const LOGO_VISUAL_SCALE = 1.5;
+/** Nudge logo right (px) without changing grid column width */
+const LOGO_NUDGE_RIGHT_PX = 36;
+/** Party headline — one line, shared size */
+const PARTY_HEADLINE_PX = 42;
+/** Red banner “Digital MEMBERSHIP CARD” */
+const BANNER_TEXT_PX = 25;
+/** Inset red bar from the left (px) so it clears the enlarged logo visually */
+const BANNER_INSET_LEFT_PX = 36;
+/** One size for name, location lines, membership No, Tel / Member since */
+const MEMBER_BODY_TEXT_PX = 22;
+/** Member portrait frame (w × h) — card is fixed width; one size keeps layout predictable */
+const PHOTO_W = 196;
+const PHOTO_H = 272;
+/** Watermark — `public/membershipregistration/backgroundid.jpeg` */
+const CARD_WATERMARK_SRC = "/membershipregistration/backgroundid.jpeg";
+const CARD_WATERMARK_OPACITY = 0.17;
 
 interface MemberCardProps {
   data: EnrollmentFormData;
@@ -18,7 +58,6 @@ function getStateName(stateId: string): string {
   return NIGERIA_STATES.find((s) => s.id === stateId)?.name ?? stateId;
 }
 
-/** Display slug as title case (e.g. "aba-north" → "Aba North") */
 function formatSlugForDisplay(s: string): string {
   if (!s) return "—";
   return s
@@ -27,17 +66,49 @@ function formatSlugForDisplay(s: string): string {
     .join(" ");
 }
 
-/** Member Since label from joinDate (e.g. "January 2026") */
+function formatDisplayName(data: EnrollmentFormData): string {
+  const raw = [data.surname, data.firstName, data.otherNames].filter(Boolean).join(" ").trim();
+  if (!raw) return "—";
+  return raw
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/** Registration title (Mr, Mrs, Dr, …) + full name for the ID card */
+function formatNameWithTitle(data: EnrollmentFormData): string {
+  const name = formatDisplayName(data);
+  const t = data.title?.trim();
+  if (!t) return name;
+  return `${t} ${name}`;
+}
+
 function getMemberSinceLabel(joinDate?: string): string {
-  if (!joinDate) return "2026";
+  if (!joinDate) return "—";
   try {
     const d = new Date(joinDate);
-    if (Number.isNaN(d.getTime())) return "2026";
-    return format(d, "MMMM yyyy");
+    if (Number.isNaN(d.getTime())) return "—";
+    return format(d, "MMM yyyy");
   } catch {
-    return "2026";
+    return "—";
   }
 }
+
+/** Reference palette */
+const C = {
+  label: "#808080",
+  greenParty: "#008000",
+  redBanner: "#FF0000",
+  redId: "#CC0000",
+  noLabel: "#FF8C00",
+} as const;
+
+const PARTY_HEADLINE_STYLE: CSSProperties = {
+  color: C.greenParty,
+  fontWeight: 800,
+  /* Slight edge hint only — less heavy than full faux-bold */
+  textShadow: "0.35px 0 0 currentColor, -0.35px 0 0 currentColor",
+};
 
 export function MemberCard({ data, className, showBarcode = true, id = "member-card" }: MemberCardProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
@@ -52,7 +123,7 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
     const payload = `${base}/enroll/verify?member=${regId}`;
     import("qrcode").then((QRCode) => {
       QRCode.toDataURL(payload, {
-        width: 160,
+        width: 128,
         margin: 1,
         color: { dark: "#000000", light: "#ffffff" },
       })
@@ -61,134 +132,201 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
     });
   }, [showBarcode, membershipId]);
 
-
-  const fullName = [data.surname, data.firstName, data.otherNames].filter(Boolean).join(" ").toUpperCase();
+  const displayNameWithTitle = formatNameWithTitle(data);
   const memberSince = getMemberSinceLabel(data.joinDate);
+
+  const fieldTextStyle: CSSProperties = {
+    fontSize: MEMBER_BODY_TEXT_PX,
+    lineHeight: MEMBER_BODY_LINE_HEIGHT,
+    marginBottom: LOCATION_TIGHT,
+  };
 
   return (
     <article
       id={id}
       className={cn(
-        "relative overflow-hidden rounded-lg bg-white shadow-xl flex flex-col",
-        "border-2 border-[#01a85a]",
+        "sdp-member-card relative flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-xl",
         className
       )}
       style={{
-        width: "952px",
-        height: "560px",
-        minWidth: "952px",
-        minHeight: "560px"
+        width: CARD_W,
+        height: CARD_H,
+        minWidth: CARD_W,
+        minHeight: CARD_H,
       }}
       aria-label="Digital membership card"
     >
-      {/* Green top banner */}
-      <div className="bg-[#01a85a] px-6 py-4 flex items-center gap-4 h-[100px] shrink-0">
-        <div className="w-20 h-20 rounded-sm bg-white flex items-center justify-center overflow-hidden border-2 border-white/80 shrink-0">
-          <img
-            src="/sdplogo.jpg"
-            alt="SDP logo"
-            className="w-full h-full object-contain"
-          />
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        style={{
+          backgroundImage: `url(${CARD_WATERMARK_SRC})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          backgroundRepeat: "no-repeat",
+          opacity: CARD_WATERMARK_OPACITY,
+        }}
+        aria-hidden
+      />
+      {/* Header: logo only left column; party + red band right column (banner does not span under logo) */}
+      <header
+        className="relative z-[1] grid shrink-0 items-start"
+        style={{
+          paddingLeft: INSET_X,
+          paddingRight: INSET_X,
+          paddingTop: 20,
+          columnGap: LOGO_TO_PARTY_GAP,
+          gridTemplateColumns: `${LOGO_LAYOUT_SLOT}px 1fr`,
+        }}
+      >
+        <div className="flex flex-col">
+          {/* Fixed slot size — logo drawn larger via scale + origin so body/main card layout unchanged */}
+          <div
+            className="relative z-[2] flex shrink-0 items-start justify-center overflow-visible"
+            style={{ width: LOGO_LAYOUT_SLOT, height: LOGO_LAYOUT_SLOT }}
+            aria-hidden
+          >
+            <img
+              src="/sdplogo.jpg"
+              alt="SDP logo"
+              className="h-full w-full object-contain"
+              style={{
+                transform: `translateX(${LOGO_NUDGE_RIGHT_PX}px) scale(${LOGO_VISUAL_SCALE})`,
+                transformOrigin: "right center",
+              }}
+            />
+          </div>
         </div>
-        <div className="flex-1 text-center">
-          <p className="text-white text-2xl font-bold uppercase tracking-wide leading-tight">
-            Social Democratic Party
-          </p>
-          <p className="text-white/95 text-xl font-bold">SDP</p>
+
+        <div className="relative min-w-0">
+          <div className="relative z-[1] flex items-center justify-center px-2 pb-2 pt-0 text-center">
+            <p
+              className="m-0 whitespace-nowrap font-extrabold leading-tight tracking-tight antialiased"
+              style={{ ...PARTY_HEADLINE_STYLE, fontSize: PARTY_HEADLINE_PX }}
+            >
+              Social Democratic Party<span className="mx-2 opacity-90" aria-hidden>
+                ·
+              </span>
+              SDP
+            </p>
+          </div>
+          <div
+            className="relative z-[1] py-3 text-white"
+            style={{
+              backgroundColor: C.redBanner,
+              marginLeft: BANNER_INSET_LEFT_PX,
+              width: `calc(100% - ${BANNER_INSET_LEFT_PX}px)`,
+            }}
+          >
+            <p className="m-0 text-center font-semibold leading-tight" style={{ fontSize: BANNER_TEXT_PX }}>
+              <span className="font-normal">Digital </span>
+              <span className="font-bold uppercase tracking-[0.06em]">MEMBERSHIP CARD</span>
+            </p>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {/* Orange band */}
-      <div className="bg-[#f48735] px-6 py-2 text-center shrink-0">
-        <p className="text-white text-lg font-bold uppercase tracking-widest">Digital Membership Card</p>
-      </div>
+      {/* Main: left block + fixed-size portrait (top-aligned), same as earlier implementation */}
+      <div
+        className="relative z-[1] flex min-h-0 flex-1 flex-row items-start"
+        style={{
+          paddingLeft: INSET_X,
+          paddingRight: INSET_X,
+          paddingTop: AFTER_BANNER_TO_NAME,
+          columnGap: 40,
+        }}
+      >
+        <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-between" style={{ paddingBottom: 10 }}>
+          <div className="min-w-0">
+            {/* 1. Name + registration title */}
+            <p
+              className="m-0 font-bold text-neutral-900"
+              style={{
+                ...fieldTextStyle,
+                marginBottom: NAME_TO_LOCATION,
+              }}
+            >
+              {displayNameWithTitle}
+            </p>
 
-      {/* White content area with green borders */}
-      <div className="border-x-2 border-b-2 border-[#01a85a] flex-1 flex flex-col min-h-0">
-        <div className="px-6 py-6 flex-1 flex items-center">
-          <div className="grid gap-8 grid-cols-[180px_1fr_180px] items-center w-full">
-          {/* Portrait – left, green border */}
-          <div className="w-[180px] h-[220px] rounded-md overflow-hidden bg-neutral-200 border-2 border-[#01a85a] shrink-0">
-            {data.portraitDataUrl ? (
-              <img
-                src={data.portraitDataUrl}
-                alt=""
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-neutral-400 text-xs">
-                Photo
+            {/* 2. Membership ID */}
+            <div style={{ paddingTop: 2, paddingBottom: NO_BLOCK_PAD_Y }}>
+              <p className="m-0" style={{ ...fieldTextStyle, marginBottom: LOCATION_TIGHT }}>
+                <span className="font-semibold" style={{ color: C.noLabel }}>
+                  No:{" "}
+                </span>
+                <span className="font-bold tracking-tight" style={{ color: C.redId }}>
+                  {membershipId || "—"}
+                </span>
+              </p>
+            </div>
+
+            {/* 3. State (own row) */}
+            <p className="m-0" style={fieldTextStyle}>
+              <span style={{ color: C.label }}>State: </span>
+              <span className="font-bold text-neutral-900">{getStateName(data.state) || "—"}</span>
+            </p>
+
+            {/* 4. LGA — below state */}
+            <p className="m-0" style={fieldTextStyle}>
+              <span style={{ color: C.label }}>LG: </span>
+              <span className="font-bold text-neutral-900">{formatSlugForDisplay(data.lga)}</span>
+            </p>
+
+            {/* 5. Ward */}
+            <p className="m-0" style={fieldTextStyle}>
+              <span style={{ color: C.label }}>Ward: </span>
+              <span className="font-bold text-neutral-900">{formatSlugForDisplay(data.ward)}</span>
+            </p>
+
+            {/* 6. Polling Unit */}
+            <p className="m-0" style={{ ...fieldTextStyle, marginBottom: 0 }}>
+              <span style={{ color: C.label }}>Polling Unit: </span>
+              <span className="font-bold text-neutral-900">{data.pollingUnit?.trim() || "—"}</span>
+            </p>
+          </div>
+
+          {/* QR + Tel; member since on one line beside QR */}
+          <div className="flex flex-row items-center" style={{ gap: QR_TO_TEL, marginTop: 8 }}>
+            {showBarcode && membershipId ? (
+              <div className="shrink-0 rounded-sm border border-neutral-300 bg-white p-0.5" aria-hidden>
+                {qrDataUrl ? (
+                  <img src={qrDataUrl} alt="" width={120} height={120} className="block size-[120px]" />
+                ) : (
+                  <div className="flex size-[120px] items-center justify-center text-xs text-neutral-400">QR…</div>
+                )}
               </div>
+            ) : (
+              <div className="w-[120px] shrink-0" />
+            )}
+            <div className="min-w-0 space-y-1">
+              <p className="m-0" style={{ fontSize: MEMBER_BODY_TEXT_PX, lineHeight: MEMBER_BODY_LINE_HEIGHT }}>
+                <span style={{ color: C.label }}>Tel: </span>
+                <span className="font-bold text-neutral-900">{data.phone || "—"}</span>
+              </p>
+              <p className="m-0 whitespace-nowrap" style={{ fontSize: MEMBER_BODY_TEXT_PX, lineHeight: MEMBER_BODY_LINE_HEIGHT }}>
+                <span style={{ color: C.label }}>Member since: </span>
+                <span className="font-bold text-neutral-900">{memberSince}</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Portrait: fixed frame, top-aligned (previous behaviour — not full column height) */}
+        <div className="shrink-0 pt-0.5">
+          <div className="overflow-hidden rounded-sm bg-neutral-100" style={{ width: PHOTO_W, height: PHOTO_H }}>
+            {data.portraitDataUrl ? (
+              <img src={data.portraitDataUrl} alt="" className="h-full w-full object-cover" />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-xs text-neutral-400">Photo</div>
             )}
           </div>
-
-          {/* Details – center */}
-          <div className="min-w-0">
-            <p className="text-3xl font-bold text-neutral-900 uppercase tracking-wide leading-tight break-words">
-              {fullName || "—"}
-            </p>
-            <p className="mt-1 text-lg">
-              <span className="text-[#f48735] font-semibold">Membership ID: </span>
-              <span className="text-[#e0762a] font-bold">{membershipId}</span>
-            </p>
- 
-            <div className="grid grid-cols-2 gap-x-10 gap-y-3 mt-6">
-              <div>
-                <p className="text-neutral-500 uppercase text-[10px] font-bold">State</p>
-                <p className="font-bold text-neutral-900 text-base break-words">{getStateName(data.state)}</p>
-              </div>
-              <div>
-                <p className="text-neutral-500 uppercase text-[10px] font-bold">LGA</p>
-                <p className="font-bold text-neutral-900 text-base leading-tight break-words" title={data.lga}>{formatSlugForDisplay(data.lga)}</p>
-              </div>
-              <div>
-                <p className="text-neutral-500 uppercase text-[10px] font-bold">Ward</p>
-                <p className="font-bold text-neutral-900 text-base leading-tight break-words" title={data.ward}>{formatSlugForDisplay(data.ward)}</p>
-              </div>
-              <div>
-                <p className="text-neutral-500 uppercase text-[10px] font-bold">Polling Unit</p>
-                <p className="font-bold text-neutral-900 text-sm leading-tight break-words" title={data.pollingUnit}>
-                  {data.pollingUnit || "—"}
-                </p>
-              </div>
-              <div>
-                <p className="text-neutral-500 uppercase text-[10px] font-bold">Tel</p>
-                <p className="font-bold text-neutral-900 text-base break-words">{data.phone}</p>
-              </div>
-              <div>
-                <p className="text-neutral-500 uppercase text-[10px] font-bold">Member Since</p>
-                <p className="font-bold text-neutral-900 text-base leading-tight">{memberSince}</p>
-              </div>
-              <div className="col-span-2 pb-6">
-                <p className="text-neutral-500 uppercase text-[10px] font-bold">Voter Reg No</p>
-                <p className="font-bold text-neutral-900 font-mono tracking-wide whitespace-nowrap text-base">
-                  {formatVoterIdDisplay(data.voterRegistrationNumber)}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* QR code – right */}
-          {showBarcode && membershipId && (
-            <div className="w-[180px] h-[180px] border-2 border-[#f48735] rounded bg-white flex items-center justify-center shrink-0" aria-hidden>
-              {qrDataUrl ? (
-                <img
-                  src={qrDataUrl}
-                  alt=""
-                  className="w-[160px] h-[160px] block"
-                  width={160}
-                  height={160}
-                />
-              ) : (
-                <span className="text-xs text-neutral-400">QR…</span>
-              )}
-            </div>
-          )}
         </div>
-        </div>
+      </div>
 
-        {/* Green bottom banner */}
-        <div className="h-3 bg-[#01a85a] mt-auto shrink-0" />
+      {/* Reference footer: thin red, then thicker green */}
+      <div className="relative z-[1] mt-auto flex w-full shrink-0 flex-col">
+        <div className="h-1 w-full" style={{ backgroundColor: C.redBanner }} />
+        <div className="h-2.5 w-full" style={{ backgroundColor: C.greenParty }} />
       </div>
     </article>
   );

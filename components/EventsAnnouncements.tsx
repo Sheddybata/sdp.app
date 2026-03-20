@@ -34,7 +34,19 @@ const MOCK_EVENTS_FALLBACK: EventRecord[] = [
 ];
 
 const MOCK_ANNOUNCEMENTS: { text: string; date: string }[] = [
-  { text: "Member registration is now open. Join your ward today.", date: "Jan 28, 2026" },
+  { text: "Old and new members are required to register.", date: "Mar 4, 2026" },
+  {
+    text: 'All forms submitted are kept in "escrow" until verified and validated before entering the database.',
+    date: "Mar 4, 2026",
+  },
+  {
+    text: "Payments are not required for registration but will be computed and recorded.",
+    date: "Mar 4, 2026",
+  },
+  {
+    text: "Payment of membership fees is mandatory for financial members only.",
+    date: "Mar 4, 2026",
+  },
 ];
 
 function formatDate(s: string, locale: string = "en-NG") {
@@ -112,6 +124,30 @@ export function EventsAnnouncements({ events = [], announcements = [] }: EventsA
               </li>
             );
           })}
+        </ul>
+      </div>
+      <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+        <h3 className="mb-3 text-sm font-medium text-neutral-700">{t.home.contactHeading}</h3>
+        <p className="mb-3 text-sm text-neutral-600">{t.home.contactIntro}</p>
+        <ul className="space-y-3 text-sm text-neutral-800">
+          <li>
+            <a href="tel:+2347043979165" className="font-medium text-sdp-primary hover:underline">
+              +234 704 397 9165
+            </a>
+            <div className="text-xs text-neutral-600">{t.home.contactDeskOfficer}</div>
+          </li>
+          <li>
+            <a href="tel:+2348066524457" className="font-medium text-sdp-primary hover:underline">
+              +234 806 652 4457
+            </a>
+            <div className="text-xs text-neutral-600">{t.home.contactOrganizingManager}</div>
+          </li>
+          <li>
+            <a href="tel:+2348033022578" className="font-medium text-sdp-primary hover:underline">
+              +234 803 302 2578
+            </a>
+            <div className="text-xs text-neutral-600">{t.home.contactNationalLine}</div>
+          </li>
         </ul>
       </div>
     </section>
