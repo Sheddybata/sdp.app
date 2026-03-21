@@ -56,7 +56,7 @@
 /* Print: show only the member card */
 @media print {
   @page {
-    size: landscape;
+    size: auto;
     margin: 0;
   }
   html, body {
@@ -75,7 +75,13 @@
   #member-card-back-capture,
   #member-card-back-capture *,
   #member-cards-capture-stack,
-  #member-cards-capture-stack * {
+  #member-cards-capture-stack *,
+  #member-card-capture-portrait,
+  #member-card-capture-portrait *,
+  #member-card-back-capture-portrait,
+  #member-card-back-capture-portrait *,
+  #member-cards-capture-stack-portrait,
+  #member-cards-capture-stack-portrait * {
     visibility: visible;
   }
   #member-card-preview,
@@ -84,8 +90,29 @@
     position: relative !important;
     left: auto !important;
     top: auto !important;
-    width: 952px !important;
-    height: 560px !important;
+    width: 856px !important;
+    height: 539px !important;
+    max-width: none !important;
+    max-height: none !important;
+    box-shadow: none !important;
+    border: 1px solid #d4d4d4 !important;
+    margin: 0 auto !important;
+    padding: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    transform: none !important;
+    background: white !important;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  #member-card-capture-portrait,
+  #member-card-back-capture-portrait {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: 640px !important;
+    height: 1008px !important;
     max-width: none !important;
     max-height: none !important;
     box-shadow: none !important;
@@ -102,12 +129,20 @@
 
   #member-card-back-capture {
     page-break-before: always;
+    page-break-after: always;
+    break-before: page;
+    break-after: page;
+  }
+
+  #member-card-back-capture-portrait {
+    page-break-before: always;
     page-break-after: auto;
     break-before: page;
     break-after: auto;
   }
 
-  #member-cards-capture-stack {
+  #member-cards-capture-stack,
+  #member-cards-capture-stack-portrait {
     position: static !important;
     left: auto !important;
     top: auto !important;
@@ -124,8 +159,18 @@
   /* Prefer color-accurate print when the printer supports it */
   #member-card-preview .sdp-member-card,
   #member-card-capture.sdp-member-card,
-  #member-card-back-capture.sdp-member-card-back {
+  #member-card-back-capture.sdp-member-card-back,
+  #member-card-capture-portrait.sdp-member-card-portrait,
+  #member-card-back-capture-portrait.sdp-member-card-back-portrait {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  /* Match on-screen reds/greens in print (some browsers desaturate otherwise) */
+  #member-card-capture [data-sdp-red-banner],
+  #member-card-preview [data-sdp-red-banner],
+  #member-card-capture-portrait [data-sdp-red-banner] {
+    background-color: #ff0000 !important;
+    color: #ffffff !important;
   }
 }

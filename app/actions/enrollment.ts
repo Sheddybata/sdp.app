@@ -2,7 +2,7 @@
 
 import { createAdminClient } from "@/lib/supabase/admin";
 import { insertMember } from "@/lib/db/members";
-import type { EnrollmentFormData } from "@/lib/enrollment-schema";
+import { enrollmentSchema, type EnrollmentFormData } from "@/lib/enrollment-schema";
 import { getPortalSession } from "@/app/actions/portalAuth";
 
 import type { MemberRecord } from "@/lib/mock-members";
@@ -18,6 +18,14 @@ export async function submitEnrollment(
   enrollmentSource: EnrollmentSource = "public"
 ): Promise<EnrollmentResult> {
   try {
+    const parsed = enrollmentSchema.safeParse(data);
+    if (!parsed.success) {
+      const flat = parsed.error.flatten().fieldErrors;
+      const first = Object.values(flat).flat()[0];
+      return { ok: false, error: first || "Invalid enrollment data. Check the form and try again." };
+    }
+    data = parsed.data;
+
     // Validate required fields
     if (
       !data.voterRegistrationNumber ||

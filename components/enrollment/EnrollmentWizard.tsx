@@ -20,6 +20,7 @@ import { Step3Geography } from "./Step3Geography";
 import { Step4Verification } from "./Step4Verification";
 import { Step5Preview } from "./Step5Preview";
 import type { EnrollmentSource } from "@/app/actions/enrollment";
+import { format, startOfMonth } from "date-fns";
 
 interface EnrollmentWizardProps {
   step: number;
@@ -58,7 +59,7 @@ export function EnrollmentWizard({
       ward: formData.ward ?? "",
       pollingUnit: formData.pollingUnit ?? "",
       voterRegistrationNumber: formData.voterRegistrationNumber ?? "",
-      joinDate: formData.joinDate ?? new Date().toISOString().slice(0, 10),
+      joinDate: formData.joinDate ?? format(startOfMonth(new Date()), "yyyy-MM-dd"),
       portraitDataUrl: formData.portraitDataUrl ?? "",
       agreedToConstitution: formData.agreedToConstitution ?? false,
     },
@@ -152,7 +153,7 @@ export function EnrollmentWizard({
       ward: "",
       pollingUnit: "",
       voterRegistrationNumber: "",
-      joinDate: new Date().toISOString().slice(0, 10),
+      joinDate: format(startOfMonth(new Date()), "yyyy-MM-dd"),
       portraitDataUrl: "",
       agreedToConstitution: false,
     });

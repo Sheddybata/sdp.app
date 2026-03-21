@@ -1,4 +1,6 @@
 import { z } from "zod";
+import { isDobWithinEnrollmentRules, isValidJoinMonthYearIso } from "@/lib/enrollment-dates";
+import { isValidEnrollmentNigerianPhone } from "@/lib/phone-nigeria";
 
 // Nigerian voter registration number: 19–20 alphanumeric characters (stored without spaces)
 const voterIdRegex = /^[A-Z0-9]{19,20}$/i;
@@ -20,7 +22,15 @@ export const enrollmentSchema = z.object({
     .regex(ninRegex, "NIN must be exactly 11 digits"),
 
   // Step 2: Contact & Age
-  phone: z.string().min(10, "Valid phone required").max(15).regex(/^[0-9+\-\s()]+$/, "Invalid phone format"),
+  phone: z
+    .string()
+    .min(10, "Valid phone required")
+    .max(22)
+    .regex(/^[0-9+\-\s()]+$/, "Invalid phone format")
+    .refine(isValidEnrollmentNigerianPhone, {
+      message:
+        "Use a Nigerian mobile number: +234… or 234…, or local 070, 080, 081, 090, or 091 followed by 8 more digits.",
+    }),
   phoneVerified: z.boolean().optional().default(false),
   // Empty string = no email (bulk CSV / optional field). Invalid non-empty must fail.
   email: z
@@ -32,11 +42,21 @@ export const enrollmentSchema = z.object({
       },
       { message: "Valid email required" }
     ),
-  dateOfBirth: z.string().min(1, "Date of birth is required"),
+  dateOfBirth: z
+    .string()
+    .min(1, "Date of birth is required")
+    .refine(isDobWithinEnrollmentRules, {
+      message: "Date of birth must be between 1925 and 2008 and you must be at least 18 (and not over 110 years old).",
+    }),
   address: z.string().min(5, "Address is required").max(200),
 
   // Step 3: Political Geography
-  joinDate: z.string().optional(),
+  joinDate: z
+    .string()
+    .min(1, "Membership month and year are required")
+    .refine(isValidJoinMonthYearIso, {
+      message: "Choose membership join month from January 2010 through the current month.",
+    }),
   state: z.string().min(1, "State is required"),
   lga: z.string().min(1, "LGA is required"),
   ward: z.string().min(1, "Ward is required"),

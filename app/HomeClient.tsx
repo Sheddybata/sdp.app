@@ -93,7 +93,7 @@ export function HomeClient({ events, announcements }: { events: EventRecord[]; a
                 {t.home.memberServicesDescription}
               </p>
               <div className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                <ActionCard href="/enroll/new" imageSrc="/images/enrollement.png" title={t.home.newEnrollment} description={t.home.newEnrollmentDesc} primary aria-label="Start new member enrollment" />
+                <ActionCard href="/enroll/new" imageSrc="/images/enrollement.png" title={t.home.newEnrollment} description={t.home.newEnrollmentDesc} primary aria-label="Start enrollment" />
                 <ActionCard href="/enroll/verify" imageSrc="/images/verification.png" title={t.home.verifyMembership} description={t.home.verifyMembershipDesc} aria-label="Verify existing membership" />
                 <ActionCard href="/admin/login" imageSrc="/images/admin.png" title={t.home.adminCommand} description={t.home.adminCommandDesc} aria-label="Go to Admin Command Center" />
                 <ActionCard href="/agent/login" imageSrc="/images/agent.png" title={t.home.agentPortal} description={t.home.agentPortalDesc} aria-label="Open agent portal login" />

@@ -23,7 +23,7 @@ function dbToMember(row: DbMember): MemberRecord {
     email: row.email ?? "",
     dateOfBirth: row.date_of_birth ?? "",
     address: row.address ?? "",
-    joinDate: row.join_date ?? undefined,
+    joinDate: row.join_date ?? "",
     state: row.state,
     lga: row.lga,
     ward: row.ward,

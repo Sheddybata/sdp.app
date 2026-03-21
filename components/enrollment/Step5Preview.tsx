@@ -6,7 +6,14 @@ import { getMembershipIdFromData } from "@/lib/enrollment-schema";
 import { Button } from "@/components/ui/button";
 import { MemberCard } from "./MemberCard";
 import { MemberCardBack } from "./MemberCardBack";
-import { MEMBER_CARD_H, MEMBER_CARD_W } from "@/lib/member-card-back-content";
+import { PortraitMemberCard } from "./PortraitMemberCard";
+import { PortraitMemberCardBack } from "./PortraitMemberCardBack";
+import {
+  MEMBER_CARD_H,
+  MEMBER_CARD_W,
+  MEMBER_CARD_PORTRAIT_H,
+  MEMBER_CARD_PORTRAIT_W,
+} from "@/lib/member-card-back-content";
 import {
   Dialog,
   DialogContent,
@@ -20,6 +27,7 @@ import { Download, Printer, ArrowLeft, CheckCircle2, Share2 } from "lucide-react
 import { useLanguage } from "@/lib/i18n/context";
 import { calculateMembershipDues, DEFAULT_MONTHLY_DUE_NGN } from "@/lib/membership/dues";
 import { cn } from "@/lib/utils";
+import { format, startOfMonth } from "date-fns";
 
 interface Step5PreviewProps {
   formData: EnrollmentFormData;
@@ -39,11 +47,12 @@ export function Step5Preview({
   const [confirmation, setConfirmation] = React.useState<"download" | "print" | null>(null);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [cardSide, setCardSide] = React.useState<"front" | "back">("front");
+  const [cardLayout, setCardLayout] = React.useState<"landscape" | "portrait">("landscape");
   const containerRef = React.useRef<HTMLDivElement>(null);
   const membershipId = formData.locationMembershipId || formData.membershipId || getMembershipIdFromData(formData);
   const dues = React.useMemo(() => {
     return calculateMembershipDues({
-      joinDateISO: formData.joinDate || new Date().toISOString().slice(0, 10),
+      joinDateISO: formData.joinDate || format(startOfMonth(new Date()), "yyyy-MM-dd"),
       monthlyDue: DEFAULT_MONTHLY_DUE_NGN,
     });
   }, [formData.joinDate]);
@@ -58,7 +67,9 @@ export function Step5Preview({
     const updateScale = () => {
       if (containerRef.current) {
         const containerWidth = containerRef.current.offsetWidth;
-        const newScale = Math.min(containerWidth / MEMBER_CARD_W, 1);
+        const cardW =
+          cardLayout === "landscape" ? MEMBER_CARD_W : MEMBER_CARD_PORTRAIT_W;
+        const newScale = Math.min(containerWidth / cardW, 1);
         setScale(newScale);
       }
     };
@@ -66,7 +77,7 @@ export function Step5Preview({
     updateScale();
     window.addEventListener("resize", updateScale);
     return () => window.removeEventListener("resize", updateScale);
-  }, []);
+  }, [cardLayout]);
 
   const html2canvasOpts = React.useMemo(
     () => ({
@@ -74,47 +85,73 @@ export function Step5Preview({
       useCORS: true,
       logging: false,
       backgroundColor: "#ffffff",
-      width: MEMBER_CARD_W,
-      height: MEMBER_CARD_H,
+      scrollX: 0,
+      scrollY: 0,
+      /** Let element define width/height — fixed W/H here skewed banner/text in captures */
+      foreignObjectRendering: false,
     }),
     []
   );
 
   const handleDownloadPDF = useCallback(() => {
-    const front = document.getElementById("member-card-capture");
-    const back = document.getElementById("member-card-back-capture");
+    const portrait = cardLayout === "portrait";
+    const front = document.getElementById(
+      portrait ? "member-card-capture-portrait" : "member-card-capture"
+    );
+    const back = document.getElementById(
+      portrait ? "member-card-back-capture-portrait" : "member-card-back-capture"
+    );
     if (!front || !back) return;
 
     import("html2canvas").then(({ default: html2canvas }) => {
       Promise.all([html2canvas(front, html2canvasOpts), html2canvas(back, html2canvasOpts)])
         .then(([cFront, cBack]) => {
-          const imgWidth = 280;
-          const imgHeight = (cFront.height * imgWidth) / cFront.width;
-          const pdf = new jsPDF({
-            orientation: "landscape",
-            unit: "mm",
-            format: [imgWidth, imgHeight],
-          });
-          pdf.addImage(cFront.toDataURL("image/png"), "PNG", 0, 0, imgWidth, imgHeight);
-          pdf.addPage();
-          pdf.addImage(cBack.toDataURL("image/png"), "PNG", 0, 0, imgWidth, imgHeight);
-          pdf.save(`SDP-MemberCard-${formData.voterRegistrationNumber}.pdf`);
+          if (portrait) {
+            const imgWidthMm = 70;
+            const imgHeightMm = (cFront.height * imgWidthMm) / cFront.width;
+            const pdf = new jsPDF({
+              orientation: "portrait",
+              unit: "mm",
+              format: [imgWidthMm, imgHeightMm],
+            });
+            pdf.addImage(cFront.toDataURL("image/png"), "PNG", 0, 0, imgWidthMm, imgHeightMm);
+            pdf.addPage([imgWidthMm, imgHeightMm], "p");
+            pdf.addImage(cBack.toDataURL("image/png"), "PNG", 0, 0, imgWidthMm, imgHeightMm);
+            pdf.save(`SDP-MemberCard-portrait-${formData.voterRegistrationNumber}.pdf`);
+          } else {
+            const imgWidth = 280;
+            const imgHeight = (cFront.height * imgWidth) / cFront.width;
+            const pdf = new jsPDF({
+              orientation: "landscape",
+              unit: "mm",
+              format: [imgWidth, imgHeight],
+            });
+            pdf.addImage(cFront.toDataURL("image/png"), "PNG", 0, 0, imgWidth, imgHeight);
+            pdf.addPage();
+            pdf.addImage(cBack.toDataURL("image/png"), "PNG", 0, 0, imgWidth, imgHeight);
+            pdf.save(`SDP-MemberCard-${formData.voterRegistrationNumber}.pdf`);
+          }
           setConfirmation("download");
         })
         .catch((err) => console.error("PDF generation failed:", err));
     }).catch((err) => console.error("PDF generation failed:", err));
-  }, [formData.voterRegistrationNumber, html2canvasOpts]);
+  }, [cardLayout, formData.voterRegistrationNumber, html2canvasOpts]);
 
   const handleDownloadImage = useCallback(() => {
-    const front = document.getElementById("member-card-capture");
-    const back = document.getElementById("member-card-back-capture");
+    const portrait = cardLayout === "portrait";
+    const front = document.getElementById(
+      portrait ? "member-card-capture-portrait" : "member-card-capture"
+    );
+    const back = document.getElementById(
+      portrait ? "member-card-back-capture-portrait" : "member-card-back-capture"
+    );
     if (!front || !back) return;
     import("html2canvas").then(({ default: html2canvas }) => {
       const opts = { ...html2canvasOpts, scale: 3 as const };
       Promise.all([html2canvas(front, opts), html2canvas(back, opts)])
         .then(([cFront, cBack]) => {
-          const w = MEMBER_CARD_W;
-          const h = MEMBER_CARD_H;
+          const w = portrait ? MEMBER_CARD_PORTRAIT_W : MEMBER_CARD_W;
+          const h = portrait ? MEMBER_CARD_PORTRAIT_H : MEMBER_CARD_H;
           const stacked = document.createElement("canvas");
           stacked.width = w * 3;
           stacked.height = h * 3 * 2;
@@ -125,7 +162,9 @@ export function Step5Preview({
           ctx.drawImage(cFront, 0, 0, stacked.width, h * 3);
           ctx.drawImage(cBack, 0, h * 3, stacked.width, h * 3);
           const link = document.createElement("a");
-          link.download = `SDP-MemberCard-${formData.voterRegistrationNumber}.png`;
+          link.download = portrait
+            ? `SDP-MemberCard-portrait-${formData.voterRegistrationNumber}.png`
+            : `SDP-MemberCard-${formData.voterRegistrationNumber}.png`;
           link.href = stacked.toDataURL("image/png");
           link.click();
           setConfirmation("download");
@@ -135,7 +174,93 @@ export function Step5Preview({
           handleDownloadPDF();
         });
     });
-  }, [formData.voterRegistrationNumber, handleDownloadPDF, html2canvasOpts]);
+  }, [cardLayout, formData.voterRegistrationNumber, handleDownloadPDF, html2canvasOpts]);
+
+  const handleDownloadBothPDF = useCallback(() => {
+    const lf = document.getElementById("member-card-capture");
+    const lb = document.getElementById("member-card-back-capture");
+    const pf = document.getElementById("member-card-capture-portrait");
+    const pb = document.getElementById("member-card-back-capture-portrait");
+    if (!lf || !lb || !pf || !pb) return;
+
+    import("html2canvas").then(({ default: html2canvas }) => {
+      Promise.all([
+        html2canvas(lf, html2canvasOpts),
+        html2canvas(lb, html2canvasOpts),
+        html2canvas(pf, html2canvasOpts),
+        html2canvas(pb, html2canvasOpts),
+      ])
+        .then(([cLf, cLb, cPf, cPb]) => {
+          const lw = 280;
+          const lh = (cLf.height * lw) / cLf.width;
+          const pw = 70;
+          const ph = (cPf.height * pw) / cPf.width;
+
+          const pdf = new jsPDF({
+            orientation: "landscape",
+            unit: "mm",
+            format: [lw, lh],
+          });
+          pdf.addImage(cLf.toDataURL("image/png"), "PNG", 0, 0, lw, lh);
+          pdf.addPage([lw, lh], "l");
+          pdf.addImage(cLb.toDataURL("image/png"), "PNG", 0, 0, lw, lh);
+          pdf.addPage([pw, ph], "p");
+          pdf.addImage(cPf.toDataURL("image/png"), "PNG", 0, 0, pw, ph);
+          pdf.addPage([pw, ph], "p");
+          pdf.addImage(cPb.toDataURL("image/png"), "PNG", 0, 0, pw, ph);
+          pdf.save(`SDP-MemberCard-both-layouts-${formData.voterRegistrationNumber}.pdf`);
+          setConfirmation("download");
+        })
+        .catch((err) => console.error("PDF generation failed:", err));
+    });
+  }, [formData.voterRegistrationNumber, html2canvasOpts]);
+
+  const handleDownloadBothPNG = useCallback(() => {
+    const lf = document.getElementById("member-card-capture");
+    const lb = document.getElementById("member-card-back-capture");
+    const pf = document.getElementById("member-card-capture-portrait");
+    const pb = document.getElementById("member-card-back-capture-portrait");
+    if (!lf || !lb || !pf || !pb) return;
+
+    import("html2canvas").then(({ default: html2canvas }) => {
+      const opts = { ...html2canvasOpts, scale: 3 as const };
+      Promise.all([
+        html2canvas(lf, opts),
+        html2canvas(lb, opts),
+        html2canvas(pf, opts),
+        html2canvas(pb, opts),
+      ])
+        .then(([cLf, cLb, cPf, cPb]) => {
+          const gap = 36;
+          const maxW = Math.max(cLf.width, cLb.width, cPf.width, cPb.width);
+          const totalH = cLf.height + cLb.height + gap + cPf.height + cPb.height + gap;
+          const stacked = document.createElement("canvas");
+          stacked.width = maxW;
+          stacked.height = totalH;
+          const ctx = stacked.getContext("2d");
+          if (!ctx) return;
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0, 0, stacked.width, stacked.height);
+          let y = 0;
+          const drawCentered = (c: HTMLCanvasElement) => {
+            const x = Math.floor((maxW - c.width) / 2);
+            ctx.drawImage(c, x, y);
+            y += c.height;
+          };
+          drawCentered(cLf);
+          drawCentered(cLb);
+          y += gap;
+          drawCentered(cPf);
+          drawCentered(cPb);
+          const link = document.createElement("a");
+          link.download = `SDP-MemberCard-both-layouts-${formData.voterRegistrationNumber}.png`;
+          link.href = stacked.toDataURL("image/png");
+          link.click();
+          setConfirmation("download");
+        })
+        .catch((err) => console.error("Image download failed:", err));
+    });
+  }, [formData.voterRegistrationNumber, html2canvasOpts]);
 
   const handlePrint = useCallback(() => {
     window.print();
@@ -189,6 +314,27 @@ export function Step5Preview({
       <div className="flex flex-wrap justify-center gap-2">
         <Button
           type="button"
+          variant={cardLayout === "landscape" ? "default" : "outline"}
+          size="sm"
+          className={cardLayout === "landscape" ? "bg-sdp-primary hover:bg-sdp-primary/90" : ""}
+          onClick={() => setCardLayout("landscape")}
+        >
+          {t.enrollment.step5.layoutLandscape}
+        </Button>
+        <Button
+          type="button"
+          variant={cardLayout === "portrait" ? "default" : "outline"}
+          size="sm"
+          className={cardLayout === "portrait" ? "bg-sdp-primary hover:bg-sdp-primary/90" : ""}
+          onClick={() => setCardLayout("portrait")}
+        >
+          {t.enrollment.step5.layoutPortrait}
+        </Button>
+      </div>
+
+      <div className="flex flex-wrap justify-center gap-2">
+        <Button
+          type="button"
           variant={cardSide === "front" ? "default" : "outline"}
           size="sm"
           className={cardSide === "front" ? "bg-sdp-accent hover:bg-[#018f4e]" : ""}
@@ -211,15 +357,15 @@ export function Step5Preview({
       <div className="w-full flex justify-center py-4 overflow-hidden" ref={containerRef}>
         <div
           style={{
-            width: `${MEMBER_CARD_W * scale}px`,
-            height: `${MEMBER_CARD_H * scale}px`,
+            width: `${(cardLayout === "landscape" ? MEMBER_CARD_W : MEMBER_CARD_PORTRAIT_W) * scale}px`,
+            height: `${(cardLayout === "landscape" ? MEMBER_CARD_H : MEMBER_CARD_PORTRAIT_H) * scale}px`,
             position: "relative",
           }}
         >
           <div
             style={{
-              width: MEMBER_CARD_W,
-              height: MEMBER_CARD_H,
+              width: cardLayout === "landscape" ? MEMBER_CARD_W : MEMBER_CARD_PORTRAIT_W,
+              height: cardLayout === "landscape" ? MEMBER_CARD_H : MEMBER_CARD_PORTRAIT_H,
               transform: `scale(${scale})`,
               transformOrigin: "top left",
               position: "absolute",
@@ -227,27 +373,62 @@ export function Step5Preview({
               left: 0,
             }}
           >
-            {cardSide === "front" ? (
-              <MemberCard
+            {cardLayout === "landscape" ? (
+              cardSide === "front" ? (
+                <MemberCard
+                  data={formData}
+                  showBarcode={true}
+                  className="ring-2 ring-sdp-primary/20"
+                />
+              ) : (
+                <MemberCardBack className="ring-2 ring-sdp-primary/20" />
+              )
+            ) : cardSide === "front" ? (
+              <PortraitMemberCard
                 data={formData}
                 showBarcode={true}
                 className="ring-2 ring-sdp-primary/20"
               />
             ) : (
-              <MemberCardBack className="ring-2 ring-sdp-primary/20" />
+              <PortraitMemberCardBack className="ring-2 ring-sdp-primary/20" />
             )}
           </div>
         </div>
       </div>
 
-      {/* Hidden captures — front + back for PNG/PDF (off-screen) */}
+      {/* Hidden captures — landscape + portrait for PNG/PDF (off-screen) */}
       <div
-        id="member-cards-capture-stack"
-        className="member-cards-capture-stack pointer-events-none fixed left-[-10000px] top-0 z-[-1] flex flex-col gap-0 print:static print:left-auto print:top-auto print:z-auto"
+        className="pointer-events-none fixed top-0 z-[-1] flex flex-row gap-6 print:static print:left-auto print:top-auto print:z-auto print:flex-col"
+        style={{ left: -(MEMBER_CARD_W + MEMBER_CARD_PORTRAIT_W + 48) }}
         aria-hidden
       >
-        <MemberCard data={formData} showBarcode={true} id="member-card-capture" />
-        <MemberCardBack id="member-card-back-capture" />
+        <div
+          id="member-cards-capture-stack"
+          className="member-cards-capture-stack flex flex-col gap-0"
+        >
+          <MemberCard
+            data={formData}
+            showBarcode={true}
+            id="member-card-capture"
+            variant="capture"
+          />
+          <MemberCardBack id="member-card-back-capture" variant="capture" />
+        </div>
+        <div
+          id="member-cards-capture-stack-portrait"
+          className="member-cards-capture-stack-portrait flex flex-col gap-0"
+        >
+          <PortraitMemberCard
+            data={formData}
+            showBarcode={true}
+            id="member-card-capture-portrait"
+            variant="capture"
+          />
+          <PortraitMemberCardBack
+            id="member-card-back-capture-portrait"
+            variant="capture"
+          />
+        </div>
       </div>
 
       {confirmation && (
@@ -297,6 +478,28 @@ export function Step5Preview({
           >
             <Download className="h-5 w-5" />
             {t.enrollment.step5.downloadPDF}
+          </Button>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleDownloadBothPNG}
+            className="w-full min-h-[44px] border-sdp-primary/40"
+            aria-label="Download landscape and portrait cards as one PNG"
+          >
+            <Download className="h-5 w-5" />
+            {t.enrollment.step5.downloadBothPNG}
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={handleDownloadBothPDF}
+            className="w-full min-h-[44px] border-sdp-primary/40"
+            aria-label="Download landscape and portrait cards as one PDF"
+          >
+            <Download className="h-5 w-5" />
+            {t.enrollment.step5.downloadBothPDF}
           </Button>
         </div>
         <Button

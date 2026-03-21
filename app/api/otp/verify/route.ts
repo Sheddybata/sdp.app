@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { normalizePhone, verifyOtp } from "@/lib/otp/termii";
+import { isValidEnrollmentNigerianPhone } from "@/lib/phone-nigeria";
 
 export const runtime = "nodejs";
 
@@ -12,13 +13,18 @@ type VerifyRequest = {
 export async function POST(request: Request) {
   try {
     const body = (await request.json()) as VerifyRequest;
-    const normalized = normalizePhone(body.phone || "");
-    if (!normalized) {
+    const raw = body.phone || "";
+    if (!isValidEnrollmentNigerianPhone(raw)) {
       return NextResponse.json(
-        { ok: false, error: "Enter a valid phone number in international format (e.g., +234...)." },
+        {
+          ok: false,
+          error:
+            "Use a Nigerian mobile number: +234… or 234…, or local 070, 080, 081, 090, or 091 (then 8 more digits).",
+        },
         { status: 400 }
       );
     }
+    const normalized = normalizePhone(raw)!;
     const pinId = (body.pinId || "").trim();
     if (!pinId) {
       return NextResponse.json(

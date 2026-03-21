@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Check, Camera, Upload, X, Loader2 } from "lucide-react";
 import { submitEnrollment, type EnrollmentSource } from "@/app/actions/enrollment";
 import { useLanguage } from "@/lib/i18n/context";
+import { EnrollmentReviewDialog } from "@/components/enrollment/EnrollmentReviewDialog";
 
 interface Step4VerificationProps {
   form: UseFormReturn<EnrollmentFormData>;
@@ -50,6 +51,8 @@ export function Step4Verification({
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewMerged, setReviewMerged] = useState<EnrollmentFormData | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -134,20 +137,39 @@ export function Step4Verification({
     const ok = await form.trigger(STEP4_FIELDS as unknown as (keyof EnrollmentFormData)[]);
     if (!ok) return;
     const values = form.getValues();
-    setFormData(values);
-    setIsSubmitting(true);
     const merged = { ...formData, ...values } as EnrollmentFormData;
-    const result = await submitEnrollment(merged, enrollmentSource);
+    setFormData({ ...formData, ...values });
+    setReviewMerged(merged);
+    setReviewOpen(true);
+  };
+
+  const handleReviewOpenChange = (open: boolean) => {
+    setReviewOpen(open);
+    if (!open && !isSubmitting) {
+      setSubmitError(null);
+      setReviewMerged(null);
+    }
+  };
+
+  const handleConfirmFromReview = async () => {
+    if (!reviewMerged) return;
+    setSubmitError(null);
+    setIsSubmitting(true);
+    const result = await submitEnrollment(reviewMerged, enrollmentSource);
     setIsSubmitting(false);
     if (result.ok) {
       if (result.member) {
         setFormData({
-          ...merged,
+          ...reviewMerged,
           locationMembershipId: result.member.locationMembershipId,
           wardSerial: result.member.wardSerial,
           membershipId: result.member.membershipId,
         });
+      } else {
+        setFormData(reviewMerged);
       }
+      setReviewOpen(false);
+      setReviewMerged(null);
       onNext();
     } else {
       setSubmitError(result.error ?? t.enrollment.step4.registrationFailed);
@@ -339,6 +361,15 @@ export function Step4Verification({
       </div>
 
       <canvas ref={canvasRef} className="hidden" aria-hidden />
+
+      <EnrollmentReviewDialog
+        open={reviewOpen}
+        onOpenChange={handleReviewOpenChange}
+        data={reviewMerged}
+        onConfirmSubmit={handleConfirmFromReview}
+        isSubmitting={isSubmitting}
+        error={submitError}
+      />
     </form>
   );
 }

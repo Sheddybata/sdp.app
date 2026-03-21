@@ -8,6 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DatePicker } from "@/components/ui/date-picker";
 import { useLanguage } from "@/lib/i18n/context";
+import { format } from "date-fns";
+import { getDobBounds } from "@/lib/enrollment-dates";
 import {
   Dialog,
   DialogContent,
@@ -28,6 +30,8 @@ interface Step2ContactProps {
 
 export function Step2Contact({ form, onNext, onBack }: Step2ContactProps) {
   const { t } = useLanguage();
+  const dobMin = format(getDobBounds().min, "yyyy-MM-dd");
+  const dobMax = format(getDobBounds().max, "yyyy-MM-dd");
   const {
     register,
     setValue,
@@ -232,8 +236,8 @@ export function Step2Contact({ form, onNext, onBack }: Step2ContactProps) {
           onChange={(v) => setValue("dateOfBirth", v, { shouldValidate: true })}
           placeholder={t.enrollment.step2.dobPlaceholder}
           captionLayout="dropdown-buttons"
-          min={new Date(1920, 0, 1)}
-          max={new Date()}
+          min={dobMin}
+          max={dobMax}
           valid={errors.dateOfBirth ? false : watch("dateOfBirth") ? true : undefined}
           aria-invalid={!!errors.dateOfBirth}
         />

@@ -43,6 +43,15 @@ export const MEMBER_CARD_BACK = {
   },
 } as const;
 
-/** Same as front card for export/print alignment */
-export const MEMBER_CARD_W = 952;
-export const MEMBER_CARD_H = 560;
+/**
+ * Landscape membership card — ISO/IEC 7810 ID-1 credit-card proportions (85.6mm × 53.98mm).
+ * Width in px is fixed; height is derived so aspect ratio matches a physical card.
+ */
+const ID1_WIDTH_MM = 85.6;
+const ID1_HEIGHT_MM = 53.98;
+export const MEMBER_CARD_W = 856;
+export const MEMBER_CARD_H = Math.round((MEMBER_CARD_W * ID1_HEIGHT_MM) / ID1_WIDTH_MM);
+
+/** Portrait ID card (alternate layout) — front/back use same dimensions */
+export const MEMBER_CARD_PORTRAIT_W = 640;
+export const MEMBER_CARD_PORTRAIT_H = 1008;

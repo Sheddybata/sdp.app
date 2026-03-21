@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { UseFormReturn } from "react-hook-form";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
 import { useInecGeo } from "@/hooks/useInecGeo";
@@ -15,8 +15,36 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
-import { DatePicker } from "@/components/ui/date-picker";
+import { JOIN_YEAR_MIN, getJoinMonthYearMax, isValidJoinMonthYearIso } from "@/lib/enrollment-dates";
 import { useLanguage } from "@/lib/i18n/context";
+
+function range(lo: number, hi: number): number[] {
+  const out: number[] = [];
+  for (let i = lo; i <= hi; i++) out.push(i);
+  return out;
+}
+
+function monthsForYear(year: number): number[] {
+  const { year: yMax, month: mMax } = getJoinMonthYearMax();
+  if (year < JOIN_YEAR_MIN || year > yMax) return [];
+  if (year === JOIN_YEAR_MIN && year === yMax) return range(1, mMax);
+  if (year === JOIN_YEAR_MIN) return range(1, 12);
+  if (year === yMax) return range(1, mMax);
+  return range(1, 12);
+}
+
+function parseJoinIso(iso: string | undefined): { y: number; m: number } {
+  const { year: yMax, month: mMax } = getJoinMonthYearMax();
+  if (iso && /^\d{4}-\d{2}-01$/.test(iso) && isValidJoinMonthYearIso(iso)) {
+    const [ys, ms] = iso.split("-");
+    return { y: Number(ys), m: Number(ms) };
+  }
+  return { y: yMax, m: mMax };
+}
+
+function toJoinIso(y: number, m: number): string {
+  return `${y}-${String(m).padStart(2, "0")}-01`;
+}
 
 const MANUAL_POLLING_VALUE = "__manual__";
 
@@ -50,9 +78,14 @@ export function Step3Geography(props: Step3GeographyProps) {
   const ward = wards.find((w) => w.id === wardId) ?? wards.find((w) => w.name === wardId);
   const pollingUnitOptions = ward?.pollingUnits ?? [];
 
-  useEffect(() => {
-    setValue("joinDate", format(new Date(), "yyyy-MM-dd"));
-  }, [setValue]);
+  const joinIso = watch("joinDate");
+  const { y: joinY, m: joinM } = useMemo(() => parseJoinIso(joinIso), [joinIso]);
+  const { year: maxJoinYear } = getJoinMonthYearMax();
+  const yearOptions = useMemo(
+    () => range(JOIN_YEAR_MIN, maxJoinYear),
+    [maxJoinYear]
+  );
+  const monthOptions = useMemo(() => monthsForYear(joinY), [joinY]);
 
   useEffect(() => {
     if (!stateId) {
@@ -80,6 +113,15 @@ export function Step3Geography(props: Step3GeographyProps) {
     if (!wardId) setValue("pollingUnit", "");
   }, [wardId, setValue]);
 
+  /** Keep join month valid when year or bounds change */
+  useEffect(() => {
+    const months = monthsForYear(joinY);
+    if (months.length === 0) return;
+    if (!months.includes(joinM)) {
+      setValue("joinDate", toJoinIso(joinY, months[months.length - 1]), { shouldValidate: true });
+    }
+  }, [joinY, joinM, setValue]);
+
   const loadingWardOrUnits = stateId && stateDataLoading;
   const showPollingUnitSelect = pollingUnitOptions.length > 0;
 
@@ -87,20 +129,63 @@ export function Step3Geography(props: Step3GeographyProps) {
     <form onSubmit={(e) => { e.preventDefault(); onNext(); }} className="space-y-6">
       <p className="text-sm text-neutral-600">{t.enrollment.step3.description}</p>
       <div className="space-y-2">
-        <Label htmlFor="joinDate">{t.enrollment.step3.joinDateLabel}</Label>
-        <DatePicker
-          id="joinDate"
-          value={watch("joinDate")}
-          onChange={(v) => setValue("joinDate", v)}
-          placeholder={t.enrollment.step3.joinDatePlaceholder}
-          captionLayout="dropdown-buttons"
-          min={new Date(2020, 0, 1)}
-          max={new Date()}
-          aria-describedby="joinDate-desc"
-        />
-        <p id="joinDate-desc" className="text-xs text-neutral-500">
-          {t.enrollment.step3.joinDateHint}
-        </p>
+        <span id="joinDate-label" className="text-sm font-medium text-neutral-900">
+          {t.enrollment.step3.joinDateLabel}
+        </span>
+        <p className="text-xs text-neutral-500">{t.enrollment.step3.joinDateHint}</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="space-y-1">
+            <Label htmlFor="join-month" className="text-xs text-neutral-600">
+              {t.enrollment.step3.joinMonthLabel}
+            </Label>
+            <Select
+              value={String(joinM)}
+              onValueChange={(v) => {
+                const m = Number(v);
+                setValue("joinDate", toJoinIso(joinY, m), { shouldValidate: true });
+              }}
+            >
+              <SelectTrigger id="join-month" aria-labelledby="joinDate-label">
+                <SelectValue placeholder={t.enrollment.step3.joinMonthPlaceholder} />
+              </SelectTrigger>
+              <SelectContent>
+                {monthOptions.map((m) => (
+                  <SelectItem key={m} value={String(m)}>
+                    {format(new Date(2020, m - 1, 1), "MMMM")}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="join-year" className="text-xs text-neutral-600">
+              {t.enrollment.step3.joinYearLabel}
+            </Label>
+            <Select
+              value={String(joinY)}
+              onValueChange={(v) => {
+                const y = Number(v);
+                const months = monthsForYear(y);
+                const nextM = months.includes(joinM) ? joinM : months[months.length - 1] ?? 1;
+                setValue("joinDate", toJoinIso(y, nextM), { shouldValidate: true });
+              }}
+            >
+              <SelectTrigger id="join-year" aria-labelledby="joinDate-label">
+                <SelectValue placeholder={t.enrollment.step3.joinYearPlaceholder} />
+              </SelectTrigger>
+              <SelectContent className="max-h-[min(50vh,16rem)]">
+                {yearOptions.map((y) => (
+                  <SelectItem key={y} value={String(y)}>
+                    {y}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+        {errors.joinDate && (
+          <p className="text-sm text-red-600" role="alert">{errors.joinDate.message}</p>
+        )}
       </div>
 
       <div className="space-y-2">

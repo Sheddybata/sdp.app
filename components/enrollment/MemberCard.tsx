@@ -6,43 +6,61 @@ import type { EnrollmentFormData } from "@/lib/enrollment-schema";
 import { getMembershipIdFromData } from "@/lib/enrollment-schema";
 import { NIGERIA_STATES } from "@/lib/nigeria-geo";
 import { cn } from "@/lib/utils";
+import { MEMBER_CARD_H as CARD_H, MEMBER_CARD_W as CARD_W } from "@/lib/member-card-back-content";
 
-/** Fixed card — spacing derived from reference (~5% side margins on 952px) */
-const CARD_W = 952;
-const CARD_H = 560;
+/**
+ * Layout reference (pre–credit-card size). Scaled by SX/SY so proportions hold at ID-1 aspect (MEMBER_CARD_*).
+ */
+const REF_W = 952;
+const REF_H = 560;
+const SX = CARD_W / REF_W;
+const SY = CARD_H / REF_H;
+
 /** ~5% horizontal inset; aligns logo, name, QR to same left edge */
-const INSET_X = 48;
+const INSET_X = Math.round(48 * SX);
 /** Space from red banner (right column) to member name */
-const AFTER_BANNER_TO_NAME = 24;
+const AFTER_BANNER_TO_NAME = Math.round(24 * SY);
 /** Name → first location row */
-const NAME_TO_LOCATION = 6;
+const NAME_TO_LOCATION = Math.max(4, Math.round(6 * SY));
 /** Tight stack between State/LG row, Ward */
-const LOCATION_TIGHT = 2;
+const LOCATION_TIGHT = Math.max(1, Math.round(2 * SY));
 /** Breathing room around membership No */
-const NO_BLOCK_PAD_Y = 4;
+const NO_BLOCK_PAD_Y = Math.max(2, Math.round(4 * SY));
 /** Tighter line height for member body copy */
 const MEMBER_BODY_LINE_HEIGHT = 1.08;
 /** QR ↔ Tel block */
-const QR_TO_TEL = 18;
+const QR_TO_TEL = Math.round(18 * SX);
 /** Logo column ↔ party / banner column */
-const LOGO_TO_PARTY_GAP = 20;
+const LOGO_TO_PARTY_GAP = Math.round(20 * SX);
 /** Layout slot for logo (px) — keep fixed so party text + red bar position never shift */
-const LOGO_LAYOUT_SLOT = 156;
+const LOGO_LAYOUT_SLOT = Math.round(156 * SX);
 /** Visual scale for logo only (does not change grid / body layout) */
 const LOGO_VISUAL_SCALE = 1.5;
 /** Nudge logo right (px) without changing grid column width */
-const LOGO_NUDGE_RIGHT_PX = 36;
+const LOGO_NUDGE_RIGHT_PX = Math.round(36 * SX);
 /** Party headline — one line, shared size */
-const PARTY_HEADLINE_PX = 42;
+const PARTY_HEADLINE_PX = Math.max(30, Math.round(42 * SX));
 /** Red banner “Digital MEMBERSHIP CARD” */
-const BANNER_TEXT_PX = 25;
+const BANNER_TEXT_PX = Math.max(17, Math.round(25 * SY));
 /** Inset red bar from the left (px) so it clears the enlarged logo visually */
-const BANNER_INSET_LEFT_PX = 36;
+const BANNER_INSET_LEFT_PX = Math.round(36 * SX);
+/** Second grid column width (px) — fixed so html2canvas/off-screen layout matches on-screen (no % bugs) */
+const HEADER_RIGHT_COL_W = CARD_W - INSET_X * 2 - LOGO_LAYOUT_SLOT - LOGO_TO_PARTY_GAP;
+/** Red banner inner width (px) — explicit, avoids calc(100% - …) in raster capture */
+const BANNER_AREA_WIDTH_PX = Math.max(100, HEADER_RIGHT_COL_W - BANNER_INSET_LEFT_PX);
+/** System stack so preview and PNG/PDF use the same face metrics */
+const CARD_SANS =
+  'system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif';
 /** One size for name, location lines, membership No, Tel / Member since */
-const MEMBER_BODY_TEXT_PX = 22;
+const MEMBER_BODY_TEXT_PX = Math.max(15, Math.round(22 * SY));
 /** Member portrait frame (w × h) — card is fixed width; one size keeps layout predictable */
-const PHOTO_W = 196;
-const PHOTO_H = 272;
+const PHOTO_W = Math.round(196 * SX);
+const PHOTO_H = Math.round(272 * SY);
+/** Main row gap (logo block ↔ photo) */
+const MAIN_COLUMN_GAP = Math.round(40 * SX);
+const HEADER_PADDING_TOP = Math.round(20 * SY);
+const BANNER_PAD_Y = Math.max(7, Math.round(12 * SY));
+const QR_SIZE = Math.max(96, Math.round(120 * SY));
 /** Watermark — `public/membershipregistration/backgroundid.jpeg` */
 const CARD_WATERMARK_SRC = "/membershipregistration/backgroundid.jpeg";
 const CARD_WATERMARK_OPACITY = 0.17;
@@ -52,6 +70,8 @@ interface MemberCardProps {
   className?: string;
   showBarcode?: boolean;
   id?: string;
+  /** Flat styling for html2canvas capture (drops heavy shadow so raster matches preview) */
+  variant?: "screen" | "capture";
 }
 
 function getStateName(stateId: string): string {
@@ -106,11 +126,28 @@ const C = {
 const PARTY_HEADLINE_STYLE: CSSProperties = {
   color: C.greenParty,
   fontWeight: 800,
+  fontFamily: CARD_SANS,
   /* Slight edge hint only — less heavy than full faux-bold */
   textShadow: "0.35px 0 0 currentColor, -0.35px 0 0 currentColor",
 };
 
-export function MemberCard({ data, className, showBarcode = true, id = "member-card" }: MemberCardProps) {
+const BANNER_LINE_STYLE: CSSProperties = {
+  margin: 0,
+  textAlign: "center",
+  color: "#FFFFFF",
+  fontSize: BANNER_TEXT_PX,
+  lineHeight: 1.2,
+  fontWeight: 600,
+  fontFamily: CARD_SANS,
+};
+
+export function MemberCard({
+  data,
+  className,
+  showBarcode = true,
+  id = "member-card",
+  variant = "screen",
+}: MemberCardProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
   const membershipId = data.locationMembershipId || data.membershipId || getMembershipIdFromData(data);
@@ -123,7 +160,7 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
     const payload = `${base}/enroll/verify?member=${regId}`;
     import("qrcode").then((QRCode) => {
       QRCode.toDataURL(payload, {
-        width: 128,
+        width: QR_SIZE,
         margin: 1,
         color: { dark: "#000000", light: "#ffffff" },
       })
@@ -139,13 +176,15 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
     fontSize: MEMBER_BODY_TEXT_PX,
     lineHeight: MEMBER_BODY_LINE_HEIGHT,
     marginBottom: LOCATION_TIGHT,
+    fontFamily: CARD_SANS,
   };
 
   return (
     <article
       id={id}
       className={cn(
-        "sdp-member-card relative flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white shadow-xl",
+        "sdp-member-card relative flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white",
+        variant === "capture" ? "shadow-none" : "shadow-xl",
         className
       )}
       style={{
@@ -153,6 +192,10 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
         height: CARD_H,
         minWidth: CARD_W,
         minHeight: CARD_H,
+        boxSizing: "border-box",
+        fontFamily: CARD_SANS,
+        WebkitPrintColorAdjust: "exact",
+        printColorAdjust: "exact",
       }}
       aria-label="Digital membership card"
     >
@@ -173,7 +216,7 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
         style={{
           paddingLeft: INSET_X,
           paddingRight: INSET_X,
-          paddingTop: 20,
+          paddingTop: HEADER_PADDING_TOP,
           columnGap: LOGO_TO_PARTY_GAP,
           gridTemplateColumns: `${LOGO_LAYOUT_SLOT}px 1fr`,
         }}
@@ -200,7 +243,7 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
         <div className="relative min-w-0">
           <div className="relative z-[1] flex items-center justify-center px-2 pb-2 pt-0 text-center">
             <p
-              className="m-0 whitespace-nowrap font-extrabold leading-tight tracking-tight antialiased"
+              className="m-0 whitespace-nowrap leading-tight tracking-tight"
               style={{ ...PARTY_HEADLINE_STYLE, fontSize: PARTY_HEADLINE_PX }}
             >
               Social Democratic Party<span className="mx-2 opacity-90" aria-hidden>
@@ -210,16 +253,30 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
             </p>
           </div>
           <div
-            className="relative z-[1] py-3 text-white"
+            className="relative z-[1] text-white"
+            data-sdp-red-banner
             style={{
               backgroundColor: C.redBanner,
               marginLeft: BANNER_INSET_LEFT_PX,
-              width: `calc(100% - ${BANNER_INSET_LEFT_PX}px)`,
+              width: BANNER_AREA_WIDTH_PX,
+              boxSizing: "border-box",
+              paddingTop: BANNER_PAD_Y,
+              paddingBottom: BANNER_PAD_Y,
+              paddingLeft: 8,
+              paddingRight: 8,
             }}
           >
-            <p className="m-0 text-center font-semibold leading-tight" style={{ fontSize: BANNER_TEXT_PX }}>
-              <span className="font-normal">Digital </span>
-              <span className="font-bold uppercase tracking-[0.06em]">MEMBERSHIP CARD</span>
+            <p style={BANNER_LINE_STYLE}>
+              <span style={{ fontWeight: 400 }}>Digital </span>
+              <span
+                style={{
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  letterSpacing: "0.06em",
+                }}
+              >
+                MEMBERSHIP CARD
+              </span>
             </p>
           </div>
         </div>
@@ -232,7 +289,7 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
           paddingLeft: INSET_X,
           paddingRight: INSET_X,
           paddingTop: AFTER_BANNER_TO_NAME,
-          columnGap: 40,
+          columnGap: MAIN_COLUMN_GAP,
         }}
       >
         <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-between" style={{ paddingBottom: 10 }}>
@@ -251,10 +308,8 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
             {/* 2. Membership ID */}
             <div style={{ paddingTop: 2, paddingBottom: NO_BLOCK_PAD_Y }}>
               <p className="m-0" style={{ ...fieldTextStyle, marginBottom: LOCATION_TIGHT }}>
-                <span className="font-semibold" style={{ color: C.noLabel }}>
-                  No:{" "}
-                </span>
-                <span className="font-bold tracking-tight" style={{ color: C.redId }}>
+                <span style={{ fontWeight: 600, color: C.noLabel }}>No: </span>
+                <span style={{ fontWeight: 700, letterSpacing: "-0.02em", color: C.redId }}>
                   {membershipId || "—"}
                 </span>
               </p>
@@ -286,17 +341,29 @@ export function MemberCard({ data, className, showBarcode = true, id = "member-c
           </div>
 
           {/* QR + Tel; member since on one line beside QR */}
-          <div className="flex flex-row items-center" style={{ gap: QR_TO_TEL, marginTop: 8 }}>
+          <div className="flex flex-row items-center" style={{ gap: QR_TO_TEL, marginTop: Math.max(4, Math.round(8 * SY)) }}>
             {showBarcode && membershipId ? (
               <div className="shrink-0 rounded-sm border border-neutral-300 bg-white p-0.5" aria-hidden>
                 {qrDataUrl ? (
-                  <img src={qrDataUrl} alt="" width={120} height={120} className="block size-[120px]" />
+                  <img
+                    src={qrDataUrl}
+                    alt=""
+                    width={QR_SIZE}
+                    height={QR_SIZE}
+                    className="block"
+                    style={{ width: QR_SIZE, height: QR_SIZE }}
+                  />
                 ) : (
-                  <div className="flex size-[120px] items-center justify-center text-xs text-neutral-400">QR…</div>
+                  <div
+                    className="flex items-center justify-center text-xs text-neutral-400"
+                    style={{ width: QR_SIZE, height: QR_SIZE }}
+                  >
+                    QR…
+                  </div>
                 )}
               </div>
             ) : (
-              <div className="w-[120px] shrink-0" />
+              <div className="shrink-0" style={{ width: QR_SIZE }} />
             )}
             <div className="min-w-0 space-y-1">
               <p className="m-0" style={{ fontSize: MEMBER_BODY_TEXT_PX, lineHeight: MEMBER_BODY_LINE_HEIGHT }}>
