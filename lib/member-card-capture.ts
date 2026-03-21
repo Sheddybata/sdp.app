@@ -3,6 +3,7 @@
  */
 
 import { MEMBER_CARD_H, MEMBER_CARD_PORTRAIT_H } from "@/lib/member-card-back-content";
+import { MEMBER_CARD_WATERMARK_OPACITY } from "@/lib/member-card-watermark";
 
 export function waitForCaptureReady(): Promise<void> {
   return new Promise((resolve) => {
@@ -91,7 +92,7 @@ export function patchClonedMemberCardsForExport(clonedDoc: Document): void {
       #member-card-back-capture > div.pointer-events-none.absolute.inset-0,
       #member-card-back-capture-portrait > div.pointer-events-none.absolute.inset-0 {
         z-index: 0 !important;
-        opacity: 0.17 !important;
+        opacity: ${MEMBER_CARD_WATERMARK_OPACITY} !important;
       }
 
       /* Clip scaled SDP logo to header column so white JPG + transform don’t cover the body in canvas */

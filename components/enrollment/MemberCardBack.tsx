@@ -8,10 +8,11 @@ import {
   MEMBER_CARD_H,
   MEMBER_CARD_W,
 } from "@/lib/member-card-back-content";
+import { MEMBER_CARD_WATERMARK_OPACITY, MEMBER_CARD_WATERMARK_URL } from "@/lib/member-card-watermark";
 import { cn } from "@/lib/utils";
 
-const WATERMARK_SRC = "/membershipregistration/backgroundid.jpeg";
-const WATERMARK_OPACITY = 0.17;
+const WATERMARK_URL = MEMBER_CARD_WATERMARK_URL;
+const WATERMARK_OPACITY = MEMBER_CARD_WATERMARK_OPACITY;
 
 const C = {
   greenParty: "#008000",
@@ -113,7 +114,7 @@ export function MemberCardBack({ className, id = "member-card-back", variant = "
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          backgroundImage: `url(${WATERMARK_SRC})`,
+          backgroundImage: `url("${WATERMARK_URL}")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",

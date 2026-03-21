@@ -10,12 +10,14 @@ import {
   MEMBER_CARD_PORTRAIT_H,
   MEMBER_CARD_PORTRAIT_W,
 } from "@/lib/member-card-back-content";
+import {
+  MEMBER_CARD_WATERMARK_OPACITY as CARD_WATERMARK_OPACITY,
+  MEMBER_CARD_WATERMARK_URL as CARD_WATERMARK_URL,
+} from "@/lib/member-card-watermark";
 
 const P_W = MEMBER_CARD_PORTRAIT_W;
 const P_H = MEMBER_CARD_PORTRAIT_H;
 const PX = 28;
-const CARD_WATERMARK_SRC = "/membershipregistration/backgroundid.jpeg";
-const CARD_WATERMARK_OPACITY = 0.17;
 
 const CARD_SANS =
   'system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif';
@@ -159,7 +161,7 @@ export function PortraitMemberCard({
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          backgroundImage: `url(${CARD_WATERMARK_SRC})`,
+          backgroundImage: `url("${CARD_WATERMARK_URL}")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",

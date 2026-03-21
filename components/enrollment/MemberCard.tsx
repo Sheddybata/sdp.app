@@ -7,6 +7,10 @@ import { getMembershipIdFromData } from "@/lib/enrollment-schema";
 import { NIGERIA_STATES } from "@/lib/nigeria-geo";
 import { cn } from "@/lib/utils";
 import { MEMBER_CARD_H as CARD_H, MEMBER_CARD_W as CARD_W } from "@/lib/member-card-back-content";
+import {
+  MEMBER_CARD_WATERMARK_OPACITY as CARD_WATERMARK_OPACITY,
+  MEMBER_CARD_WATERMARK_URL as CARD_WATERMARK_URL,
+} from "@/lib/member-card-watermark";
 
 /**
  * Layout reference (pre–credit-card size). Scaled by SX/SY so proportions hold at ID-1 aspect (MEMBER_CARD_*).
@@ -65,9 +69,6 @@ const HOLDER_STACK_GAP = Math.max(3, Math.round(5 * SY));
 const HEADER_PADDING_TOP = Math.round(20 * SY);
 const BANNER_PAD_Y = Math.max(7, Math.round(12 * SY));
 const QR_SIZE = Math.max(96, Math.round(120 * SY));
-/** Watermark — `public/membershipregistration/backgroundid.jpeg` */
-const CARD_WATERMARK_SRC = "/membershipregistration/backgroundid.jpeg";
-const CARD_WATERMARK_OPACITY = 0.17;
 
 interface MemberCardProps {
   data: EnrollmentFormData;
@@ -232,7 +233,7 @@ export function MemberCard({
       <div
         className="pointer-events-none absolute inset-0 z-0"
         style={{
-          backgroundImage: `url(${CARD_WATERMARK_SRC})`,
+          backgroundImage: `url("${CARD_WATERMARK_URL}")`,
           backgroundSize: "cover",
           backgroundPosition: "center",
           backgroundRepeat: "no-repeat",
