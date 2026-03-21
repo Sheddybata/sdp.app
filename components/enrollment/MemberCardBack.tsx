@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, type CSSProperties, type ReactNode } from "react";
+import type { CSSProperties } from "react";
 import {
   MEMBER_CARD_BACK,
+  MEMBER_CARD_BACK_STRIPE_GREEN,
+  MEMBER_CARD_BACK_STRIPE_ORANGE,
   MEMBER_CARD_H,
   MEMBER_CARD_W,
 } from "@/lib/member-card-back-content";
@@ -11,87 +13,20 @@ import { cn } from "@/lib/utils";
 const WATERMARK_SRC = "/membershipregistration/backgroundid.jpeg";
 const WATERMARK_OPACITY = 0.17;
 
+const C = {
+  greenParty: "#008000",
+} as const;
+
 /** Scale back-of-card typography/padding from original 952×560 design to ID-1 landscape size */
 const REF_L_W = 952;
 const REF_L_H = 560;
 const LSX = MEMBER_CARD_W / REF_L_W;
 const LSY = MEMBER_CARD_H / REF_L_H;
 const BACK_PAD_X = Math.round(28 * LSX);
-const BACK_PAD_Y = Math.round(20 * LSY);
-const BACK_PAD_BOTTOM = Math.max(8, Math.round(12 * LSY));
+const BACK_PAD_Y = Math.round(18 * LSY);
 
 const CARD_SANS =
   'system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif';
-
-function TermBlock({
-  heading,
-  children,
-  style,
-}: {
-  heading: string;
-  children: ReactNode;
-  style?: CSSProperties;
-}) {
-  return (
-    <p className="m-0" style={style}>
-      <span className="font-bold text-neutral-900">{heading}</span> {children}
-    </p>
-  );
-}
-
-function Signatory({
-  signatureSrc,
-  name,
-  role,
-}: {
-  signatureSrc: string;
-  name: string;
-  role: string;
-}) {
-  const [imgOk, setImgOk] = useState(true);
-
-  return (
-    <div className="flex min-w-0 flex-1 flex-col items-center text-center">
-      {/* Paths assigned per role in lib/member-card-back-content.ts */}
-      <div
-        className="mb-2 flex w-full items-end justify-center"
-        style={{ minHeight: Math.round(52 * LSY), maxWidth: Math.round(260 * LSX) }}
-      >
-        {imgOk ? (
-          <img
-            src={signatureSrc}
-            alt=""
-            width={Math.round(260 * LSX)}
-            height={Math.round(90 * LSY)}
-            className="h-auto w-auto max-w-full object-contain object-bottom"
-            style={{ maxHeight: Math.round(90 * LSY) }}
-            loading="eager"
-            decoding="async"
-            onError={() => setImgOk(false)}
-          />
-        ) : (
-          <div className="h-px w-full max-w-[220px] border-b border-neutral-400" aria-hidden />
-        )}
-      </div>
-      <p
-        className="m-0 font-bold leading-snug text-neutral-900"
-        style={{
-          maxWidth: Math.round(220 * LSX),
-          fontSize: Math.max(11, Math.round(14 * LSY)),
-          lineHeight: 1.3,
-        }}
-      >
-        {name}
-      </p>
-      <p
-        className="m-0 mt-0.5 text-neutral-600"
-        style={{ fontSize: Math.max(10, Math.round(13 * LSY)), lineHeight: 1.25 }}
-      >
-        {role}
-      </p>
-    </div>
-  );
-}
 
 interface MemberCardBackProps {
   className?: string;
@@ -101,21 +36,65 @@ interface MemberCardBackProps {
 
 export function MemberCardBack({ className, id = "member-card-back", variant = "screen" }: MemberCardBackProps) {
   const b = MEMBER_CARD_BACK;
-  /** Terms / body copy */
-  const bodySize = Math.max(13, Math.round(16 * LSY));
-  const bodyLeading = 1.35;
-  const bodyStyle: CSSProperties = {
-    fontSize: bodySize,
-    lineHeight: bodyLeading,
+
+  const line1Size = Math.max(17, Math.round(20 * LSY));
+  const line2Size = Math.max(22, Math.round(27 * LSY));
+  const line3Size = Math.max(16, Math.round(19 * LSY));
+  const footerLineSize = Math.max(12, Math.round(14 * LSY));
+  const footerLineGap = Math.max(4, Math.round(6 * LSY));
+
+  const line1Style: CSSProperties = {
+    fontSize: line1Size,
+    lineHeight: 1.35,
+    color: "#0a0a0a",
+    fontFamily: CARD_SANS,
+    textAlign: "center",
+    fontWeight: 500,
+    margin: 0,
+  };
+
+  const line2Style: CSSProperties = {
+    fontSize: line2Size,
+    lineHeight: 1.2,
+    color: C.greenParty,
+    fontFamily: CARD_SANS,
+    textAlign: "center",
+    fontWeight: 800,
+    letterSpacing: "0.04em",
+    margin: 0,
+  };
+
+  const line3Style: CSSProperties = {
+    fontSize: line3Size,
+    lineHeight: 1.45,
+    color: "#111827",
+    fontFamily: CARD_SANS,
+    textAlign: "center",
+    fontWeight: 500,
+    margin: 0,
+    maxWidth: "100%",
+  };
+
+  const footerLineStyle: CSSProperties = {
+    fontSize: footerLineSize,
+    lineHeight: 1.4,
     color: "#374151",
     fontFamily: CARD_SANS,
+    textAlign: "center",
+    fontWeight: 500,
+    margin: 0,
   };
+
+  const headerLineGap = Math.max(6, Math.round(8 * LSY));
+  const headerTopNudge = Math.max(22, Math.round(26 * LSY));
+  const headerToBodyGap = Math.max(10, Math.round(14 * LSY));
+  const mainToFooterGap = Math.max(16, Math.round(22 * LSY));
 
   return (
     <article
       id={id}
       className={cn(
-        "sdp-member-card-back relative flex flex-col overflow-hidden rounded-lg border border-neutral-200 bg-white",
+        "sdp-member-card-back relative flex flex-col overflow-hidden rounded-lg border border-neutral-200/80 bg-white",
         variant === "capture" ? "shadow-none" : "shadow-xl",
         className
       )}
@@ -144,109 +123,57 @@ export function MemberCardBack({ className, id = "member-card-back", variant = "
       />
 
       <div
-        className="relative z-[1] flex h-full flex-col"
+        className="relative z-[1] flex min-h-0 flex-1 flex-col"
         style={{
           paddingLeft: BACK_PAD_X,
           paddingRight: BACK_PAD_X,
           paddingTop: BACK_PAD_Y,
-          paddingBottom: BACK_PAD_BOTTOM,
         }}
       >
         <header
-          className="shrink-0 border-b border-neutral-200 text-center"
-          style={{ paddingBottom: Math.max(6, Math.round(8 * LSY)) }}
+          className="shrink-0 text-center"
+          style={{
+            marginTop: headerTopNudge,
+            marginBottom: headerToBodyGap,
+          }}
         >
-          <p
-            className="m-0 font-extrabold tracking-wide text-neutral-900"
-            style={{
-              fontSize: Math.max(14, Math.round(17 * LSY)),
-              letterSpacing: "0.04em",
-              lineHeight: 1.2,
-            }}
-          >
-            {b.headerLine1}
-          </p>
-          <p
-            className="m-0 mt-1.5 font-semibold text-neutral-700"
-            style={{ fontSize: Math.max(12, Math.round(14 * LSY)), lineHeight: 1.25 }}
-          >
-            {b.headerLine2}
-          </p>
+          <p style={line1Style}>{b.line1}</p>
+          <p style={{ ...line2Style, marginTop: headerLineGap }}>{b.line2}</p>
         </header>
 
-        <div className="min-h-0 flex-1 overflow-hidden" style={{ paddingTop: Math.max(6, Math.round(8 * LSY)) }}>
-          <p
-            className="m-0 font-bold text-neutral-900 underline decoration-neutral-300 decoration-1 underline-offset-2"
-            style={{ fontSize: Math.max(13, Math.round(16 * LSY)), marginBottom: Math.max(5, Math.round(8 * LSY)) }}
-          >
-            {b.sectionTitle}
+        <div
+          className="flex min-h-0 flex-1 flex-col items-center justify-center text-center"
+          style={{ gap: Math.max(2, Math.round(4 * LSY)) }}
+        >
+          <p className="text-pretty" style={line3Style}>
+            {b.line3a}
           </p>
-          <div style={{ display: "flex", flexDirection: "column", gap: Math.max(6, Math.round(8 * LSY)) }}>
-            <TermBlock heading={b.ownershipHeading} style={bodyStyle}>
-              {b.ownershipBody}
-            </TermBlock>
-            <TermBlock heading={b.conductHeading} style={bodyStyle}>
-              {b.conductBody}
-            </TermBlock>
-            <TermBlock heading={b.validationHeading} style={bodyStyle}>
-              <>
-                {b.validationBodyPrefix}
-                <span className="break-all font-medium text-[#008000]">{b.verificationUrl}</span>
-              </>
-            </TermBlock>
-            <TermBlock heading={b.privacyHeading} style={bodyStyle}>
-              {b.privacyBody}
-            </TermBlock>
-          </div>
+          <p style={line3Style}>{b.line3b}</p>
         </div>
 
-        <footer className="shrink-0 border-t border-neutral-200" style={{ paddingTop: Math.max(6, Math.round(8 * LSY)) }}>
-          <p
-            className="m-0 font-bold text-neutral-900"
-            style={{
-              fontSize: Math.max(12, Math.round(14 * LSY)),
-              marginBottom: Math.max(4, Math.round(6 * LSY)),
-              lineHeight: 1.3,
-            }}
-          >
-            {b.footerTitle}
-          </p>
-          <p
-            className="m-0"
-            style={{
-              ...bodyStyle,
-              fontSize: Math.max(10, Math.round(12 * LSY)),
-              marginBottom: Math.max(3, Math.round(4 * LSY)),
-              lineHeight: 1.35,
-            }}
-          >
-            {b.issuedLine}
-          </p>
-          <p
-            className="m-0"
-            style={{
-              ...bodyStyle,
-              fontSize: Math.max(10, Math.round(12 * LSY)),
-              marginBottom: Math.max(6, Math.round(8 * LSY)),
-              lineHeight: 1.35,
-            }}
-          >
-            {b.headquartersLine}
-          </p>
-
-          <div className="flex flex-row justify-center px-2" style={{ gap: Math.max(16, Math.round(32 * LSX)) }}>
-            <Signatory
-              signatureSrc={b.chairman.signatureSrc}
-              name={b.chairman.name}
-              role={b.chairman.title}
-            />
-            <Signatory
-              signatureSrc={b.secretary.signatureSrc}
-              name={b.secretary.name}
-              role={b.secretary.title}
-            />
+        <footer
+          className="shrink-0 text-center"
+          style={{
+            paddingLeft: BACK_PAD_X,
+            paddingRight: BACK_PAD_X,
+            paddingTop: mainToFooterGap,
+            paddingBottom: Math.max(10, Math.round(12 * LSY)),
+          }}
+        >
+          <div className="flex flex-col items-center" style={{ gap: footerLineGap }}>
+            {b.footerLines.map((line, i) => (
+              <p key={i} className="max-w-full break-words text-pretty" style={footerLineStyle}>
+                {line}
+              </p>
+            ))}
           </div>
         </footer>
+      </div>
+
+      {/* Green (thin) + orange (thick) — SDP back-of-card stripes */}
+      <div className="relative z-[1] mt-auto flex w-full shrink-0 flex-col">
+        <div className="h-1 w-full" style={{ backgroundColor: MEMBER_CARD_BACK_STRIPE_GREEN }} />
+        <div className="h-2.5 w-full" style={{ backgroundColor: MEMBER_CARD_BACK_STRIPE_ORANGE }} />
       </div>
     </article>
   );

@@ -27,6 +27,11 @@ import { Download, Printer, ArrowLeft, CheckCircle2, Share2 } from "lucide-react
 import { useLanguage } from "@/lib/i18n/context";
 import { calculateMembershipDues, DEFAULT_MONTHLY_DUE_NGN } from "@/lib/membership/dues";
 import { cn } from "@/lib/utils";
+import {
+  mergeCanvasesVertical,
+  patchClonedMemberCardsForExport,
+  waitForCaptureReady,
+} from "@/lib/member-card-capture";
 import { format, startOfMonth } from "date-fns";
 
 interface Step5PreviewProps {
@@ -79,6 +84,9 @@ export function Step5Preview({
     return () => window.removeEventListener("resize", updateScale);
   }, [cardLayout]);
 
+  /** Same ring as on-screen preview so export matches what the user sees */
+  const previewRingClass = "ring-2 ring-sdp-primary/20";
+
   const html2canvasOpts = React.useMemo(
     () => ({
       scale: 2 as const,
@@ -87,8 +95,17 @@ export function Step5Preview({
       backgroundColor: "#ffffff",
       scrollX: 0,
       scrollY: 0,
-      /** Let element define width/height — fixed W/H here skewed banner/text in captures */
       foreignObjectRendering: false,
+      /**
+       * Capture host uses near-zero opacity so it’s invisible on the page; the clone used for
+       * rasterization must be fully opaque or some browsers flatten layout/text incorrectly.
+       */
+      onclone: (clonedDoc: Document) => {
+        clonedDoc.querySelectorAll<HTMLElement>(".member-cards-capture-host").forEach((host) => {
+          host.style.opacity = "1";
+        });
+        patchClonedMemberCardsForExport(clonedDoc);
+      },
     }),
     []
   );
@@ -103,8 +120,12 @@ export function Step5Preview({
     );
     if (!front || !back) return;
 
-    import("html2canvas").then(({ default: html2canvas }) => {
-      Promise.all([html2canvas(front, html2canvasOpts), html2canvas(back, html2canvasOpts)])
+    import("html2canvas").then(async ({ default: html2canvas }) => {
+      await waitForCaptureReady();
+      Promise.all([
+        html2canvas(front as HTMLElement, html2canvasOpts),
+        html2canvas(back as HTMLElement, html2canvasOpts),
+      ])
         .then(([cFront, cBack]) => {
           if (portrait) {
             const imgWidthMm = 70;
@@ -146,21 +167,16 @@ export function Step5Preview({
       portrait ? "member-card-back-capture-portrait" : "member-card-back-capture"
     );
     if (!front || !back) return;
-    import("html2canvas").then(({ default: html2canvas }) => {
+    import("html2canvas").then(async ({ default: html2canvas }) => {
+      await waitForCaptureReady();
       const opts = { ...html2canvasOpts, scale: 3 as const };
-      Promise.all([html2canvas(front, opts), html2canvas(back, opts)])
+      Promise.all([
+        html2canvas(front as HTMLElement, opts),
+        html2canvas(back as HTMLElement, opts),
+      ])
         .then(([cFront, cBack]) => {
-          const w = portrait ? MEMBER_CARD_PORTRAIT_W : MEMBER_CARD_W;
-          const h = portrait ? MEMBER_CARD_PORTRAIT_H : MEMBER_CARD_H;
-          const stacked = document.createElement("canvas");
-          stacked.width = w * 3;
-          stacked.height = h * 3 * 2;
-          const ctx = stacked.getContext("2d");
-          if (!ctx) return;
-          ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, stacked.width, stacked.height);
-          ctx.drawImage(cFront, 0, 0, stacked.width, h * 3);
-          ctx.drawImage(cBack, 0, h * 3, stacked.width, h * 3);
+          const gap = 12;
+          const stacked = mergeCanvasesVertical(cFront, cBack, gap);
           const link = document.createElement("a");
           link.download = portrait
             ? `SDP-MemberCard-portrait-${formData.voterRegistrationNumber}.png`
@@ -183,12 +199,13 @@ export function Step5Preview({
     const pb = document.getElementById("member-card-back-capture-portrait");
     if (!lf || !lb || !pf || !pb) return;
 
-    import("html2canvas").then(({ default: html2canvas }) => {
+    import("html2canvas").then(async ({ default: html2canvas }) => {
+      await waitForCaptureReady();
       Promise.all([
-        html2canvas(lf, html2canvasOpts),
-        html2canvas(lb, html2canvasOpts),
-        html2canvas(pf, html2canvasOpts),
-        html2canvas(pb, html2canvasOpts),
+        html2canvas(lf as HTMLElement, html2canvasOpts),
+        html2canvas(lb as HTMLElement, html2canvasOpts),
+        html2canvas(pf as HTMLElement, html2canvasOpts),
+        html2canvas(pb as HTMLElement, html2canvasOpts),
       ])
         .then(([cLf, cLb, cPf, cPb]) => {
           const lw = 280;
@@ -222,36 +239,34 @@ export function Step5Preview({
     const pb = document.getElementById("member-card-back-capture-portrait");
     if (!lf || !lb || !pf || !pb) return;
 
-    import("html2canvas").then(({ default: html2canvas }) => {
+    import("html2canvas").then(async ({ default: html2canvas }) => {
+      await waitForCaptureReady();
       const opts = { ...html2canvasOpts, scale: 3 as const };
       Promise.all([
-        html2canvas(lf, opts),
-        html2canvas(lb, opts),
-        html2canvas(pf, opts),
-        html2canvas(pb, opts),
+        html2canvas(lf as HTMLElement, opts),
+        html2canvas(lb as HTMLElement, opts),
+        html2canvas(pf as HTMLElement, opts),
+        html2canvas(pb as HTMLElement, opts),
       ])
         .then(([cLf, cLb, cPf, cPb]) => {
-          const gap = 36;
-          const maxW = Math.max(cLf.width, cLb.width, cPf.width, cPb.width);
-          const totalH = cLf.height + cLb.height + gap + cPf.height + cPb.height + gap;
+          const sectionGap = 36;
+          const landStack = mergeCanvasesVertical(cLf, cLb, 12);
+          const portStack = mergeCanvasesVertical(cPf, cPb, 12);
+          const maxW = Math.max(landStack.width, portStack.width);
+          const totalH = landStack.height + sectionGap + portStack.height;
           const stacked = document.createElement("canvas");
           stacked.width = maxW;
           stacked.height = totalH;
           const ctx = stacked.getContext("2d");
           if (!ctx) return;
           ctx.fillStyle = "#ffffff";
-          ctx.fillRect(0, 0, stacked.width, stacked.height);
-          let y = 0;
-          const drawCentered = (c: HTMLCanvasElement) => {
-            const x = Math.floor((maxW - c.width) / 2);
-            ctx.drawImage(c, x, y);
-            y += c.height;
-          };
-          drawCentered(cLf);
-          drawCentered(cLb);
-          y += gap;
-          drawCentered(cPf);
-          drawCentered(cPb);
+          ctx.fillRect(0, 0, maxW, totalH);
+          ctx.drawImage(landStack, Math.floor((maxW - landStack.width) / 2), 0);
+          ctx.drawImage(
+            portStack,
+            Math.floor((maxW - portStack.width) / 2),
+            landStack.height + sectionGap
+          );
           const link = document.createElement("a");
           link.download = `SDP-MemberCard-both-layouts-${formData.voterRegistrationNumber}.png`;
           link.href = stacked.toDataURL("image/png");
@@ -375,59 +390,94 @@ export function Step5Preview({
           >
             {cardLayout === "landscape" ? (
               cardSide === "front" ? (
-                <MemberCard
-                  data={formData}
-                  showBarcode={true}
-                  className="ring-2 ring-sdp-primary/20"
-                />
+                <MemberCard data={formData} showBarcode={true} className={previewRingClass} />
               ) : (
-                <MemberCardBack className="ring-2 ring-sdp-primary/20" />
+                <MemberCardBack className={previewRingClass} />
               )
             ) : cardSide === "front" ? (
-              <PortraitMemberCard
-                data={formData}
-                showBarcode={true}
-                className="ring-2 ring-sdp-primary/20"
-              />
+              <PortraitMemberCard data={formData} showBarcode={true} className={previewRingClass} />
             ) : (
-              <PortraitMemberCardBack className="ring-2 ring-sdp-primary/20" />
+              <PortraitMemberCardBack className={previewRingClass} />
             )}
           </div>
         </div>
       </div>
 
-      {/* Hidden captures — landscape + portrait for PNG/PDF (off-screen) */}
+      {/*
+        Export targets: same card dimensions + ring + screen variant as the preview (not variant="capture").
+        Framed like the preview inner box (fixed W×H) so flex parents can’t alter layout.
+        Host opacity is reset to 1 inside html2canvas onclone before rasterizing.
+      */}
       <div
-        className="pointer-events-none fixed top-0 z-[-1] flex flex-row gap-6 print:static print:left-auto print:top-auto print:z-auto print:flex-col"
-        style={{ left: -(MEMBER_CARD_W + MEMBER_CARD_PORTRAIT_W + 48) }}
+        className="member-cards-capture-host pointer-events-none fixed left-0 z-0 flex flex-row items-start gap-4 print:static print:z-auto print:w-full print:flex-col print:items-center"
+        style={{
+          top: "100vh",
+          opacity: 0.004,
+          width: MEMBER_CARD_W + MEMBER_CARD_PORTRAIT_W + 32,
+        }}
         aria-hidden
       >
         <div
           id="member-cards-capture-stack"
-          className="member-cards-capture-stack flex flex-col gap-0"
+          className="member-cards-capture-stack flex shrink-0 flex-col gap-0"
+          style={{ width: MEMBER_CARD_W }}
         >
-          <MemberCard
-            data={formData}
-            showBarcode={true}
-            id="member-card-capture"
-            variant="capture"
-          />
-          <MemberCardBack id="member-card-back-capture" variant="capture" />
+          <div
+            className="flex-none"
+            style={{
+              width: MEMBER_CARD_W,
+              height: MEMBER_CARD_H,
+              position: "relative",
+            }}
+          >
+            <MemberCard
+              data={formData}
+              showBarcode={true}
+              id="member-card-capture"
+              className={previewRingClass}
+            />
+          </div>
+          <div
+            className="flex-none"
+            style={{
+              width: MEMBER_CARD_W,
+              height: MEMBER_CARD_H,
+              position: "relative",
+            }}
+          >
+            <MemberCardBack id="member-card-back-capture" className={previewRingClass} />
+          </div>
         </div>
         <div
           id="member-cards-capture-stack-portrait"
-          className="member-cards-capture-stack-portrait flex flex-col gap-0"
+          className="member-cards-capture-stack-portrait flex shrink-0 flex-col gap-0"
+          style={{ width: MEMBER_CARD_PORTRAIT_W }}
         >
-          <PortraitMemberCard
-            data={formData}
-            showBarcode={true}
-            id="member-card-capture-portrait"
-            variant="capture"
-          />
-          <PortraitMemberCardBack
-            id="member-card-back-capture-portrait"
-            variant="capture"
-          />
+          <div
+            className="flex-none"
+            style={{
+              width: MEMBER_CARD_PORTRAIT_W,
+              height: MEMBER_CARD_PORTRAIT_H,
+              position: "relative",
+            }}
+          >
+            <PortraitMemberCard
+              data={formData}
+              showBarcode={true}
+              id="member-card-capture-portrait"
+              className={previewRingClass}
+            />
+          </div>
+          <div
+            className="flex-none"
+            style={{
+              width: MEMBER_CARD_PORTRAIT_W,
+              height: MEMBER_CARD_PORTRAIT_H,
+              position: "relative",
+            }}
+          >
+            <PortraitMemberCardBack id="member-card-back-capture-portrait" className={previewRingClass} />
+          </div>
         </div>
       </div>
 

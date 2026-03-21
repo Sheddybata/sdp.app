@@ -67,12 +67,26 @@ function getMemberSinceLabel(joinDate?: string): string {
   }
 }
 
+/** Portrait — name + membership No line */
 const BODY: CSSProperties = {
-  fontSize: 19,
+  fontSize: 29,
+  lineHeight: 1.25,
+  marginBottom: 4,
+  fontFamily: CARD_SANS,
+};
+
+/** Smaller type for State / LG / Ward / Polling / Tel / Member since only */
+const BODY_DETAIL: CSSProperties = {
+  fontSize: 21,
   lineHeight: 1.22,
   marginBottom: 4,
   fontFamily: CARD_SANS,
 };
+
+/** Party header lines: +50% vs previous 16px */
+const PARTY_LINE_PX = 24;
+
+const QR_DISPLAY_PX = 128;
 
 interface PortraitMemberCardProps {
   data: EnrollmentFormData;
@@ -100,7 +114,7 @@ export function PortraitMemberCard({
     const payload = `${base}/enroll/verify?member=${regId}`;
     import("qrcode").then((QRCode) => {
       QRCode.toDataURL(payload, {
-        width: 112,
+        width: QR_DISPLAY_PX,
         margin: 1,
         color: { dark: "#000000", light: "#ffffff" },
       })
@@ -157,7 +171,7 @@ export function PortraitMemberCard({
       {/* Header: logo | party stack | decorative corner */}
       <header
         className="relative z-[1] flex shrink-0 items-start justify-between"
-        style={{ paddingLeft: PX, paddingRight: PX, paddingTop: 16, paddingBottom: 6 }}
+        style={{ paddingLeft: PX, paddingRight: PX, paddingTop: 30, paddingBottom: 6 }}
       >
         <div
           className="relative flex shrink-0 items-start justify-center overflow-visible"
@@ -174,13 +188,13 @@ export function PortraitMemberCard({
             }}
           />
         </div>
-        <div className="min-w-0 flex-1 px-2 text-center">
+        <div className="min-w-0 flex-1 px-2 pt-1 text-center">
           <p
             className="m-0 leading-tight"
             style={{
               color: C.greenParty,
               fontWeight: 800,
-              fontSize: 16,
+              fontSize: PARTY_LINE_PX,
               fontFamily: CARD_SANS,
               letterSpacing: "-0.01em",
               textShadow: "0.35px 0 0 currentColor, -0.35px 0 0 currentColor",
@@ -189,11 +203,11 @@ export function PortraitMemberCard({
             Social Democratic Party
           </p>
           <p
-            className="m-0 mt-0.5 leading-tight"
+            className="m-0 mt-1 leading-tight"
             style={{
               color: C.greenParty,
               fontWeight: 800,
-              fontSize: 16,
+              fontSize: PARTY_LINE_PX,
               fontFamily: CARD_SANS,
               letterSpacing: "-0.01em",
             }}
@@ -258,60 +272,76 @@ export function PortraitMemberCard({
         </div>
       </div>
 
-      {/* Member details — Tel / member since + QR tight under polling unit */}
+      {/* Member details — text block centered; QR centered at bottom (aligned with photo column) */}
       <div
+        data-sdp-member-body=""
         className="relative z-[1] flex min-h-0 flex-1 flex-col px-7"
-        style={{ paddingBottom: 8 }}
+        style={{ paddingBottom: 6 }}
       >
-        <p
-          className="m-0 text-center font-bold text-neutral-900"
-          style={{ ...BODY, fontSize: 22, marginBottom: 8, lineHeight: 1.15 }}
-        >
-          {displayNameWithTitle}
-        </p>
-        <p className="m-0 text-center" style={{ ...BODY, marginBottom: 8 }}>
-          <span style={{ fontWeight: 600, color: C.noLabel }}>No: </span>
-          <span style={{ fontWeight: 800, color: C.redId, letterSpacing: "-0.02em" }}>{membershipId || "—"}</span>
-        </p>
-        <p className="m-0" style={{ ...BODY, marginBottom: 3 }}>
-          <span style={{ color: C.label }}>State: </span>
-          <span className="font-bold text-neutral-900">{getStateName(data.state) || "—"}</span>
-        </p>
-        <p className="m-0" style={{ ...BODY, marginBottom: 3 }}>
-          <span style={{ color: C.label }}>LG: </span>
-          <span className="font-bold text-neutral-900">{formatSlugForDisplay(data.lga)}</span>
-        </p>
-        <p className="m-0" style={{ ...BODY, marginBottom: 3 }}>
-          <span style={{ color: C.label }}>Ward: </span>
-          <span className="font-bold text-neutral-900">{formatSlugForDisplay(data.ward)}</span>
-        </p>
-        <p className="m-0" style={{ ...BODY, marginBottom: 6 }}>
-          <span style={{ color: C.label }}>Polling Unit: </span>
-          <span className="font-bold text-neutral-900">{data.pollingUnit?.trim() || "—"}</span>
-        </p>
+        <div className="flex w-full flex-col items-center text-center">
+          <p
+            className="m-0 font-bold text-neutral-900"
+            style={{
+              ...BODY,
+              fontSize: 33,
+              marginBottom: 10,
+              lineHeight: 1.15,
+            }}
+          >
+            {displayNameWithTitle}
+          </p>
+          <p className="m-0" style={{ ...BODY, marginBottom: 10 }}>
+            <span style={{ fontWeight: 600, color: C.noLabel }}>No: </span>
+            <span style={{ fontWeight: 800, color: C.redId, letterSpacing: "-0.02em" }}>{membershipId || "—"}</span>
+          </p>
+          <p className="m-0" style={{ ...BODY_DETAIL, marginBottom: 4 }}>
+            <span style={{ color: C.label }}>State: </span>
+            <span className="font-bold text-neutral-900">{getStateName(data.state) || "—"}</span>
+          </p>
+          <p className="m-0" style={{ ...BODY_DETAIL, marginBottom: 4 }}>
+            <span style={{ color: C.label }}>LG: </span>
+            <span className="font-bold text-neutral-900">{formatSlugForDisplay(data.lga)}</span>
+          </p>
+          <p className="m-0" style={{ ...BODY_DETAIL, marginBottom: 4 }}>
+            <span style={{ color: C.label }}>Ward: </span>
+            <span className="font-bold text-neutral-900">{formatSlugForDisplay(data.ward)}</span>
+          </p>
+          <p className="m-0" style={{ ...BODY_DETAIL, marginBottom: 8 }}>
+            <span style={{ color: C.label }}>Polling Unit: </span>
+            <span className="font-bold text-neutral-900">{data.pollingUnit?.trim() || "—"}</span>
+          </p>
+          <p className="m-0" style={{ ...BODY_DETAIL, marginBottom: 4 }}>
+            <span style={{ color: C.label }}>Tel: </span>
+            <span className="font-bold text-neutral-900">{data.phone || "—"}</span>
+          </p>
+          <p className="m-0" style={{ ...BODY_DETAIL, marginBottom: 0 }}>
+            <span style={{ color: C.label }}>Member since: </span>
+            <span className="font-bold text-neutral-900">{memberSince}</span>
+          </p>
+        </div>
 
-        <div className="flex flex-row items-start justify-between gap-2 pt-0">
-          <div className="min-w-0 space-y-0.5">
-            <p className="m-0" style={{ ...BODY, marginBottom: 0 }}>
-              <span style={{ color: C.label }}>Tel: </span>
-              <span className="font-bold text-neutral-900">{data.phone || "—"}</span>
-            </p>
-            <p className="m-0" style={{ ...BODY, marginBottom: 0 }}>
-              <span style={{ color: C.label }}>Member since: </span>
-              <span className="font-bold text-neutral-900">{memberSince}</span>
-            </p>
-          </div>
+        <div className="mt-auto flex w-full shrink-0 justify-center pt-2 pb-1">
           {showBarcode && membershipId ? (
-            <div className="shrink-0 rounded-sm border border-neutral-300 bg-white p-0.5" aria-hidden>
+            <div className="rounded-sm border border-neutral-300 bg-white p-0.5" aria-hidden>
               {qrDataUrl ? (
-                <img src={qrDataUrl} alt="" width={112} height={112} className="block size-[112px]" />
+                <img
+                  src={qrDataUrl}
+                  alt=""
+                  width={QR_DISPLAY_PX}
+                  height={QR_DISPLAY_PX}
+                  className="block"
+                  style={{ width: QR_DISPLAY_PX, height: QR_DISPLAY_PX }}
+                />
               ) : (
-                <div className="flex size-[112px] items-center justify-center text-xs text-neutral-400">QR…</div>
+                <div
+                  className="flex items-center justify-center text-xs text-neutral-400"
+                  style={{ width: QR_DISPLAY_PX, height: QR_DISPLAY_PX }}
+                >
+                  QR…
+                </div>
               )}
             </div>
-          ) : (
-            <div className="w-[112px] shrink-0" />
-          )}
+          ) : null}
         </div>
       </div>
 

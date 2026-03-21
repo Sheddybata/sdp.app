@@ -76,6 +76,8 @@
   #member-card-back-capture *,
   #member-cards-capture-stack,
   #member-cards-capture-stack *,
+  .member-cards-capture-host,
+  .member-cards-capture-host *,
   #member-card-capture-portrait,
   #member-card-capture-portrait *,
   #member-card-back-capture-portrait,
@@ -148,6 +150,18 @@
     top: auto !important;
     z-index: auto !important;
     width: 100% !important;
+    align-items: center !important;
+    gap: 0 !important;
+  }
+
+  .member-cards-capture-host {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: none !important;
+    flex-direction: column !important;
     align-items: center !important;
     gap: 0 !important;
   }

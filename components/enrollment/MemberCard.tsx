@@ -20,8 +20,6 @@ const SY = CARD_H / REF_H;
 const INSET_X = Math.round(48 * SX);
 /** Space from red banner (right column) to member name */
 const AFTER_BANNER_TO_NAME = Math.round(24 * SY);
-/** Name → first location row */
-const NAME_TO_LOCATION = Math.max(4, Math.round(6 * SY));
 /** Tight stack between State/LG row, Ward */
 const LOCATION_TIGHT = Math.max(1, Math.round(2 * SY));
 /** Breathing room around membership No */
@@ -51,13 +49,19 @@ const BANNER_AREA_WIDTH_PX = Math.max(100, HEADER_RIGHT_COL_W - BANNER_INSET_LEF
 /** System stack so preview and PNG/PDF use the same face metrics */
 const CARD_SANS =
   'system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif';
-/** One size for name, location lines, membership No, Tel / Member since */
+/** Location rows, Tel, member since */
 const MEMBER_BODY_TEXT_PX = Math.max(15, Math.round(22 * SY));
+/** Holder name — larger for readability */
+const HOLDER_NAME_TEXT_PX = Math.max(19, Math.round(28 * SY));
+/** Membership ID line (“No:” + number) */
+const MEMBERSHIP_ID_TEXT_PX = Math.max(18, Math.round(25 * SY));
 /** Member portrait frame (w × h) — card is fixed width; one size keeps layout predictable */
 const PHOTO_W = Math.round(196 * SX);
 const PHOTO_H = Math.round(272 * SY);
-/** Main row gap (logo block ↔ photo) */
-const MAIN_COLUMN_GAP = Math.round(40 * SX);
+/** Main row gap (data column ↔ photo) — tighter for global ID–style grouping */
+const MAIN_COLUMN_GAP = Math.round(22 * SX);
+/** Vertical rhythm in holder data column */
+const HOLDER_STACK_GAP = Math.max(3, Math.round(5 * SY));
 const HEADER_PADDING_TOP = Math.round(20 * SY);
 const BANNER_PAD_Y = Math.max(7, Math.round(12 * SY));
 const QR_SIZE = Math.max(96, Math.round(120 * SY));
@@ -112,6 +116,17 @@ function getMemberSinceLabel(joinDate?: string): string {
   } catch {
     return "—";
   }
+}
+
+/** Single-line display cap (full value in title tooltip). */
+const MAX_HOLDER_NAME_CHARS = 44;
+const MAX_PHONE_DISPLAY_CHARS = 18;
+
+function clipDisplay(s: string, maxChars: number): string {
+  const t = s.trim();
+  if (!t) return "—";
+  if (t.length <= maxChars) return t;
+  return `${t.slice(0, Math.max(1, maxChars - 1)).trimEnd()}…`;
 }
 
 /** Reference palette */
@@ -169,8 +184,23 @@ export function MemberCard({
     });
   }, [showBarcode, membershipId]);
 
-  const displayNameWithTitle = formatNameWithTitle(data);
+  const fullNameWithTitle = formatNameWithTitle(data);
+  const displayNameWithTitle = clipDisplay(fullNameWithTitle, MAX_HOLDER_NAME_CHARS);
   const memberSince = getMemberSinceLabel(data.joinDate);
+
+  const stateFull = getStateName(data.state) || "—";
+
+  const lgaFormatted = formatSlugForDisplay(data.lga);
+  const lgaFull = lgaFormatted === "—" ? "—" : lgaFormatted.toUpperCase();
+
+  const wardFull = formatSlugForDisplay(data.ward);
+
+  const pollingRaw = data.pollingUnit?.trim() || "";
+  const pollingFull = pollingRaw || "—";
+  const pollingUpper = pollingRaw ? pollingRaw.toUpperCase() : "—";
+
+  const phoneFull = data.phone?.trim() || "—";
+  const phoneDisplay = clipDisplay(phoneFull, MAX_PHONE_DISPLAY_CHARS);
 
   const fieldTextStyle: CSSProperties = {
     fontSize: MEMBER_BODY_TEXT_PX,
@@ -282,68 +312,107 @@ export function MemberCard({
         </div>
       </header>
 
-      {/* Main: left block + fixed-size portrait (top-aligned), same as earlier implementation */}
+      {/* Main holder zone: data + machine-readable row grouped; photo flush — no justify-between gap */}
       <div
+        data-sdp-member-body=""
         className="relative z-[1] flex min-h-0 flex-1 flex-row items-start"
         style={{
           paddingLeft: INSET_X,
           paddingRight: INSET_X,
-          paddingTop: AFTER_BANNER_TO_NAME,
+          paddingTop: Math.max(6, AFTER_BANNER_TO_NAME - Math.round(4 * SY)),
+          paddingBottom: Math.max(6, Math.round(8 * SY)),
           columnGap: MAIN_COLUMN_GAP,
         }}
       >
-        <div className="flex min-h-0 min-w-0 flex-1 flex-col justify-between" style={{ paddingBottom: 10 }}>
-          <div className="min-w-0">
-            {/* 1. Name + registration title */}
+        <div
+          className="flex min-h-0 min-w-0 flex-1 flex-col"
+          style={{ gap: HOLDER_STACK_GAP, paddingBottom: 0 }}
+        >
+          {/* Holder name — one line ellipsis; full name on hover */}
+          <p
+            className="m-0 min-w-0 max-w-full font-bold text-neutral-900"
+            style={{
+              fontSize: HOLDER_NAME_TEXT_PX,
+              lineHeight: MEMBER_BODY_LINE_HEIGHT,
+              marginBottom: 0,
+              fontFamily: CARD_SANS,
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+            title={fullNameWithTitle !== displayNameWithTitle ? fullNameWithTitle : undefined}
+          >
+            {displayNameWithTitle}
+          </p>
+
+          {/* Membership ID — original format */}
+          <div style={{ paddingTop: 2, paddingBottom: NO_BLOCK_PAD_Y }}>
             <p
-              className="m-0 font-bold text-neutral-900"
+              className="m-0"
               style={{
-                ...fieldTextStyle,
-                marginBottom: NAME_TO_LOCATION,
+                fontSize: MEMBERSHIP_ID_TEXT_PX,
+                lineHeight: MEMBER_BODY_LINE_HEIGHT,
+                marginBottom: LOCATION_TIGHT,
+                fontFamily: CARD_SANS,
               }}
             >
-              {displayNameWithTitle}
-            </p>
-
-            {/* 2. Membership ID */}
-            <div style={{ paddingTop: 2, paddingBottom: NO_BLOCK_PAD_Y }}>
-              <p className="m-0" style={{ ...fieldTextStyle, marginBottom: LOCATION_TIGHT }}>
-                <span style={{ fontWeight: 600, color: C.noLabel }}>No: </span>
-                <span style={{ fontWeight: 700, letterSpacing: "-0.02em", color: C.redId }}>
-                  {membershipId || "—"}
-                </span>
-              </p>
-            </div>
-
-            {/* 3. State (own row) */}
-            <p className="m-0" style={fieldTextStyle}>
-              <span style={{ color: C.label }}>State: </span>
-              <span className="font-bold text-neutral-900">{getStateName(data.state) || "—"}</span>
-            </p>
-
-            {/* 4. LGA — below state */}
-            <p className="m-0" style={fieldTextStyle}>
-              <span style={{ color: C.label }}>LG: </span>
-              <span className="font-bold text-neutral-900">{formatSlugForDisplay(data.lga)}</span>
-            </p>
-
-            {/* 5. Ward */}
-            <p className="m-0" style={fieldTextStyle}>
-              <span style={{ color: C.label }}>Ward: </span>
-              <span className="font-bold text-neutral-900">{formatSlugForDisplay(data.ward)}</span>
-            </p>
-
-            {/* 6. Polling Unit */}
-            <p className="m-0" style={{ ...fieldTextStyle, marginBottom: 0 }}>
-              <span style={{ color: C.label }}>Polling Unit: </span>
-              <span className="font-bold text-neutral-900">{data.pollingUnit?.trim() || "—"}</span>
+              <span style={{ fontWeight: 600, color: C.noLabel }}>No: </span>
+              <span style={{ fontWeight: 700, letterSpacing: "-0.02em", color: C.redId }}>
+                {membershipId || "—"}
+              </span>
             </p>
           </div>
 
-          {/* QR + Tel; member since on one line beside QR */}
-          <div className="flex flex-row items-center" style={{ gap: QR_TO_TEL, marginTop: Math.max(4, Math.round(8 * SY)) }}>
+          {/* State | LGA and Ward | Polling — two columns, all left-aligned */}
+          <div
+            className="w-full min-w-0"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+              columnGap: Math.round(14 * SX),
+              rowGap: Math.max(2, Math.round(4 * SY)),
+              fontSize: MEMBER_BODY_TEXT_PX,
+              lineHeight: MEMBER_BODY_LINE_HEIGHT,
+              fontFamily: CARD_SANS,
+            }}
+          >
+            <p className="m-0 min-w-0 overflow-hidden text-left text-ellipsis whitespace-nowrap" title={stateFull}>
+              <span style={{ color: C.label }}>State: </span>
+              <span className="font-bold text-neutral-900">{stateFull}</span>
+            </p>
+            <p
+              className="m-0 min-w-0 overflow-hidden text-left text-ellipsis whitespace-nowrap"
+              title={lgaFull !== "—" ? lgaFull : undefined}
+            >
+              <span style={{ color: C.label }}>LGA: </span>
+              <span className="font-bold text-neutral-900">{lgaFull}</span>
+            </p>
+            <p
+              className="m-0 min-w-0 overflow-hidden text-left text-ellipsis whitespace-nowrap"
+              title={wardFull !== "—" ? wardFull : undefined}
+            >
+              <span style={{ color: C.label }}>Ward: </span>
+              <span className="font-bold text-neutral-900">{wardFull}</span>
+            </p>
+            <p
+              className="m-0 min-w-0 overflow-hidden text-left text-ellipsis whitespace-nowrap"
+              title={pollingFull !== "—" ? pollingFull : undefined}
+            >
+              <span style={{ color: C.label }}>Polling Unit: </span>
+              <span className="font-bold text-neutral-900">{pollingUpper}</span>
+            </p>
+          </div>
+
+          {/* Machine-readable strip: QR + contact directly under address block (global ID pattern) */}
+          <div
+            className="flex min-w-0 flex-row items-center border-t border-neutral-200/90 pt-2"
+            style={{ gap: QR_TO_TEL, marginTop: Math.max(2, Math.round(4 * SY)) }}
+          >
             {showBarcode && membershipId ? (
-              <div className="shrink-0 rounded-sm border border-neutral-300 bg-white p-0.5" aria-hidden>
+              <div
+                className="shrink-0 rounded border border-neutral-400/80 bg-white p-px shadow-sm"
+                aria-hidden
+              >
                 {qrDataUrl ? (
                   <img
                     src={qrDataUrl}
@@ -365,12 +434,19 @@ export function MemberCard({
             ) : (
               <div className="shrink-0" style={{ width: QR_SIZE }} />
             )}
-            <div className="min-w-0 space-y-1">
-              <p className="m-0" style={{ fontSize: MEMBER_BODY_TEXT_PX, lineHeight: MEMBER_BODY_LINE_HEIGHT }}>
+            <div className="min-w-0" style={{ display: "flex", flexDirection: "column", gap: Math.max(2, Math.round(4 * SY)) }}>
+              <p
+                className="m-0 min-w-0"
+                style={{ fontSize: MEMBER_BODY_TEXT_PX, lineHeight: MEMBER_BODY_LINE_HEIGHT }}
+                title={phoneFull !== phoneDisplay && phoneFull !== "—" ? phoneFull : undefined}
+              >
                 <span style={{ color: C.label }}>Tel: </span>
-                <span className="font-bold text-neutral-900">{data.phone || "—"}</span>
+                <span className="font-bold text-neutral-900">{phoneDisplay}</span>
               </p>
-              <p className="m-0 whitespace-nowrap" style={{ fontSize: MEMBER_BODY_TEXT_PX, lineHeight: MEMBER_BODY_LINE_HEIGHT }}>
+              <p
+                className="m-0 min-w-0 whitespace-nowrap"
+                style={{ fontSize: MEMBER_BODY_TEXT_PX, lineHeight: MEMBER_BODY_LINE_HEIGHT }}
+              >
                 <span style={{ color: C.label }}>Member since: </span>
                 <span className="font-bold text-neutral-900">{memberSince}</span>
               </p>
@@ -378,9 +454,12 @@ export function MemberCard({
           </div>
         </div>
 
-        {/* Portrait: fixed frame, top-aligned (previous behaviour — not full column height) */}
-        <div className="shrink-0 pt-0.5">
-          <div className="overflow-hidden rounded-sm bg-neutral-100" style={{ width: PHOTO_W, height: PHOTO_H }}>
+        {/* Portrait — ID photo frame, aligned with holder column top */}
+        <div className="shrink-0 self-start">
+          <div
+            className="overflow-hidden rounded-sm bg-neutral-100 ring-1 ring-neutral-300/90"
+            style={{ width: PHOTO_W, height: PHOTO_H }}
+          >
             {data.portraitDataUrl ? (
               <img src={data.portraitDataUrl} alt="" className="h-full w-full object-cover" />
             ) : (
