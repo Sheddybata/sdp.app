@@ -3,7 +3,7 @@ import type { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
   appId: 'org.sdp.memberportal',
-  appName: 'SDP Registration Gateway',
+  appName: 'Official SDP Registration Gateway',
   webDir: 'out',
   server: {
     androidScheme: 'https',

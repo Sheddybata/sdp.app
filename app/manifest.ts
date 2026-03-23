@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "SDP Registration Gateway",
+    name: "Official SDP Registration Gateway",
     short_name: "SDP Gateway",
     description: "Social Democratic Party - Registration, verification, and member services",
     start_url: "/",

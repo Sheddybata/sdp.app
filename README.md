@@ -1,4 +1,4 @@
-# SDP Registration Gateway
+# Official SDP Registration Gateway
 
 A **mobile-first PWA** for the Social Democratic Party (SDP): **Member Enrollment** and **Admin Command Center**.
 

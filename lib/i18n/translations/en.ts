@@ -35,7 +35,7 @@ export const en = {
     secretaryName: "Dr. Olu Agunloye",
     secretaryRole: "National Secretary, Social Democratic Party",
     secretariatCaption: "National Secretariat, Nigeria",
-    title: "SDP Registration Gateway",
+    title: "Official SDP Registration Gateway",
     description:
       "Join the SDP Crusade. Register as a member or validate your membership of SDP.",
     newEnrollment: "Register",
