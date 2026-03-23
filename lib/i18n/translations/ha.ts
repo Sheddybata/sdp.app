@@ -37,8 +37,8 @@ export const ha = {
     secretariatCaption: "National Secretariat, Nigeria",
     title: "Portal na Memba SDP",
     description:
-      "Join the SDP Crusade. Enroll as a member or validate your membership of SDP.",
-    newEnrollment: "Enrollment",
+      "Join the SDP Crusade. Register as a member or validate your membership of SDP.",
+    newEnrollment: "Register",
     newEnrollmentDesc: "Shiga a matsayin memba cikin mintuna",
     verifyMembership: "Tabbatar da Memba",
     verifyMembershipDesc: "Verify or review your data",

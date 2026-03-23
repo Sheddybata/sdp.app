@@ -37,8 +37,8 @@ export const ig = {
     secretariatCaption: "National Secretariat, Nigeria",
     title: "Portal Onye otu SDP",
     description:
-      "Join the SDP Crusade. Enroll as a member or validate your membership of SDP.",
-    newEnrollment: "Enrollment",
+      "Join the SDP Crusade. Register as a member or validate your membership of SDP.",
+    newEnrollment: "Register",
     newEnrollmentDesc: "Sonye dị ka onye otu n'ime nkeji",
     verifyMembership: "Chọpụta Onye otu",
     verifyMembershipDesc: "Verify or review your data",

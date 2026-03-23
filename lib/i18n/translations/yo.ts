@@ -37,8 +37,8 @@ export const yo = {
     secretariatCaption: "National Secretariat, Nigeria",
     title: "Portal Ẹgbẹ SDP",
     description:
-      "Join the SDP Crusade. Enroll as a member or validate your membership of SDP.",
-    newEnrollment: "Enrollment",
+      "Join the SDP Crusade. Register as a member or validate your membership of SDP.",
+    newEnrollment: "Register",
     newEnrollmentDesc: "Darapọ gẹgẹbi ẹgbẹ ni iṣẹju",
     verifyMembership: "Ṣayẹwo Ẹgbẹ",
     verifyMembershipDesc: "Verify or review your data",
