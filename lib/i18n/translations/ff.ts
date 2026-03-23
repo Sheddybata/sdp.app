@@ -23,7 +23,7 @@ export const ff = {
     memberServicesHeading: "Member & field services",
     memberServicesDescription:
       "Use the options below for registration, verification, administration, and structured list submission to the national office.",
-    leadershipHeading: "Message from national leadership",
+    leadershipHeading: "Message from the National Chairman",
     leadershipSubheading:
       "Words from the National Chairman on membership, integrity, and service to Nigerians at home and abroad.",
     chairmanQuote:
