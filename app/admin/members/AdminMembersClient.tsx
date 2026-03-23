@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { filterMembers, type MemberRecord } from "@/lib/mock-members";
+import { formatEnrollmentDisplayName, formatEnrollmentNameWithTitleFromParts } from "@/lib/enrollment-schema";
 import { NIGERIA_STATES } from "@/lib/nigeria-geo";
 import type { DiasporaSupporterRecord } from "@/lib/db/diaspora-supporters";
 import { getCountryName } from "@/lib/data/country-dial-codes";
@@ -262,7 +263,11 @@ export function AdminMembersClient({
     let y = 22;
     sorted.slice(0, 50).forEach((m, i) => {
       if (y > 270) { pdf.addPage(); y = 14; }
-      pdf.text(`${i + 1}. ${m.surname} ${m.firstName} - ${m.voterRegistrationNumber} - ${getStateName(m.state)}`, 14, y);
+      pdf.text(
+        `${i + 1}. ${formatEnrollmentDisplayName(m)} - ${m.voterRegistrationNumber} - ${getStateName(m.state)}`,
+        14,
+        y
+      );
       y += 6;
     });
     pdf.save(`SDP-Members-${new Date().toISOString().slice(0, 10)}.pdf`);
@@ -277,7 +282,7 @@ export function AdminMembersClient({
     filteredDiaspora.slice(0, 50).forEach((d, i) => {
       if (y > 270) { pdf.addPage(); y = 14; }
       pdf.text(
-        `${i + 1}. ${d.surname} ${d.firstName} — ${d.email} — ${d.phoneE164}`,
+        `${i + 1}. ${formatEnrollmentDisplayName({ surname: d.surname, firstName: d.firstName })} — ${d.email} — ${d.phoneE164}`,
         14,
         y
       );
@@ -414,8 +419,8 @@ export function AdminMembersClient({
                   </td>
                 </tr>
               ) : paginatedMembers.map((m) => (
-                <tr key={m.id} role="button" tabIndex={0} onClick={() => setSelectedMember(m)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedMember(m); } }} className="cursor-pointer hover:bg-sdp-primary/5 focus:bg-sdp-primary/5 focus:outline-none min-h-[44px]" aria-label={`View profile for ${m.surname} ${m.firstName}`}>
-                  <td className="px-4 py-3 font-medium text-neutral-900">{m.title} {m.surname} {m.firstName}</td>
+                <tr key={m.id} role="button" tabIndex={0} onClick={() => setSelectedMember(m)} onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setSelectedMember(m); } }} className="cursor-pointer hover:bg-sdp-primary/5 focus:bg-sdp-primary/5 focus:outline-none min-h-[44px]" aria-label={`View profile for ${formatEnrollmentDisplayName(m)}`}>
+                  <td className="px-4 py-3 font-medium text-neutral-900">{formatEnrollmentNameWithTitleFromParts(m)}</td>
                   <td className="px-4 py-3 text-neutral-600">{m.phone}</td>
                   <td className="px-4 py-3 text-neutral-600">{getStateName(m.state)}</td>
                   <td className="px-4 py-3 text-neutral-600">{getLGAName(m.state, m.lga)} / {getWardName(m.state, m.lga, m.ward)}</td>
@@ -521,10 +526,10 @@ export function AdminMembersClient({
                       }
                     }}
                     className="cursor-pointer hover:bg-sdp-primary/5 focus:bg-sdp-primary/5 focus:outline-none min-h-[44px]"
-                    aria-label={`View ${d.surname} ${d.firstName}`}
+                    aria-label={`View ${formatEnrollmentDisplayName({ surname: d.surname, firstName: d.firstName })}`}
                   >
                     <td className="px-4 py-3 font-medium text-neutral-900">
-                      {d.surname} {d.firstName}
+                      {formatEnrollmentDisplayName({ surname: d.surname, firstName: d.firstName })}
                     </td>
                     <td className="px-4 py-3 text-neutral-600">{d.email}</td>
                     <td className="px-4 py-3 font-mono text-neutral-700">{d.phoneE164}</td>
@@ -591,7 +596,7 @@ export function AdminMembersClient({
               <SheetHeader className="sticky top-0 z-10 shrink-0 space-y-0 border-b border-neutral-200 bg-white px-4 py-3 sm:px-6">
                 <div className="flex items-start justify-between gap-3">
                   <SheetTitle className="min-w-0 flex-1 text-left text-base leading-snug sm:text-lg">
-                    {`${selectedMember.title} ${selectedMember.surname} ${selectedMember.firstName}`}
+                    {formatEnrollmentNameWithTitleFromParts(selectedMember)}
                   </SheetTitle>
                   <SheetClose asChild>
                     <Button

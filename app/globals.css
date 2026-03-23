@@ -187,4 +187,9 @@
     background-color: #ff0000 !important;
     color: #ffffff !important;
   }
+
+  [data-sdp-card-stripes] > div {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
 }

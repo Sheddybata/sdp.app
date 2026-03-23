@@ -1,10 +1,10 @@
 import Image from "next/image";
 import type { TranslationKeys } from "@/lib/i18n/translations";
+import { HomeQuickInfoPanel } from "@/components/home/HomeQuickInfoPanel";
 
 type HomeCopy = TranslationKeys["home"];
 
 const CHAIRMAN_PORTRAIT = "/images/dr.sadiq.jpg";
-const SECRETARY_PORTRAIT = "/images/drolu.jpg";
 /** National secretariat building — add `natsec.jpeg` in /public/images/. */
 const SECRETARIAT_IMAGE = "/images/natsec.jpeg";
 
@@ -14,21 +14,12 @@ function LeadershipQuote({
   name,
   role,
   imageSrc,
-  accent,
 }: {
   quote: string;
   name: string;
   role: string;
   imageSrc: string;
-  accent: "primary" | "accent";
 }) {
-  const borderClass = accent === "primary" ? "border-sdp-primary" : "border-sdp-accent";
-  /** Secretary portrait: lower focal point in source image = face sits higher in the circle. */
-  const imageObjectClass =
-    accent === "accent"
-      ? "object-cover [object-position:50%_42%] sm:[object-position:50%_44%]"
-      : "object-cover object-top";
-
   return (
     <div className="min-w-0 space-y-3">
       <div className="flex items-center gap-3 sm:gap-4">
@@ -37,7 +28,7 @@ function LeadershipQuote({
             src={imageSrc}
             alt={name}
             fill
-            className={imageObjectClass}
+            className="object-cover object-top"
             sizes="56px"
             priority={false}
           />
@@ -48,9 +39,7 @@ function LeadershipQuote({
         </div>
       </div>
 
-      <blockquote
-        className={`m-0 w-full min-w-0 border-y-0 border-r-0 border-l-[3px] border-solid py-0 pl-4 sm:pl-5 ${borderClass}`}
-      >
+      <blockquote className="m-0 w-full min-w-0 border-y-0 border-r-0 border-l-[3px] border-solid border-sdp-primary py-0 pl-4 sm:pl-5">
         <p className="text-sm leading-relaxed text-neutral-600 sm:leading-relaxed">{quote}</p>
       </blockquote>
     </div>
@@ -95,22 +84,16 @@ export function HomeInstitutionalSection({ home }: { home: HomeCopy }) {
             {t.leadershipSubheading}
           </p>
 
-          <div className="mt-8 space-y-8 sm:space-y-9">
+          <div className="mt-8">
             <LeadershipQuote
               quote={t.chairmanQuote}
               name={t.chairmanName}
               role={t.chairmanRole}
               imageSrc={CHAIRMAN_PORTRAIT}
-              accent="primary"
-            />
-            <LeadershipQuote
-              quote={t.secretaryQuote}
-              name={t.secretaryName}
-              role={t.secretaryRole}
-              imageSrc={SECRETARY_PORTRAIT}
-              accent="accent"
             />
           </div>
+
+          <HomeQuickInfoPanel heading={t.quickInfoHeading} bullets={t.quickInfoBullets} />
         </div>
       </div>
     </section>

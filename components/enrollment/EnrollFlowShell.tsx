@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { EnrollmentWizard } from "@/components/enrollment/EnrollmentWizard";
-import type { EnrollmentFormData } from "@/lib/enrollment-schema";
+import { type EnrollmentFormData, formatEnrollmentNameWithTitleFromParts } from "@/lib/enrollment-schema";
 import { NIGERIA_STATES } from "@/lib/nigeria-geo";
 import { cn } from "@/lib/utils";
 import { ArrowLeft } from "lucide-react";
@@ -161,9 +161,12 @@ export function EnrollFlowShell({
             <div className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 px-4 py-3">
               <p className="text-xs font-medium text-neutral-600">Summary so far</p>
               <p className="mt-1 text-sm font-medium text-neutral-900">
-                {[formData.title, formData.surname, formData.firstName, formData.otherNames]
-                  .filter(Boolean)
-                  .join(" ")}
+                {formatEnrollmentNameWithTitleFromParts({
+                  title: formData.title,
+                  surname: formData.surname ?? "",
+                  firstName: formData.firstName ?? "",
+                  otherNames: formData.otherNames,
+                })}
                 {formData.state && (
                   <span className="text-neutral-600">
                     {" "}

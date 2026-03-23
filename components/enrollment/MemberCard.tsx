@@ -3,7 +3,7 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { format } from "date-fns";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
-import { getMembershipIdFromData } from "@/lib/enrollment-schema";
+import { formatEnrollmentNameWithTitle, getMembershipIdFromData } from "@/lib/enrollment-schema";
 import { NIGERIA_STATES } from "@/lib/nigeria-geo";
 import { cn } from "@/lib/utils";
 import { MEMBER_CARD_H as CARD_H, MEMBER_CARD_W as CARD_W } from "@/lib/member-card-back-content";
@@ -91,23 +91,6 @@ function formatSlugForDisplay(s: string): string {
     .join(" ");
 }
 
-function formatDisplayName(data: EnrollmentFormData): string {
-  const raw = [data.surname, data.firstName, data.otherNames].filter(Boolean).join(" ").trim();
-  if (!raw) return "—";
-  return raw
-    .split(/\s+/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(" ");
-}
-
-/** Registration title (Mr, Mrs, Dr, …) + full name for the ID card */
-function formatNameWithTitle(data: EnrollmentFormData): string {
-  const name = formatDisplayName(data);
-  const t = data.title?.trim();
-  if (!t) return name;
-  return `${t} ${name}`;
-}
-
 function getMemberSinceLabel(joinDate?: string): string {
   if (!joinDate) return "—";
   try {
@@ -185,7 +168,7 @@ export function MemberCard({
     });
   }, [showBarcode, membershipId]);
 
-  const fullNameWithTitle = formatNameWithTitle(data);
+  const fullNameWithTitle = formatEnrollmentNameWithTitle(data);
   const displayNameWithTitle = clipDisplay(fullNameWithTitle, MAX_HOLDER_NAME_CHARS);
   const memberSince = getMemberSinceLabel(data.joinDate);
 
@@ -470,10 +453,28 @@ export function MemberCard({
         </div>
       </div>
 
-      {/* Reference footer: thin red, then thicker green */}
-      <div className="relative z-[1] mt-auto flex w-full shrink-0 flex-col">
-        <div className="h-1 w-full" style={{ backgroundColor: C.redBanner }} />
-        <div className="h-2.5 w-full" style={{ backgroundColor: C.greenParty }} />
+      {/* Reference footer: thin red, then thicker green (inline px for same look in preview + html2canvas) */}
+      <div className="relative z-[1] mt-auto flex w-full shrink-0 flex-col" data-sdp-card-stripes="">
+        <div
+          className="w-full shrink-0"
+          style={{
+            height: Math.max(3, Math.round(4 * SY)),
+            minHeight: Math.max(3, Math.round(4 * SY)),
+            backgroundColor: C.redBanner,
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          }}
+        />
+        <div
+          className="w-full shrink-0"
+          style={{
+            height: Math.max(8, Math.round(10 * SY)),
+            minHeight: Math.max(8, Math.round(10 * SY)),
+            backgroundColor: C.greenParty,
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          }}
+        />
       </div>
     </article>
   );

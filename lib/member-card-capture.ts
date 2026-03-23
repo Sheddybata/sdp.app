@@ -141,6 +141,13 @@ export function patchClonedMemberCardsForExport(clonedDoc: Document): void {
         transform: translateY(-6px) !important;
         margin-top: 12px !important;
       }
+
+      /* Bottom colour stripes: keep fills vivid in html2canvas clone (some engines desaturate nested opacity contexts). */
+      [data-sdp-card-stripes] > div {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-sizing: border-box !important;
+      }
     `;
     head.appendChild(scoped);
   }
@@ -235,14 +242,27 @@ export function patchClonedMemberCardsForExport(clonedDoc: Document): void {
   }
 }
 
+export type MergeCanvasesOptions = {
+  /**
+   * Draw a neutral band + horizontal rule between the two faces (front above, back below).
+   * When true, the gap is at least ~24px so the divider reads clearly even if `gapPx` is small.
+   */
+  faceDivider?: boolean;
+};
+
+const MIN_DIVIDER_GAP_PX = 24;
+
 /** Stack two captures vertically; uses intrinsic canvas sizes (avoids stretch/clipping bugs). */
 export function mergeCanvasesVertical(
   top: HTMLCanvasElement,
   bottom: HTMLCanvasElement,
-  gapPx: number
+  gapPx: number,
+  options?: MergeCanvasesOptions
 ): HTMLCanvasElement {
+  const faceDivider = options?.faceDivider === true;
+  const gap = faceDivider ? Math.max(gapPx, MIN_DIVIDER_GAP_PX) : gapPx;
   const w = Math.max(top.width, bottom.width);
-  const h = top.height + gapPx + bottom.height;
+  const h = top.height + gap + bottom.height;
   const out = document.createElement("canvas");
   out.width = w;
   out.height = h;
@@ -251,6 +271,23 @@ export function mergeCanvasesVertical(
   ctx.fillStyle = "#ffffff";
   ctx.fillRect(0, 0, w, h);
   ctx.drawImage(top, Math.floor((w - top.width) / 2), 0);
-  ctx.drawImage(bottom, Math.floor((w - bottom.width) / 2), top.height + gapPx);
+
+  const gapY = top.height;
+  if (faceDivider && gap >= 8) {
+    ctx.fillStyle = "#f4f4f5";
+    ctx.fillRect(0, gapY, w, gap);
+
+    const inset = Math.round(w * 0.08);
+    const midY = gapY + gap / 2;
+
+    ctx.strokeStyle = "#94a3b8";
+    ctx.lineWidth = Math.max(2, Math.round(w * 0.0025));
+    ctx.beginPath();
+    ctx.moveTo(inset, midY);
+    ctx.lineTo(w - inset, midY);
+    ctx.stroke();
+  }
+
+  ctx.drawImage(bottom, Math.floor((w - bottom.width) / 2), gapY + gap);
   return out;
 }

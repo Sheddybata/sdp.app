@@ -175,8 +175,7 @@ export function Step5Preview({
         html2canvas(back as HTMLElement, opts),
       ])
         .then(([cFront, cBack]) => {
-          const gap = 12;
-          const stacked = mergeCanvasesVertical(cFront, cBack, gap);
+          const stacked = mergeCanvasesVertical(cFront, cBack, 12, { faceDivider: true });
           const link = document.createElement("a");
           link.download = portrait
             ? `SDP-MemberCard-portrait-${formData.voterRegistrationNumber}.png`
@@ -250,8 +249,8 @@ export function Step5Preview({
       ])
         .then(([cLf, cLb, cPf, cPb]) => {
           const sectionGap = 36;
-          const landStack = mergeCanvasesVertical(cLf, cLb, 12);
-          const portStack = mergeCanvasesVertical(cPf, cPb, 12);
+          const landStack = mergeCanvasesVertical(cLf, cLb, 12, { faceDivider: true });
+          const portStack = mergeCanvasesVertical(cPf, cPb, 12, { faceDivider: true });
           const maxW = Math.max(landStack.width, portStack.width);
           const totalH = landStack.height + sectionGap + portStack.height;
           const stacked = document.createElement("canvas");

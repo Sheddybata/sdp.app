@@ -3,12 +3,14 @@
 import { useEffect, useState, type CSSProperties } from "react";
 import { format } from "date-fns";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
-import { getMembershipIdFromData } from "@/lib/enrollment-schema";
+import { formatEnrollmentNameWithTitle, getMembershipIdFromData } from "@/lib/enrollment-schema";
 import { NIGERIA_STATES } from "@/lib/nigeria-geo";
 import { cn } from "@/lib/utils";
 import {
   MEMBER_CARD_PORTRAIT_H,
   MEMBER_CARD_PORTRAIT_W,
+  MEMBER_CARD_P_STRIPE_THICK_PX,
+  MEMBER_CARD_P_TRICOLOR_MID_PX,
 } from "@/lib/member-card-back-content";
 import {
   MEMBER_CARD_WATERMARK_OPACITY as CARD_WATERMARK_OPACITY,
@@ -40,22 +42,6 @@ function formatSlugForDisplay(s: string): string {
     .split("-")
     .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
     .join(" ");
-}
-
-function formatDisplayName(data: EnrollmentFormData): string {
-  const raw = [data.surname, data.firstName, data.otherNames].filter(Boolean).join(" ").trim();
-  if (!raw) return "—";
-  return raw
-    .split(/\s+/)
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
-    .join(" ");
-}
-
-function formatNameWithTitle(data: EnrollmentFormData): string {
-  const name = formatDisplayName(data);
-  const t = data.title?.trim();
-  if (!t) return name;
-  return `${t} ${name}`;
 }
 
 function getMemberSinceLabel(joinDate?: string): string {
@@ -125,7 +111,7 @@ export function PortraitMemberCard({
     });
   }, [showBarcode, membershipId]);
 
-  const displayNameWithTitle = formatNameWithTitle(data);
+  const displayNameWithTitle = formatEnrollmentNameWithTitle(data);
   const memberSince = getMemberSinceLabel(data.joinDate);
 
   const bannerText: CSSProperties = {
@@ -347,11 +333,37 @@ export function PortraitMemberCard({
         </div>
       </div>
 
-      {/* Tricolour footer — green, white, red */}
-      <div className="relative z-[1] mt-auto flex w-full shrink-0 flex-col">
-        <div className="h-2.5 w-full" style={{ backgroundColor: C.greenParty }} />
-        <div className="h-1.5 w-full bg-white" />
-        <div className="h-2.5 w-full" style={{ backgroundColor: C.redBanner }} />
+      {/* Tricolour footer — green, white, red (inline px for export fidelity) */}
+      <div className="relative z-[1] mt-auto flex w-full shrink-0 flex-col" data-sdp-card-stripes="">
+        <div
+          className="w-full shrink-0"
+          style={{
+            height: MEMBER_CARD_P_STRIPE_THICK_PX,
+            minHeight: MEMBER_CARD_P_STRIPE_THICK_PX,
+            backgroundColor: C.greenParty,
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          }}
+        />
+        <div
+          className="w-full shrink-0 bg-white"
+          style={{
+            height: MEMBER_CARD_P_TRICOLOR_MID_PX,
+            minHeight: MEMBER_CARD_P_TRICOLOR_MID_PX,
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          }}
+        />
+        <div
+          className="w-full shrink-0"
+          style={{
+            height: MEMBER_CARD_P_STRIPE_THICK_PX,
+            minHeight: MEMBER_CARD_P_STRIPE_THICK_PX,
+            backgroundColor: C.redBanner,
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          }}
+        />
       </div>
     </article>
   );

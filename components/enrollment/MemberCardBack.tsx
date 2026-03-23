@@ -6,6 +6,8 @@ import {
   MEMBER_CARD_BACK_STRIPE_GREEN,
   MEMBER_CARD_BACK_STRIPE_ORANGE,
   MEMBER_CARD_H,
+  MEMBER_CARD_L_STRIPE_THICK_PX,
+  MEMBER_CARD_L_STRIPE_THIN_PX,
   MEMBER_CARD_W,
 } from "@/lib/member-card-back-content";
 import { MEMBER_CARD_WATERMARK_OPACITY, MEMBER_CARD_WATERMARK_URL } from "@/lib/member-card-watermark";
@@ -171,10 +173,28 @@ export function MemberCardBack({ className, id = "member-card-back", variant = "
         </footer>
       </div>
 
-      {/* Green (thin) + orange (thick) — SDP back-of-card stripes */}
-      <div className="relative z-[1] mt-auto flex w-full shrink-0 flex-col">
-        <div className="h-1 w-full" style={{ backgroundColor: MEMBER_CARD_BACK_STRIPE_GREEN }} />
-        <div className="h-2.5 w-full" style={{ backgroundColor: MEMBER_CARD_BACK_STRIPE_ORANGE }} />
+      {/* Green (thin) + orange (thick) — SDP back-of-card stripes (inline px + color-adjust for export fidelity) */}
+      <div className="relative z-[1] mt-auto flex w-full shrink-0 flex-col" data-sdp-card-stripes="">
+        <div
+          className="w-full shrink-0"
+          style={{
+            height: MEMBER_CARD_L_STRIPE_THIN_PX,
+            minHeight: MEMBER_CARD_L_STRIPE_THIN_PX,
+            backgroundColor: MEMBER_CARD_BACK_STRIPE_GREEN,
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          }}
+        />
+        <div
+          className="w-full shrink-0"
+          style={{
+            height: MEMBER_CARD_L_STRIPE_THICK_PX,
+            minHeight: MEMBER_CARD_L_STRIPE_THICK_PX,
+            backgroundColor: MEMBER_CARD_BACK_STRIPE_ORANGE,
+            WebkitPrintColorAdjust: "exact",
+            printColorAdjust: "exact",
+          }}
+        />
       </div>
     </article>
   );

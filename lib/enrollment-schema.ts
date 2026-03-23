@@ -83,6 +83,45 @@ export const enrollmentSchema = z.object({
 
 export type EnrollmentFormData = z.infer<typeof enrollmentSchema>;
 
+type NameParts = {
+  surname: string;
+  firstName: string;
+  otherNames?: string | null;
+};
+
+/**
+ * Nigerian display order: first name, other names (middle), then surname.
+ * Title-cases each whitespace-separated token.
+ */
+export function formatEnrollmentDisplayName(data: NameParts): string {
+  const raw = [data.firstName, data.otherNames, data.surname]
+    .map((s) => (s ?? "").trim())
+    .filter(Boolean)
+    .join(" ")
+    .trim();
+  if (!raw) return "—";
+  return raw
+    .split(/\s+/)
+    .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
+/** Title (Mr, Dr, …) + {@link formatEnrollmentDisplayName} for ID card and previews. */
+export function formatEnrollmentNameWithTitle(data: EnrollmentFormData): string {
+  const name = formatEnrollmentDisplayName(data);
+  const t = data.title?.trim();
+  if (!t) return name;
+  return `${t} ${name}`;
+}
+
+/** Same as {@link formatEnrollmentNameWithTitle} for DB/admin rows (optional title). */
+export function formatEnrollmentNameWithTitleFromParts(data: NameParts & { title?: string | null }): string {
+  const name = formatEnrollmentDisplayName(data);
+  const t = data.title?.trim();
+  if (!t) return name;
+  return `${t} ${name}`;
+}
+
 /** Strip spaces for validation/storage; display with 4-digit spacing */
 export function formatVoterIdDisplay(value: string): string {
   const raw = value.replace(/\s/g, "");

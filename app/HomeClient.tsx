@@ -97,7 +97,7 @@ export function HomeClient({ events, announcements }: { events: EventRecord[]; a
                 <ActionCard href="/enroll/verify" imageSrc="/images/verification.png" title={t.home.verifyMembership} description={t.home.verifyMembershipDesc} aria-label="Verify existing membership" />
                 <ActionCard href="/admin/login" imageSrc="/images/admin.png" title={t.home.adminCommand} description={t.home.adminCommandDesc} aria-label="Go to Admin Command Center" />
                 <ActionCard href="/agent/login" imageSrc="/images/agent.png" title={t.home.agentPortal} description={t.home.agentPortalDesc} aria-label="Open agent portal login" />
-                <ActionCard href="/cluster/login" imageSrc="/images/cluster.png" title={t.home.clusterPortal} description={t.home.clusterPortalDesc} aria-label="Open cluster portal login" />
+                <ActionCard href="/cluster/login" imageSrc="/images/cluster.png" title={t.home.clusterPortal} description={t.home.clusterPortalDesc} aria-label="Open group registration login" />
                 <ActionCard href="/enroll/diaspora" imageSrc="/images/diaspora.png" title={t.home.diasporaRegistration} description={t.home.diasporaRegistrationDesc} aria-label="Start diaspora registration" />
               </div>
             </section>
