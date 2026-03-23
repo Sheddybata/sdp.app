@@ -1,17 +1,30 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useMemo, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, ShieldCheck, Loader2, Share2 } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Loader2, Share2, Download } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { MemberCard } from "@/components/enrollment/MemberCard";
+import { MemberCardBack } from "@/components/enrollment/MemberCardBack";
 import { MemberCardFitPreview } from "@/components/enrollment/MemberCardFitPreview";
 import { verifyByMembershipId } from "@/app/actions/verification";
 import { getMembershipIdDisplayForRecord } from "@/lib/enrollment-schema";
 import type { MemberRecord } from "@/lib/mock-members";
 import { useLanguage } from "@/lib/i18n/context";
+import { MEMBER_CARD_H, MEMBER_CARD_W } from "@/lib/member-card-back-content";
+import {
+  patchClonedMemberCardsForExport,
+  waitForCaptureReady,
+} from "@/lib/member-card-capture";
+
+function safePdfFilenamePart(raw: string): string {
+  const t = raw.replace(/\s+/g, "").replace(/[^a-zA-Z0-9_-]/g, "-");
+  return t.length > 0 ? t.slice(0, 80) : "member";
+}
 
 function VerifyPageContent() {
   const { t } = useLanguage();
@@ -22,6 +35,64 @@ function VerifyPageContent() {
   const [searched, setSearched] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [isPdfLoading, setIsPdfLoading] = useState(false);
+
+  const previewRingClass = "ring-2 ring-sdp-primary/20";
+
+  const html2canvasOpts = useMemo(
+    () => ({
+      scale: 2 as const,
+      useCORS: true,
+      logging: false,
+      backgroundColor: "#ffffff",
+      scrollX: 0,
+      scrollY: 0,
+      foreignObjectRendering: false,
+      onclone: (clonedDoc: Document) => {
+        clonedDoc.querySelectorAll<HTMLElement>(".member-cards-capture-host").forEach((host) => {
+          host.style.opacity = "1";
+        });
+        patchClonedMemberCardsForExport(clonedDoc);
+      },
+    }),
+    []
+  );
+
+  const handleDownloadMembershipCardPdf = useCallback(async () => {
+    if (!verifiedMember) return;
+    const front = document.getElementById("member-card-capture");
+    const back = document.getElementById("member-card-back-capture");
+    if (!front || !back) return;
+    setIsPdfLoading(true);
+    try {
+      const { default: html2canvas } = await import("html2canvas");
+      await waitForCaptureReady();
+      const [cFront, cBack] = await Promise.all([
+        html2canvas(front as HTMLElement, html2canvasOpts),
+        html2canvas(back as HTMLElement, html2canvasOpts),
+      ]);
+      const imgWidth = 280;
+      const imgHeight = (cFront.height * imgWidth) / cFront.width;
+      const pdf = new jsPDF({
+        orientation: "landscape",
+        unit: "mm",
+        format: [imgWidth, imgHeight],
+      });
+      pdf.addImage(cFront.toDataURL("image/png"), "PNG", 0, 0, imgWidth, imgHeight);
+      pdf.addPage();
+      pdf.addImage(cBack.toDataURL("image/png"), "PNG", 0, 0, imgWidth, imgHeight);
+      const fileId = safePdfFilenamePart(
+        getMembershipIdDisplayForRecord(verifiedMember) ||
+          verifiedMember.voterRegistrationNumber ||
+          "member"
+      );
+      pdf.save(`SDP-MemberCard-${fileId}.pdf`);
+    } catch (err) {
+      console.error("Verify page PDF export failed:", err);
+    } finally {
+      setIsPdfLoading(false);
+    }
+  }, [verifiedMember, html2canvasOpts]);
 
   const onVerify = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -171,7 +242,58 @@ function VerifyPageContent() {
 
                   <MemberCardFitPreview data={verifiedMember} showBarcode />
 
+                  <div
+                    className="member-cards-capture-host pointer-events-none fixed left-0 z-0 flex flex-row items-start gap-4"
+                    style={{
+                      top: "100vh",
+                      opacity: 0.004,
+                      width: MEMBER_CARD_W,
+                    }}
+                    aria-hidden
+                  >
+                    <div className="flex shrink-0 flex-col gap-0" style={{ width: MEMBER_CARD_W }}>
+                      <div
+                        className="flex-none"
+                        style={{
+                          width: MEMBER_CARD_W,
+                          height: MEMBER_CARD_H,
+                          position: "relative",
+                        }}
+                      >
+                        <MemberCard
+                          data={verifiedMember}
+                          showBarcode
+                          id="member-card-capture"
+                          className={previewRingClass}
+                        />
+                      </div>
+                      <div
+                        className="flex-none"
+                        style={{
+                          width: MEMBER_CARD_W,
+                          height: MEMBER_CARD_H,
+                          position: "relative",
+                        }}
+                      >
+                        <MemberCardBack id="member-card-back-capture" className={previewRingClass} />
+                      </div>
+                    </div>
+                  </div>
+
                   <div className="flex flex-col gap-2">
+                    <Button
+                      type="button"
+                      disabled={isPdfLoading}
+                      className="min-h-[44px] w-full bg-sdp-primary hover:bg-sdp-primary/90"
+                      onClick={() => void handleDownloadMembershipCardPdf()}
+                    >
+                      {isPdfLoading ? (
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                      ) : (
+                        <Download className="h-5 w-5" />
+                      )}
+                      {isPdfLoading ? t.verify.downloadingPdf : t.verify.downloadMembershipCardPdf}
+                    </Button>
                     <Button
                       variant="outline"
                       onClick={async () => {

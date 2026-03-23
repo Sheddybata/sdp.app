@@ -16,8 +16,8 @@ export const MEMBER_CARD_BACK = {
     "SDP National Headquarters, 17 Nairobi Street, Wuse II, Abuja.",
     "Website: https://www.socialdemocraticparty.com.ng/",
     "Email: contact@socialdemocraticparty.com.ng",
-    "WhatsApp: +2348093746",
-    "Tel: +2347885554",
+    "WhatsApp: +234 805 912 8097",
+    "Tel: +234 805 912 8097",
   ],
 } as const;
 

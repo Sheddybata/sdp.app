@@ -68,9 +68,9 @@ export const en = {
     enterPortal: "Enter Portal",
     contactHeading: "Contact",
     contactIntro: "For enquiries or more information, contact:",
-    contactDeskOfficer: "Desk Officer",
-    contactOrganizingManager: "Organizing manager",
-    contactNationalLine: "National secretariat",
+    contactDeskOfficer: "Front Desk",
+    contactOrganizingManager: "Organisation",
+    contactNationalLine: "Administration",
   },
   enrollment: {
     step1: {
@@ -212,6 +212,8 @@ export const en = {
     memberNotFoundDesc:
       "No record matches the membership registration number you entered. Check for typos and try again.",
     shareVerification: "Share verification",
+    downloadMembershipCardPdf: "Download membership card (PDF)",
+    downloadingPdf: "Preparing PDF…",
     verifyAnother: "Verify another",
     name: "Name",
     membershipIdLabel: "Membership ID",

@@ -68,9 +68,9 @@ export const ha = {
     enterPortal: "Shiga Portal",
     contactHeading: "Contact",
     contactIntro: "For enquiries or more information, contact:",
-    contactDeskOfficer: "Desk Officer",
-    contactOrganizingManager: "Organizing manager",
-    contactNationalLine: "National secretariat",
+    contactDeskOfficer: "Front Desk",
+    contactOrganizingManager: "Organisation",
+    contactNationalLine: "Administration",
   },
   enrollment: {
     step1: {
@@ -168,6 +168,8 @@ export const ha = {
     memberNotFoundDesc:
       "No record matches the membership registration number you entered. Check for typos and try again.",
     shareVerification: "Raba tabbatarwa",
+    downloadMembershipCardPdf: "Download membership card (PDF)",
+    downloadingPdf: "Preparing PDF…",
     verifyAnother: "Tabbatar wani",
     name: "Suna",
     membershipIdLabel: "ID na Memba",
