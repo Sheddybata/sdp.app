@@ -28,8 +28,8 @@ function LeadershipQuote({
             src={imageSrc}
             alt={name}
             fill
-            className="object-cover object-top"
-            sizes="80px"
+            className="object-cover object-[50%_12%] scale-[1.72] origin-[50%_20%] sm:scale-[1.65] sm:origin-[50%_18%]"
+            sizes="96px"
             priority={false}
           />
         </div>
