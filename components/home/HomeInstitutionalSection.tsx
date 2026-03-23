@@ -23,13 +23,13 @@ function LeadershipQuote({
   return (
     <div className="min-w-0 space-y-3">
       <div className="flex items-center gap-3 sm:gap-4">
-        <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-neutral-200 bg-neutral-100 sm:h-14 sm:w-14">
+        <div className="relative h-16 w-[4.25rem] shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100 sm:h-[4.5rem] sm:w-20">
           <Image
             src={imageSrc}
             alt={name}
             fill
             className="object-cover object-top"
-            sizes="56px"
+            sizes="80px"
             priority={false}
           />
         </div>
