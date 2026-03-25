@@ -22,6 +22,10 @@ export type DiasporaSupporterRecord = {
   registeredVia: string;
 };
 
+/** Admin list only — excludes large base64 image columns. */
+const DIASPORA_LIST_COLUMNS =
+  "id,surname,first_name,email,phone_e164,phone_country_iso2,residence_country_iso2,residence_city,residence_address,nigeria_state_id,nigeria_lga_id,nigeria_state_name,nigeria_lga_name,vin,created_at,registered_via";
+
 function rowToRecord(row: DbDiasporaSupporter): DiasporaSupporterRecord {
   return {
     id: row.id,
@@ -89,7 +93,7 @@ export async function getDiasporaSupporters(opts?: {
 
   let query = supabase
     .from("diaspora_supporters")
-    .select("*")
+    .select(DIASPORA_LIST_COLUMNS)
     .order("created_at", { ascending: false });
 
   if (opts?.search) {
@@ -107,5 +111,30 @@ export async function getDiasporaSupporters(opts?: {
     return [];
   }
 
-  return (data ?? []).map((r) => rowToRecord(r as DbDiasporaSupporter));
+  return (data ?? []).map((r) =>
+    rowToRecord({
+      ...(r as object),
+      portrait_data_url: null,
+      id_document_data_url: null,
+    } as DbDiasporaSupporter)
+  );
+}
+
+/** Single row for admin detail sheet (includes portrait and ID document URLs). */
+export async function getDiasporaSupporterById(
+  id: string
+): Promise<DiasporaSupporterRecord | null> {
+  const supabase = createAdminClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("diaspora_supporters")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (error) {
+    console.error("[ADMIN] diaspora get by id error:", error);
+    return null;
+  }
+  if (!data) return null;
+  return rowToRecord(data as DbDiasporaSupporter);
 }

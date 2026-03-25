@@ -14,6 +14,7 @@ import {
 import { Button } from "@/components/ui/button";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
 import { formatVoterIdDisplay } from "@/lib/enrollment-schema";
+import { getPwdCategoryLabel } from "@/lib/pwd-enrollment";
 import { useLanguage } from "@/lib/i18n/context";
 import { X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -133,6 +134,28 @@ export function EnrollmentReviewDialog({
               label={t.enrollment.step4.voterIdLabel}
               value={formatVoterIdDisplay(data.voterRegistrationNumber)}
             />
+            <ReviewRow
+              label={t.enrollment.step4.reviewPwdIdentifiesLabel}
+              value={
+                data.pwdIdentifies
+                  ? t.enrollment.step4.reviewPwdYes
+                  : t.enrollment.step4.reviewPwdNo
+              }
+            />
+            <ReviewRow
+              label={t.enrollment.step4.reviewPwdCategoryLabel}
+              value={
+                data.pwdIdentifies
+                  ? getPwdCategoryLabel(data.pwdCategory, t.enrollment.step4)
+                  : "—"
+              }
+            />
+            {data.pwdIdentifies && data.pwdCategory === "other" && (
+              <ReviewRow
+                label={t.enrollment.step4.reviewPwdOtherDetailLabel}
+                value={data.pwdCategoryOther?.trim() || "—"}
+              />
+            )}
             <ReviewRow
               label={t.enrollment.step4.portraitLabel}
               value={

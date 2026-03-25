@@ -11,6 +11,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { PWD_CATEGORY_VALUES, type PwdCategory } from "@/lib/enrollment-schema";
 import { Check, Camera, Upload, X, Loader2 } from "lucide-react";
 import { submitEnrollment, type EnrollmentSource } from "@/app/actions/enrollment";
 import { useLanguage } from "@/lib/i18n/context";
@@ -24,8 +32,6 @@ interface Step4VerificationProps {
   setFormData: (d: Partial<EnrollmentFormData>) => void;
   enrollmentSource?: EnrollmentSource;
 }
-
-const STEP4_FIELDS = ["voterRegistrationNumber", "portraitDataUrl", "agreedToConstitution"] as const;
 
 export function Step4Verification({
   form,
@@ -42,6 +48,8 @@ export function Step4Verification({
     setValue,
   } = form;
   const voterIdRaw = watch("voterRegistrationNumber") ?? "";
+  const pwdIdentifies = watch("pwdIdentifies");
+  const pwdCategory = watch("pwdCategory");
   const normalized = normalizeVoterIdInput(voterIdRaw);
   const isValidVoterId =
     (normalized.length === 19 || normalized.length === 20) && validateVoterId(normalized);
@@ -134,7 +142,7 @@ export function Step4Verification({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError(null);
-    const ok = await form.trigger(STEP4_FIELDS as unknown as (keyof EnrollmentFormData)[]);
+    const ok = await form.trigger();
     if (!ok) return;
     const values = form.getValues();
     const merged = { ...formData, ...values } as EnrollmentFormData;
@@ -212,6 +220,104 @@ export function Step4Verification({
           <p id="voter-error" className="text-sm text-red-600" role="alert">
             {errors.voterRegistrationNumber.message}
           </p>
+        )}
+      </div>
+
+      <div className="space-y-3 rounded-lg border border-neutral-200 bg-neutral-50/50 p-4">
+        <div className="space-y-1">
+          <Label className="text-neutral-900">{t.enrollment.step4.pwdQuestionLabel}</Label>
+          <p className="text-xs text-neutral-500">{t.enrollment.step4.pwdQuestionHint}</p>
+        </div>
+        <div className="flex flex-wrap gap-2" role="group" aria-label={t.enrollment.step4.pwdQuestionLabel}>
+          <Button
+            type="button"
+            variant={pwdIdentifies === true ? "default" : "outline"}
+            className="min-h-[44px] min-w-[5rem]"
+            onClick={() => {
+              setValue("pwdIdentifies", true, { shouldValidate: true });
+            }}
+          >
+            {t.enrollment.step4.pwdYes}
+          </Button>
+          <Button
+            type="button"
+            variant={pwdIdentifies === false ? "default" : "outline"}
+            className="min-h-[44px] min-w-[5rem]"
+            onClick={() => {
+              setValue("pwdIdentifies", false, { shouldValidate: true });
+              setValue("pwdCategory", undefined, { shouldValidate: true });
+              setValue("pwdCategoryOther", "", { shouldValidate: true });
+            }}
+          >
+            {t.enrollment.step4.pwdNo}
+          </Button>
+        </div>
+        {errors.pwdIdentifies && (
+          <p className="text-sm text-red-600" role="alert">
+            {errors.pwdIdentifies.message}
+          </p>
+        )}
+
+        {pwdIdentifies === true && (
+          <div className="space-y-2 pt-1">
+            <Label htmlFor="pwd-category">{t.enrollment.step4.pwdCategoryLabel}</Label>
+            <Select
+              value={pwdCategory ?? undefined}
+              onValueChange={(v) => {
+                setValue("pwdCategory", v as PwdCategory, { shouldValidate: true });
+                if (v !== "other") {
+                  setValue("pwdCategoryOther", "", { shouldValidate: true });
+                }
+              }}
+            >
+              <SelectTrigger id="pwd-category" className="w-full" aria-invalid={!!errors.pwdCategory}>
+                <SelectValue placeholder={t.enrollment.step4.pwdCategoryPlaceholder} />
+              </SelectTrigger>
+              <SelectContent>
+                {PWD_CATEGORY_VALUES.map((v) => (
+                  <SelectItem key={v} value={v}>
+                    {(
+                      {
+                        wheelchair_mobility: t.enrollment.step4.pwdCategoryWheelchairMobility,
+                        deaf_hard_of_hearing: t.enrollment.step4.pwdCategoryDeafHardOfHearing,
+                        blind_visual: t.enrollment.step4.pwdCategoryBlindVisual,
+                        intellectual_learning: t.enrollment.step4.pwdCategoryIntellectualLearning,
+                        psychosocial_mental_health: t.enrollment.step4.pwdCategoryPsychosocialMentalHealth,
+                        prefer_not_to_say: t.enrollment.step4.pwdCategoryPreferNotToSay,
+                        other: t.enrollment.step4.pwdCategoryOther,
+                      } satisfies Record<PwdCategory, string>
+                    )[v]}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {errors.pwdCategory && (
+              <p className="text-sm text-red-600" role="alert">
+                {errors.pwdCategory.message}
+              </p>
+            )}
+
+            {pwdCategory === "other" && (
+              <div className="space-y-1">
+                <Label htmlFor="pwd-category-other">{t.enrollment.step4.pwdCategoryOtherSpecifyLabel}</Label>
+                <Input
+                  id="pwd-category-other"
+                  value={watch("pwdCategoryOther") ?? ""}
+                  onChange={(e) =>
+                    setValue("pwdCategoryOther", e.target.value, { shouldValidate: true })
+                  }
+                  placeholder={t.enrollment.step4.pwdCategoryOtherPlaceholder}
+                  maxLength={200}
+                  aria-invalid={!!errors.pwdCategoryOther}
+                />
+                {errors.pwdCategoryOther && (
+                  <p className="text-sm text-red-600" role="alert">
+                    {errors.pwdCategoryOther.message}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         )}
       </div>
 

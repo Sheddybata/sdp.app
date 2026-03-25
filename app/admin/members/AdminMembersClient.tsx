@@ -25,8 +25,48 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { MemberCardFitPreview } from "@/components/enrollment/MemberCardFitPreview";
-import { Download, Search, FileDown, ChevronLeft, ChevronRight, X } from "lucide-react";
+import {
+  Download,
+  Search,
+  FileDown,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  Loader2,
+} from "lucide-react";
+import { fetchAdminMemberDetail, fetchAdminDiasporaDetail } from "@/app/actions/adminMembers";
+import { getPwdCategoryLabel, PWD_CATEGORY_LABELS_EN } from "@/lib/pwd-enrollment";
 import { jsPDF } from "jspdf";
+
+const ADMIN_SHEET_PWD_LABELS = {
+  pwdCategoryWheelchairMobility: PWD_CATEGORY_LABELS_EN.wheelchair_mobility,
+  pwdCategoryDeafHardOfHearing: PWD_CATEGORY_LABELS_EN.deaf_hard_of_hearing,
+  pwdCategoryBlindVisual: PWD_CATEGORY_LABELS_EN.blind_visual,
+  pwdCategoryIntellectualLearning: PWD_CATEGORY_LABELS_EN.intellectual_learning,
+  pwdCategoryPsychosocialMentalHealth: PWD_CATEGORY_LABELS_EN.psychosocial_mental_health,
+  pwdCategoryPreferNotToSay: PWD_CATEGORY_LABELS_EN.prefer_not_to_say,
+  pwdCategoryOther: PWD_CATEGORY_LABELS_EN.other,
+};
+
+function adminMemberSheetRows(m: MemberRecord): [string, string][] {
+  const rows: [string, string][] = [
+    ["NIN", m.nin || "—"],
+    ["Phone", m.phone],
+    ["Email", m.email || "—"],
+    ["DOB", m.dateOfBirth],
+    ["Address", m.address || "—"],
+    ["Polling Unit", m.pollingUnit || "—"],
+    ["Registered By", m.registeredBy ?? "—"],
+    ["Person with disability (self-identified)", m.pwdIdentifies ? "Yes" : "No"],
+  ];
+  if (m.pwdIdentifies) {
+    rows.push(["Disability category", getPwdCategoryLabel(m.pwdCategory, ADMIN_SHEET_PWD_LABELS)]);
+    if (m.pwdCategory === "other") {
+      rows.push(["Other (specify)", m.pwdCategoryOther?.trim() || "—"]);
+    }
+  }
+  return rows;
+}
 
 function getStateName(id: string) {
   return NIGERIA_STATES.find((s) => s.id === id)?.name ?? id;
@@ -64,6 +104,8 @@ export function AdminMembersClient({
   const [selectedDiaspora, setSelectedDiaspora] = useState<DiasporaSupporterRecord | null>(
     null
   );
+  const [memberDetailLoading, setMemberDetailLoading] = useState(false);
+  const [diasporaDetailLoading, setDiasporaDetailLoading] = useState(false);
   const [sortBy, setSortBy] = useState<keyof MemberRecord>("createdAt");
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
@@ -114,6 +156,50 @@ export function AdminMembersClient({
   useEffect(() => {
     setCurrentPage(1);
   }, [diasporaSearch]);
+
+  useEffect(() => {
+    const id = selectedMember?.id;
+    if (!id) {
+      setMemberDetailLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setMemberDetailLoading(true);
+    void fetchAdminMemberDetail(id)
+      .then((full) => {
+        if (cancelled) return;
+        if (full) setSelectedMember(full);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setMemberDetailLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedMember?.id]);
+
+  useEffect(() => {
+    const id = selectedDiaspora?.id;
+    if (!id) {
+      setDiasporaDetailLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setDiasporaDetailLoading(true);
+    void fetchAdminDiasporaDetail(id)
+      .then((full) => {
+        if (cancelled) return;
+        if (full) setSelectedDiaspora(full);
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (!cancelled) setDiasporaDetailLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedDiaspora?.id]);
 
   const filteredDiaspora = useMemo(() => {
     const q = diasporaSearch.trim().toLowerCase();
@@ -612,20 +698,25 @@ export function AdminMembersClient({
                 </div>
               </SheetHeader>
               <div className="min-w-0 flex-1 space-y-6 px-4 py-4 sm:px-6 sm:py-6">
-                <MemberCardFitPreview data={selectedMember} />
+                <div className="relative min-h-[120px]">
+                  {memberDetailLoading ? (
+                    <div
+                      className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 rounded-lg bg-white/90"
+                      aria-busy
+                      aria-label="Loading member photo and card"
+                    >
+                      <Loader2 className="h-8 w-8 animate-spin text-sdp-primary" />
+                      <span className="text-xs text-neutral-500">Loading photo & card…</span>
+                    </div>
+                  ) : null}
+                  <MemberCardFitPreview data={selectedMember} />
+                </div>
                 <dl className="min-w-0 space-y-4 text-sm">
-                  {(
-                    [
-                      ["NIN", selectedMember.nin || "—"],
-                      ["Phone", selectedMember.phone],
-                      ["Email", selectedMember.email || "—"],
-                      ["DOB", selectedMember.dateOfBirth],
-                      ["Address", selectedMember.address || "—"],
-                      ["Polling Unit", selectedMember.pollingUnit || "—"],
-                      ["Registered By", selectedMember.registeredBy ?? "—"],
-                    ] as const
-                  ).map(([label, value]) => (
-                    <div key={label} className="min-w-0 grid gap-1 sm:grid-cols-[minmax(0,7rem)_minmax(0,1fr)] sm:gap-x-3">
+                  {adminMemberSheetRows(selectedMember).map(([label, value]) => (
+                    <div
+                      key={label}
+                      className="min-w-0 grid gap-1 sm:grid-cols-[minmax(0,11rem)_minmax(0,1fr)] sm:gap-x-3"
+                    >
                       <dt className="shrink-0 font-medium text-neutral-500">{label}</dt>
                       <dd className="min-w-0 break-words font-medium text-neutral-900">{value}</dd>
                     </div>
@@ -667,30 +758,41 @@ export function AdminMembersClient({
                 </div>
               </SheetHeader>
               <div className="min-w-0 flex-1 space-y-6 px-4 py-4 sm:px-6 sm:py-6">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  {selectedDiaspora.portraitDataUrl ? (
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-neutral-500">Membership photo</p>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={selectedDiaspora.portraitDataUrl}
-                        alt="Portrait"
-                        className="max-h-48 w-full rounded-lg border border-neutral-200 object-cover"
-                      />
-                    </div>
-                  ) : null}
-                  {selectedDiaspora.idDocumentDataUrl ? (
-                    <div className="space-y-1">
-                      <p className="text-xs font-medium text-neutral-500">ID / proof</p>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={selectedDiaspora.idDocumentDataUrl}
-                        alt="ID document"
-                        className="max-h-48 w-full rounded-lg border border-neutral-200 object-cover"
-                      />
-                    </div>
-                  ) : null}
-                </div>
+                {diasporaDetailLoading ? (
+                  <div
+                    className="flex h-32 flex-col items-center justify-center gap-2 rounded-lg border border-neutral-100 bg-neutral-50"
+                    aria-busy
+                    aria-label="Loading images"
+                  >
+                    <Loader2 className="h-8 w-8 animate-spin text-sdp-primary" />
+                    <span className="text-xs text-neutral-500">Loading photos…</span>
+                  </div>
+                ) : (
+                  <div className="grid gap-4 sm:grid-cols-2">
+                    {selectedDiaspora.portraitDataUrl ? (
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-neutral-500">Membership photo</p>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={selectedDiaspora.portraitDataUrl}
+                          alt="Portrait"
+                          className="max-h-48 w-full rounded-lg border border-neutral-200 object-cover"
+                        />
+                      </div>
+                    ) : null}
+                    {selectedDiaspora.idDocumentDataUrl ? (
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium text-neutral-500">ID / proof</p>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={selectedDiaspora.idDocumentDataUrl}
+                          alt="ID document"
+                          className="max-h-48 w-full rounded-lg border border-neutral-200 object-cover"
+                        />
+                      </div>
+                    ) : null}
+                  </div>
+                )}
                 <dl className="min-w-0 space-y-4 text-sm">
                   {(
                     [

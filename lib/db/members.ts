@@ -11,6 +11,10 @@ import { calculateMembershipDues, DEFAULT_MONTHLY_DUE_NGN } from "@/lib/membersh
 
 type AdminSupabaseClient = NonNullable<ReturnType<typeof createAdminClient>>;
 
+/** Admin list only — excludes `portrait_data_url` (large base64) so list loads stay fast. */
+const MEMBER_LIST_COLUMNS =
+  "id,title,surname,first_name,other_names,nin,phone,email,date_of_birth,address,join_date,state,lga,ward,polling_unit,voter_registration_number,membership_id,location_membership_id,ward_serial,phone_verified,gender,monthly_due,months_owed,amount_owed,dues_calculated_at,has_paid_membership,membership_status,created_at,registered_by,registered_via,pwd_identifies,pwd_category,pwd_category_other";
+
 function dbToMember(row: DbMember): MemberRecord {
   return {
     id: row.id,
@@ -45,6 +49,9 @@ function dbToMember(row: DbMember): MemberRecord {
     createdAt: row.created_at,
     registeredBy: row.registered_by ?? undefined,
     registeredVia: row.registered_via ?? "self",
+    pwdIdentifies: row.pwd_identifies ?? false,
+    pwdCategory: (row.pwd_category as EnrollmentFormData["pwdCategory"]) ?? undefined,
+    pwdCategoryOther: row.pwd_category_other ?? undefined,
     // Note: membership_id is stored but we still compute it for consistency
     // The stored value is used for lookups, computed value for display
   };
@@ -100,6 +107,12 @@ function formToDbInsert(
     dues_calculated_at: new Date().toISOString(),
     has_paid_membership: false,
     membership_status: "unpaid",
+    pwd_identifies: data.pwdIdentifies,
+    pwd_category: data.pwdIdentifies ? (data.pwdCategory ?? null) : null,
+    pwd_category_other:
+      data.pwdIdentifies && data.pwdCategory === "other"
+        ? (data.pwdCategoryOther?.trim() || null)
+        : null,
   };
 }
 
@@ -451,7 +464,10 @@ export async function getMembers(opts?: {
   }
 
   try {
-    let query = supabase.from("members").select("*").order("created_at", { ascending: false });
+    let query = supabase
+      .from("members")
+      .select(MEMBER_LIST_COLUMNS)
+      .order("created_at", { ascending: false });
 
     if (opts?.search) {
       const q = opts.search.toLowerCase().replace(/[%_]/g, "");
@@ -474,10 +490,30 @@ export async function getMembers(opts?: {
       return [];
     }
 
-    return (data ?? []).map((r) => dbToMember(r as DbMember));
+    return (data ?? []).map((r) =>
+      dbToMember({ ...(r as object), portrait_data_url: null } as DbMember)
+    );
   } catch (err) {
     console.error("[ADMIN] Exception fetching members:", err);
     return [];
+  }
+}
+
+/** Single member for admin detail sheet (includes portrait). */
+export async function getMemberByIdForAdmin(id: string): Promise<MemberRecord | null> {
+  const supabase = createAdminClient();
+  if (!supabase) return null;
+  try {
+    const { data, error } = await supabase.from("members").select("*").eq("id", id).maybeSingle();
+    if (error) {
+      console.error("[ADMIN] Error fetching member by id:", error);
+      return null;
+    }
+    if (!data) return null;
+    return dbToMember(data as DbMember);
+  } catch (err) {
+    console.error("[ADMIN] Exception fetching member by id:", err);
+    return null;
   }
 }
 

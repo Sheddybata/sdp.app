@@ -1,6 +1,10 @@
 import { z } from "zod";
 import { isDobWithinEnrollmentRules, isValidJoinMonthYearIso } from "@/lib/enrollment-dates";
 import { isValidEnrollmentNigerianPhone } from "@/lib/phone-nigeria";
+import { PWD_CATEGORY_VALUES, type PwdCategory } from "@/lib/pwd-enrollment";
+
+export type { PwdCategory } from "@/lib/pwd-enrollment";
+export { PWD_CATEGORY_VALUES } from "@/lib/pwd-enrollment";
 
 // Nigerian voter registration number: 19–20 alphanumeric characters (stored without spaces)
 const voterIdRegex = /^[A-Z0-9]{19,20}$/i;
@@ -75,11 +79,42 @@ export const enrollmentSchema = z.object({
   // Consent — AEC-style membership agreement
   agreedToConstitution: z.boolean().refine((v) => v === true, { message: "You must agree to the party constitution to enroll." }),
 
+  // Step 4 — PWD (mandatory yes/no; category required if yes)
+  pwdIdentifies: z.boolean({
+    required_error: "Please answer whether you identify as a person with a disability.",
+    invalid_type_error: "Please select Yes or No.",
+  }),
+  pwdCategory: z
+    .enum(PWD_CATEGORY_VALUES as unknown as [PwdCategory, ...PwdCategory[]])
+    .optional(),
+  pwdCategoryOther: z.string().max(200).optional(),
+
   // Optional enriched fields (not user-input)
   locationMembershipId: z.string().optional(),
   wardSerial: z.string().optional(),
   membershipId: z.string().optional(),
-});
+})
+  .superRefine((val, ctx) => {
+    if (val.pwdIdentifies === true) {
+      if (!val.pwdCategory) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Select a disability category.",
+          path: ["pwdCategory"],
+        });
+      }
+      if (val.pwdCategory === "other") {
+        const detail = val.pwdCategoryOther?.trim();
+        if (!detail) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            message: "Please specify when you choose Other.",
+            path: ["pwdCategoryOther"],
+          });
+        }
+      }
+    }
+  });
 
 export type EnrollmentFormData = z.infer<typeof enrollmentSchema>;
 

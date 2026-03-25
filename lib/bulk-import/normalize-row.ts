@@ -156,5 +156,8 @@ export function rawRowToEnrollmentDraft(raw: Record<string, string>): Enrollment
     voterRegistrationNumber: normalizeVoterIdInput(raw.voter_registration_number || ""),
     portraitDataUrl: BULK_IMPORT_PLACEHOLDER_PORTRAIT,
     agreedToConstitution: true,
+    pwdIdentifies: false,
+    pwdCategory: undefined,
+    pwdCategoryOther: undefined,
   };
 }

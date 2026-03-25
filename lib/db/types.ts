@@ -34,6 +34,9 @@ export interface DbMember {
   /** self | agent | cluster */
   registered_via: string;
   registered_by: string | null;
+  pwd_identifies: boolean;
+  pwd_category: string | null;
+  pwd_category_other: string | null;
 }
 
 /** Insert shape (omit id, created_at - auto-generated) */

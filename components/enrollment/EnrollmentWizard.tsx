@@ -62,6 +62,9 @@ export function EnrollmentWizard({
       joinDate: formData.joinDate ?? format(startOfMonth(new Date()), "yyyy-MM-dd"),
       portraitDataUrl: formData.portraitDataUrl ?? "",
       agreedToConstitution: formData.agreedToConstitution ?? false,
+      pwdIdentifies: formData.pwdIdentifies,
+      pwdCategory: formData.pwdCategory,
+      pwdCategoryOther: formData.pwdCategoryOther ?? "",
     },
     mode: "onChange",
   });
@@ -83,7 +86,14 @@ export function EnrollmentWizard({
     ["title", "surname", "firstName", "otherNames", "nin"],
     ["phone", "phoneVerified", "email", "dateOfBirth", "address"],
     ["joinDate", "state", "lga", "ward", "pollingUnit"],
-    ["voterRegistrationNumber", "portraitDataUrl", "agreedToConstitution"],
+    [
+      "voterRegistrationNumber",
+      "portraitDataUrl",
+      "agreedToConstitution",
+      "pwdIdentifies",
+      "pwdCategory",
+      "pwdCategoryOther",
+    ],
   ];
 
   const handleStepSubmit = async () => {
