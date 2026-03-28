@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { ADMIN_LIST_MAX_TOTAL_ROWS, POSTGREST_PAGE_SIZE } from "@/lib/db/admin-list-limits";
 import type { DbDiasporaSupporter, DbDiasporaSupporterInsert } from "./types";
 
 export type DiasporaSupporterRecord = {
@@ -83,14 +84,10 @@ export async function insertDiasporaSupporter(
   return { ok: true, id: data.id };
 }
 
-export async function getDiasporaSupporters(opts?: {
-  search?: string;
-}): Promise<DiasporaSupporterRecord[]> {
-  const supabase = createAdminClient();
-  if (!supabase) {
-    return [];
-  }
-
+function buildDiasporaListQuery(
+  supabase: NonNullable<ReturnType<typeof createAdminClient>>,
+  opts?: { search?: string }
+) {
   let query = supabase
     .from("diaspora_supporters")
     .select(DIASPORA_LIST_COLUMNS)
@@ -104,20 +101,46 @@ export async function getDiasporaSupporters(opts?: {
       );
     }
   }
+  return query;
+}
 
-  const { data, error } = await query;
-  if (error) {
-    console.error("[ADMIN] diaspora list error:", error);
+export async function getDiasporaSupporters(opts?: {
+  search?: string;
+}): Promise<DiasporaSupporterRecord[]> {
+  const supabase = createAdminClient();
+  if (!supabase) {
     return [];
   }
 
-  return (data ?? []).map((r) =>
-    rowToRecord({
-      ...(r as object),
-      portrait_data_url: null,
-      id_document_data_url: null,
-    } as DbDiasporaSupporter)
-  );
+  const acc: DiasporaSupporterRecord[] = [];
+  for (let from = 0; ; from += POSTGREST_PAGE_SIZE) {
+    if (acc.length >= ADMIN_LIST_MAX_TOTAL_ROWS) {
+      console.warn(
+        `[ADMIN] Diaspora list capped at ${ADMIN_LIST_MAX_TOTAL_ROWS} rows (ADMIN_LIST_MAX_TOTAL_ROWS).`
+      );
+      break;
+    }
+    const to = from + POSTGREST_PAGE_SIZE - 1;
+    const { data, error } = await buildDiasporaListQuery(supabase, opts).range(from, to);
+    if (error) {
+      console.error("[ADMIN] diaspora list error:", error);
+      return [];
+    }
+    const rows = data ?? [];
+    for (const r of rows) {
+      if (acc.length >= ADMIN_LIST_MAX_TOTAL_ROWS) break;
+      acc.push(
+        rowToRecord({
+          ...(r as object),
+          portrait_data_url: null,
+          id_document_data_url: null,
+        } as DbDiasporaSupporter)
+      );
+    }
+    if (acc.length >= ADMIN_LIST_MAX_TOTAL_ROWS) break;
+    if (rows.length === 0 || rows.length < POSTGREST_PAGE_SIZE) break;
+  }
+  return acc;
 }
 
 /** Single row for admin detail sheet (includes portrait and ID document URLs). */

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { getKpis } from "@/lib/mock-members";
 import type { MemberRecord } from "@/lib/mock-members";
 import { NIGERIA_STATES } from "@/lib/nigeria-geo";
@@ -158,7 +158,19 @@ function StateDensityCard({ state }: { state: { id: string; name: string; member
   );
 }
 
-function KpiCard({ title, value, icon, accent }: { title: string; value: string; icon: React.ReactNode; accent?: boolean }) {
+function KpiCard({
+  title,
+  value,
+  icon,
+  accent,
+  subtitle,
+}: {
+  title: string;
+  value: string;
+  icon: ReactNode;
+  accent?: boolean;
+  subtitle?: string;
+}) {
   return (
     <div
       className={cn(
@@ -178,6 +190,7 @@ function KpiCard({ title, value, icon, accent }: { title: string; value: string;
         </span>
       </div>
       <p className="mt-2 text-2xl font-bold text-neutral-900">{value}</p>
+      {subtitle ? <p className="mt-1 text-xs leading-snug text-neutral-500">{subtitle}</p> : null}
     </div>
   );
 }

@@ -132,9 +132,19 @@ export function getMembersByFilters(opts: {
   return filterMembers(MOCK_MEMBERS, opts);
 }
 
+/** Titles that imply female when `members.gender` is not stored (enrollment leaves it null). */
+const FEMALE_TITLES_FOR_STATS = new Set(["Mrs", "Miss", "Ms", "Dame"]);
+
+/** Female if DB says so or title implies it; otherwise male (including missing gender). */
+function isFemaleForKpi(m: MemberRecord): boolean {
+  if (m.gender === "Female") return true;
+  if (m.gender === "Male") return false;
+  return FEMALE_TITLES_FOR_STATS.has(m.title);
+}
+
 export function getKpis(members: MemberRecord[]) {
   const total = members.length;
-  const female = members.filter((m) => m.gender === "Female").length;
+  const female = members.filter(isFemaleForKpi).length;
   const male = total - female;
   const byState = members.reduce<Record<string, number>>((acc, m) => {
     acc[m.state] = (acc[m.state] || 0) + 1;

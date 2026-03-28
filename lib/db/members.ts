@@ -8,12 +8,46 @@ import { MOCK_MEMBERS, filterMembers, getKpis } from "@/lib/mock-members";
 import { normalizePhone } from "@/lib/otp/termii";
 import { getWardCodes } from "@/lib/location-codes";
 import { calculateMembershipDues, DEFAULT_MONTHLY_DUE_NGN } from "@/lib/membership/dues";
+import { ADMIN_LIST_MAX_TOTAL_ROWS, POSTGREST_PAGE_SIZE } from "@/lib/db/admin-list-limits";
 
 type AdminSupabaseClient = NonNullable<ReturnType<typeof createAdminClient>>;
 
 /** Admin list only — excludes `portrait_data_url` (large base64) so list loads stay fast. */
 const MEMBER_LIST_COLUMNS =
   "id,title,surname,first_name,other_names,nin,phone,email,date_of_birth,address,join_date,state,lga,ward,polling_unit,voter_registration_number,membership_id,location_membership_id,ward_serial,phone_verified,gender,monthly_due,months_owed,amount_owed,dues_calculated_at,has_paid_membership,membership_status,created_at,registered_by,registered_via,pwd_identifies,pwd_category,pwd_category_other";
+
+function buildMembersListQuery(
+  supabase: AdminSupabaseClient,
+  opts?: {
+    search?: string;
+    state?: string;
+    lga?: string;
+    ward?: string;
+    dateFrom?: string;
+    dateTo?: string;
+  }
+) {
+  let query = supabase
+    .from("members")
+    .select(MEMBER_LIST_COLUMNS)
+    .order("created_at", { ascending: false });
+
+  if (opts?.search) {
+    const q = opts.search.toLowerCase().replace(/[%_]/g, "");
+    if (q) {
+      query = query.or(
+        `surname.ilike.%${q}%,first_name.ilike.%${q}%,voter_registration_number.ilike.%${q}%,phone.ilike.%${q}%,nin.ilike.%${q}%,polling_unit.ilike.%${q}%,address.ilike.%${q}%`
+      );
+    }
+  }
+  if (opts?.state) query = query.eq("state", opts.state);
+  if (opts?.lga) query = query.eq("lga", opts.lga);
+  if (opts?.ward) query = query.eq("ward", opts.ward);
+  if (opts?.dateFrom) query = query.gte("join_date", opts.dateFrom);
+  if (opts?.dateTo) query = query.lte("join_date", opts.dateTo);
+
+  return query;
+}
 
 function dbToMember(row: DbMember): MemberRecord {
   return {
@@ -464,35 +498,31 @@ export async function getMembers(opts?: {
   }
 
   try {
-    let query = supabase
-      .from("members")
-      .select(MEMBER_LIST_COLUMNS)
-      .order("created_at", { ascending: false });
-
-    if (opts?.search) {
-      const q = opts.search.toLowerCase().replace(/[%_]/g, "");
-      if (q) {
-        query = query.or(
-          `surname.ilike.%${q}%,first_name.ilike.%${q}%,voter_registration_number.ilike.%${q}%,phone.ilike.%${q}%,nin.ilike.%${q}%,polling_unit.ilike.%${q}%,address.ilike.%${q}%`
+    const acc: MemberRecord[] = [];
+    for (let from = 0; ; from += POSTGREST_PAGE_SIZE) {
+      if (acc.length >= ADMIN_LIST_MAX_TOTAL_ROWS) {
+        console.warn(
+          `[ADMIN] Members list capped at ${ADMIN_LIST_MAX_TOTAL_ROWS} rows (ADMIN_LIST_MAX_TOTAL_ROWS).`
         );
+        break;
       }
+      const to = from + POSTGREST_PAGE_SIZE - 1;
+      const { data, error } = await buildMembersListQuery(supabase, opts).range(from, to);
+
+      if (error) {
+        console.error("[ADMIN] Error fetching members:", error);
+        return [];
+      }
+
+      const rows = data ?? [];
+      for (const r of rows) {
+        if (acc.length >= ADMIN_LIST_MAX_TOTAL_ROWS) break;
+        acc.push(dbToMember({ ...(r as object), portrait_data_url: null } as DbMember));
+      }
+      if (acc.length >= ADMIN_LIST_MAX_TOTAL_ROWS) break;
+      if (rows.length === 0 || rows.length < POSTGREST_PAGE_SIZE) break;
     }
-    if (opts?.state) query = query.eq("state", opts.state);
-    if (opts?.lga) query = query.eq("lga", opts.lga);
-    if (opts?.ward) query = query.eq("ward", opts.ward);
-    if (opts?.dateFrom) query = query.gte("join_date", opts.dateFrom);
-    if (opts?.dateTo) query = query.lte("join_date", opts.dateTo);
-
-    const { data, error } = await query;
-
-    if (error) {
-      console.error("[ADMIN] Error fetching members:", error);
-      return [];
-    }
-
-    return (data ?? []).map((r) =>
-      dbToMember({ ...(r as object), portrait_data_url: null } as DbMember)
-    );
+    return acc;
   } catch (err) {
     console.error("[ADMIN] Exception fetching members:", err);
     return [];
