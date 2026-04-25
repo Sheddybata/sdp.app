@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { UseFormReturn } from "react-hook-form";
 import type { EnrollmentFormData } from "@/lib/enrollment-schema";
 import { useInecGeo } from "@/hooks/useInecGeo";
@@ -71,6 +71,7 @@ export function Step3Geography(props: Step3GeographyProps) {
   const wardId = watch("ward");
 
   const { states, loading, stateData, stateDataLoading } = useInecGeo(stateId);
+  const [manualPollingMode, setManualPollingMode] = useState(false);
 
   const lgas = stateData?.lgas ?? [];
   const lga = lgas.find((l) => l.id === lgaId) ?? lgas.find((l) => l.name === lgaId);
@@ -92,25 +93,32 @@ export function Step3Geography(props: Step3GeographyProps) {
       setValue("lga", "");
       setValue("ward", "");
       setValue("pollingUnit", "");
+      setManualPollingMode(false);
       return;
     }
     setValue("lga", "");
     setValue("ward", "");
     setValue("pollingUnit", "");
+    setManualPollingMode(false);
   }, [stateId, setValue]);
 
   useEffect(() => {
     if (!lgaId) {
       setValue("ward", "");
       setValue("pollingUnit", "");
+      setManualPollingMode(false);
       return;
     }
     setValue("ward", "");
     setValue("pollingUnit", "");
+    setManualPollingMode(false);
   }, [lgaId, setValue]);
 
   useEffect(() => {
-    if (!wardId) setValue("pollingUnit", "");
+    if (!wardId) {
+      setValue("pollingUnit", "");
+      setManualPollingMode(false);
+    }
   }, [wardId, setValue]);
 
   /** Keep join month valid when year or bounds change */
@@ -124,6 +132,17 @@ export function Step3Geography(props: Step3GeographyProps) {
 
   const loadingWardOrUnits = stateId && stateDataLoading;
   const showPollingUnitSelect = pollingUnitOptions.length > 0;
+  const currentPollingUnit = watch("pollingUnit") ?? "";
+
+  useEffect(() => {
+    if (
+      showPollingUnitSelect &&
+      currentPollingUnit &&
+      !pollingUnitOptions.some((unit) => unit.name === currentPollingUnit)
+    ) {
+      setManualPollingMode(true);
+    }
+  }, [showPollingUnitSelect, currentPollingUnit, pollingUnitOptions]);
 
   return (
     <form onSubmit={(e) => { e.preventDefault(); onNext(); }} className="space-y-6">
@@ -281,8 +300,10 @@ export function Step3Geography(props: Step3GeographyProps) {
               }
               onValueChange={(v) => {
                 if (v === MANUAL_POLLING_VALUE) {
+                  setManualPollingMode(true);
                   setValue("pollingUnit", "", { shouldValidate: true });
                 } else {
+                  setManualPollingMode(false);
                   const name = pollingUnitOptions.find((u) => u.id === v)?.name ?? v;
                   setValue("pollingUnit", name, { shouldValidate: true });
                 }
@@ -302,20 +323,29 @@ export function Step3Geography(props: Step3GeographyProps) {
                 </SelectItem>
               </SelectContent>
             </Select>
-            <p className="text-xs text-neutral-500 mt-1">{t.enrollment.step3.pollingUnitOrType}</p>
-            <Input
-              id="pollingUnitManual"
-              value={
-                pollingUnitOptions.some((u) => u.name === watch("pollingUnit"))
-                  ? ""
-                  : watch("pollingUnit") ?? ""
-              }
-              onChange={(e) => setValue("pollingUnit", e.target.value.trim(), { shouldValidate: true })}
-              placeholder={t.enrollment.step3.pollingUnitPlaceholder}
-              valid={errors.pollingUnit ? false : watch("pollingUnit") ? true : undefined}
-              aria-invalid={!!errors.pollingUnit}
-              className="mt-1"
-            />
+            {!manualPollingMode ? (
+              <p className="mt-1 text-xs text-neutral-500">{t.enrollment.step3.pollingUnitOrType}</p>
+            ) : null}
+            {manualPollingMode ? (
+              <>
+                <p className="mt-1 text-xs text-neutral-500">{t.enrollment.step3.pollingUnitOrType}</p>
+                <Input
+                  id="pollingUnitManual"
+                  value={
+                    pollingUnitOptions.some((u) => u.name === watch("pollingUnit"))
+                      ? ""
+                      : watch("pollingUnit") ?? ""
+                  }
+                  onChange={(e) =>
+                    setValue("pollingUnit", e.target.value.trim(), { shouldValidate: true })
+                  }
+                  placeholder={t.enrollment.step3.pollingUnitPlaceholder}
+                  valid={errors.pollingUnit ? false : watch("pollingUnit") ? true : undefined}
+                  aria-invalid={!!errors.pollingUnit}
+                  className="mt-1"
+                />
+              </>
+            ) : null}
           </>
         ) : (
           <>

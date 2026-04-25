@@ -33,6 +33,7 @@ import {
   ChevronRight,
   X,
   Loader2,
+  Archive,
 } from "lucide-react";
 import { fetchAdminMemberDetail, fetchAdminDiasporaDetail } from "@/app/actions/adminMembers";
 import { getPwdCategoryLabel, PWD_CATEGORY_LABELS_EN } from "@/lib/pwd-enrollment";
@@ -110,6 +111,8 @@ export function AdminMembersClient({
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
   const [currentPage, setCurrentPage] = useState(1);
   const membersPerPage = 50;
+  const [inecBatchNum, setInecBatchNum] = useState("1");
+  const [inecExporting, setInecExporting] = useState(false);
 
   const filtered = useMemo(
     () =>
@@ -359,6 +362,61 @@ export function AdminMembersClient({
     pdf.save(`SDP-Members-${new Date().toISOString().slice(0, 10)}.pdf`);
   }, [sorted]);
 
+  const handleInecExportZip = useCallback(async () => {
+    if (tab !== "domestic") return;
+    setInecExporting(true);
+    try {
+      const batchNum = Math.max(1, parseInt(inecBatchNum, 10) || 1);
+      const res = await fetch("/api/admin/inec-export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          search: search || undefined,
+          state: stateFilter || undefined,
+          lga: lgaFilter || undefined,
+          ward: wardFilter || undefined,
+          dateFrom: dateFrom || undefined,
+          dateTo: dateTo || undefined,
+          batchNum,
+        }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        const msg =
+          typeof (err as { error?: string }).error === "string"
+            ? (err as { error: string }).error
+            : `Export failed (${res.status})`;
+        window.alert(msg);
+        return;
+      }
+      const blob = await res.blob();
+      const cd = res.headers.get("Content-Disposition");
+      let downloadName = `SDP-INEC_Batch${batchNum}.zip`;
+      const m = cd?.match(/filename="([^"]+)"/);
+      if (m?.[1]) downloadName = m[1];
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = downloadName;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {
+      window.alert("Could not download export. Check your connection and try again.");
+    } finally {
+      setInecExporting(false);
+    }
+  }, [
+    tab,
+    inecBatchNum,
+    search,
+    stateFilter,
+    lgaFilter,
+    wardFilter,
+    dateFrom,
+    dateTo,
+  ]);
+
   const handleExportDiasporaPDF = useCallback(() => {
     const pdf = new jsPDF({ orientation: "portrait", unit: "mm" });
     pdf.setFontSize(14);
@@ -384,7 +442,22 @@ export function AdminMembersClient({
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="text-2xl font-bold text-neutral-900">Master Member Table</h1>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap items-end gap-2">
+          <div className="flex flex-col gap-1">
+            <Label htmlFor="inec-batch" className="text-xs text-neutral-600">
+              INEC batch
+            </Label>
+            <Input
+              id="inec-batch"
+              type="number"
+              min={1}
+              value={inecBatchNum}
+              onChange={(e) => setInecBatchNum(e.target.value)}
+              className="h-11 w-[5.5rem] min-h-[44px]"
+              disabled={tab !== "domestic"}
+              aria-label="INEC batch number for folder names (e.g. Batch-AD-1)"
+            />
+          </div>
           <Button
             variant="outline"
             onClick={tab === "domestic" ? handleExportCSV : handleExportDiasporaCSV}
@@ -402,6 +475,20 @@ export function AdminMembersClient({
           >
             <Download className="h-4 w-4" />
             Export PDF
+          </Button>
+          <Button
+            variant="default"
+            className="min-h-[44px] bg-sdp-primary"
+            onClick={() => void handleInecExportZip()}
+            disabled={tab !== "domestic" || inecExporting}
+            aria-label="Export INEC register as ZIP"
+          >
+            {inecExporting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Archive className="h-4 w-4" />
+            )}
+            INEC register (ZIP)
           </Button>
         </div>
       </div>
@@ -468,16 +555,19 @@ export function AdminMembersClient({
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="dateFrom">Date From</Label>
+            <Label htmlFor="dateFrom">Registered from</Label>
             <Input id="dateFrom" type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} className="min-h-[44px]" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="dateTo">Date To</Label>
+            <Label htmlFor="dateTo">Registered to</Label>
             <Input id="dateTo" type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} className="min-h-[44px]" />
           </div>
         </div>
         <p className="mt-2 text-xs text-neutral-500">
-          Showing {startIndex + 1}-{Math.min(endIndex, sorted.length)} of {sorted.length} member(s). Export respects current filters.
+          Showing {startIndex + 1}-{Math.min(endIndex, sorted.length)} of {sorted.length} member(s). Export
+          and INEC ZIP use current filters (state, LGA, ward, registration date range). INEC ZIP contains only
+          print-ready PDF register(s) per state (very large states are split into multiple files with continuous
+          S/N, e.g. …_part2of5.pdf).
         </p>
       </div>
 

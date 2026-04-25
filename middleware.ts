@@ -101,6 +101,23 @@ async function isValidPortalSessionToken(
 export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
+  // --- Admin API (JSON / binary; same session as admin UI) ---
+  if (path.startsWith("/api/admin")) {
+    const sessionCookie = request.cookies.get("admin_session");
+    if (!sessionCookie?.value) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    try {
+      if (!(await isValidSessionToken(sessionCookie.value))) {
+        const response = NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        response.cookies.delete("admin_session");
+        return response;
+      }
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
+
   // --- Admin ---
   if (path.startsWith("/admin") && !path.startsWith("/admin/login")) {
     const sessionCookie = request.cookies.get("admin_session");
@@ -225,5 +242,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/agent/:path*", "/cluster/:path*"],
+  matcher: ["/admin/:path*", "/api/admin/:path*", "/agent/:path*", "/cluster/:path*"],
 };

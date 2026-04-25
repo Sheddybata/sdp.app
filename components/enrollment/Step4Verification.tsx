@@ -24,6 +24,64 @@ import { submitEnrollment, type EnrollmentSource } from "@/app/actions/enrollmen
 import { useLanguage } from "@/lib/i18n/context";
 import { EnrollmentReviewDialog } from "@/components/enrollment/EnrollmentReviewDialog";
 
+const MAX_PORTRAIT_UPLOAD_BYTES = 8 * 1024 * 1024;
+const MAX_PORTRAIT_DATA_URL_BYTES = 900 * 1024;
+const MAX_PORTRAIT_SIDE_PX = 960;
+const PORTRAIT_QUALITY_STEPS = [0.82, 0.72, 0.62, 0.52, 0.42] as const;
+
+function estimateDataUrlBytes(dataUrl: string): number {
+  const base64 = dataUrl.split(",")[1] ?? "";
+  return Math.ceil((base64.length * 3) / 4);
+}
+
+function buildPortraitDataUrl(
+  source: CanvasImageSource,
+  sourceWidth: number,
+  sourceHeight: number
+): string | null {
+  if (!sourceWidth || !sourceHeight) return null;
+
+  const scale = Math.min(1, MAX_PORTRAIT_SIDE_PX / Math.max(sourceWidth, sourceHeight));
+  const width = Math.max(1, Math.round(sourceWidth * scale));
+  const height = Math.max(1, Math.round(sourceHeight * scale));
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return null;
+
+  ctx.fillStyle = "#ffffff";
+  ctx.fillRect(0, 0, width, height);
+  ctx.drawImage(source, 0, 0, width, height);
+
+  let candidate: string | null = null;
+  for (const quality of PORTRAIT_QUALITY_STEPS) {
+    const dataUrl = canvas.toDataURL("image/jpeg", quality);
+    candidate = dataUrl;
+    if (estimateDataUrlBytes(dataUrl) <= MAX_PORTRAIT_DATA_URL_BYTES) {
+      return dataUrl;
+    }
+  }
+
+  return candidate;
+}
+
+function loadImageFile(file: File): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const objectUrl = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(img);
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      reject(new Error("Could not load image"));
+    };
+    img.src = objectUrl;
+  });
+}
+
 interface Step4VerificationProps {
   form: UseFormReturn<EnrollmentFormData>;
   onNext: () => void;
@@ -46,6 +104,7 @@ export function Step4Verification({
     formState: { errors },
     watch,
     setValue,
+    clearErrors,
   } = form;
   const voterIdRaw = watch("voterRegistrationNumber") ?? "";
   const pwdIdentifies = watch("pwdIdentifies");
@@ -61,6 +120,7 @@ export function Step4Verification({
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewMerged, setReviewMerged] = useState<EnrollmentFormData | null>(null);
+  const [portraitUiError, setPortraitUiError] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -120,22 +180,62 @@ export function Step4Verification({
     if (!ctx) return;
     ctx.drawImage(video, 0, 0, w, h);
 
-    const dataUrl = canvas.toDataURL("image/jpeg", 0.92);
+    const dataUrl = buildPortraitDataUrl(canvas, w, h);
+    if (!dataUrl || estimateDataUrlBytes(dataUrl) > MAX_PORTRAIT_DATA_URL_BYTES) {
+      setPortraitUiError("Passport photo is too large. Move closer or retake with a simpler background.");
+      setValue("portraitDataUrl", "", { shouldValidate: true });
+      return;
+    }
+
+    setPortraitUiError(null);
+    clearErrors("portraitDataUrl");
     setValue("portraitDataUrl", dataUrl, { shouldValidate: true });
     stopCamera();
-  }, [setValue, stopCamera]);
+  }, [clearErrors, setValue, stopCamera]);
 
   const handleVoterIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = normalizeVoterIdInput(e.target.value);
     setValue("voterRegistrationNumber", raw, { shouldValidate: true });
   };
 
-  const handleFile = (file: File | undefined) => {
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setValue("portraitDataUrl", reader.result as string);
-    reader.readAsDataURL(file);
-  };
+  const handleFile = useCallback(
+    async (file: File | undefined) => {
+      if (!file) return;
+
+      if (!file.type.startsWith("image/")) {
+        setPortraitUiError("Please choose a JPG or PNG passport photo.");
+        setValue("portraitDataUrl", "", { shouldValidate: true });
+        return;
+      }
+
+      if (file.size > MAX_PORTRAIT_UPLOAD_BYTES) {
+        setPortraitUiError("Passport photo file is too heavy. Please choose an image under 8MB.");
+        setValue("portraitDataUrl", "", { shouldValidate: true });
+        return;
+      }
+
+      try {
+        const image = await loadImageFile(file);
+        const dataUrl = buildPortraitDataUrl(image, image.naturalWidth, image.naturalHeight);
+
+        if (!dataUrl || estimateDataUrlBytes(dataUrl) > MAX_PORTRAIT_DATA_URL_BYTES) {
+          setPortraitUiError(
+            "Passport photo is still too large after processing. Please crop or resize it and try again."
+          );
+          setValue("portraitDataUrl", "", { shouldValidate: true });
+          return;
+        }
+
+        setPortraitUiError(null);
+        clearErrors("portraitDataUrl");
+        setValue("portraitDataUrl", dataUrl, { shouldValidate: true });
+      } catch {
+        setPortraitUiError("We could not process that photo. Please try a smaller JPG or PNG image.");
+        setValue("portraitDataUrl", "", { shouldValidate: true });
+      }
+    },
+    [clearErrors, setValue]
+  );
 
   const portraitDataUrl = watch("portraitDataUrl");
 
@@ -373,7 +473,10 @@ export function Step4Verification({
                 type="file"
                 accept="image/*"
                 className="hidden"
-                onChange={(e) => handleFile(e.target.files?.[0])}
+                onChange={(e) => {
+                  void handleFile(e.target.files?.[0]);
+                  e.currentTarget.value = "";
+                }}
                 aria-label="Upload image from device"
               />
               <Button
@@ -406,13 +509,21 @@ export function Step4Verification({
                   type="button"
                   variant="ghost"
                   size="sm"
-                  onClick={() => setValue("portraitDataUrl", "")}
+                  onClick={() => {
+                    setPortraitUiError(null);
+                    setValue("portraitDataUrl", "");
+                  }}
                 >
                   {t.enrollment.step4.removePhoto}
                 </Button>
               </div>
             )}
-            {!portraitDataUrl && errors.portraitDataUrl && (
+            {portraitUiError ? (
+              <p className="text-sm text-red-600" role="alert">
+                {portraitUiError}
+              </p>
+            ) : null}
+            {!portraitDataUrl && errors.portraitDataUrl && !portraitUiError && (
               <p className="text-sm text-red-600" role="alert">
                 {errors.portraitDataUrl.message}
               </p>

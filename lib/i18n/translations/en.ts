@@ -162,7 +162,7 @@ export const en = {
       reviewPwdNo: "No",
       reviewPwdCategoryLabel: "Disability category",
       reviewPwdOtherDetailLabel: "Other (details)",
-      portraitLabel: "Portrait Photo (optional)",
+      portraitLabel: "Portrait Photo",
       portraitHint: "Use device camera to take a photo, or upload an existing image",
       takePhoto: "Take Photo",
       uploadPhoto: "Upload Photo",

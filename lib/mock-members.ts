@@ -116,8 +116,12 @@ export function filterMembers(
   if (opts.state) list = list.filter((m) => m.state === opts.state);
   if (opts.lga) list = list.filter((m) => m.lga === opts.lga);
   if (opts.ward) list = list.filter((m) => m.ward === opts.ward);
-  if (opts.dateFrom) list = list.filter((m) => (m.joinDate ?? "") >= opts.dateFrom!);
-  if (opts.dateTo) list = list.filter((m) => (m.joinDate ?? "") <= opts.dateTo!);
+  if (opts.dateFrom) {
+    list = list.filter((m) => (m.createdAt?.slice(0, 10) ?? "") >= opts.dateFrom!);
+  }
+  if (opts.dateTo) {
+    list = list.filter((m) => (m.createdAt?.slice(0, 10) ?? "") <= opts.dateTo!);
+  }
   return list;
 }
 

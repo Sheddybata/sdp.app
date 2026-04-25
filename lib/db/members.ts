@@ -8,13 +8,23 @@ import { MOCK_MEMBERS, filterMembers, getKpis } from "@/lib/mock-members";
 import { normalizePhone } from "@/lib/otp/termii";
 import { getWardCodes } from "@/lib/location-codes";
 import { calculateMembershipDues, DEFAULT_MONTHLY_DUE_NGN } from "@/lib/membership/dues";
-import { ADMIN_LIST_MAX_TOTAL_ROWS, POSTGREST_PAGE_SIZE } from "@/lib/db/admin-list-limits";
+import {
+  ADMIN_LIST_MAX_TOTAL_ROWS,
+  INEC_PORTRAIT_FETCH_CHUNK,
+  POSTGREST_PAGE_SIZE,
+} from "@/lib/db/admin-list-limits";
 
 type AdminSupabaseClient = NonNullable<ReturnType<typeof createAdminClient>>;
 
 /** Admin list only — excludes `portrait_data_url` (large base64) so list loads stay fast. */
 const MEMBER_LIST_COLUMNS =
   "id,title,surname,first_name,other_names,nin,phone,email,date_of_birth,address,join_date,state,lga,ward,polling_unit,voter_registration_number,membership_id,location_membership_id,ward_serial,phone_verified,gender,monthly_due,months_owed,amount_owed,dues_calculated_at,has_paid_membership,membership_status,created_at,registered_by,registered_via,pwd_identifies,pwd_category,pwd_category_other";
+
+function chunkIds(ids: string[], size: number): string[][] {
+  const out: string[][] = [];
+  for (let i = 0; i < ids.length; i += size) out.push(ids.slice(i, i + size));
+  return out;
+}
 
 function buildMembersListQuery(
   supabase: AdminSupabaseClient,
@@ -25,11 +35,12 @@ function buildMembersListQuery(
     ward?: string;
     dateFrom?: string;
     dateTo?: string;
-  }
+  },
+  columns: string = MEMBER_LIST_COLUMNS
 ) {
   let query = supabase
     .from("members")
-    .select(MEMBER_LIST_COLUMNS)
+    .select(columns)
     .order("created_at", { ascending: false });
 
   if (opts?.search) {
@@ -43,8 +54,9 @@ function buildMembersListQuery(
   if (opts?.state) query = query.eq("state", opts.state);
   if (opts?.lga) query = query.eq("lga", opts.lga);
   if (opts?.ward) query = query.eq("ward", opts.ward);
-  if (opts?.dateFrom) query = query.gte("join_date", opts.dateFrom);
-  if (opts?.dateTo) query = query.lte("join_date", opts.dateTo);
+  // Registration time (portal submit), not party "join date" — matches INEC "registered by" windows.
+  if (opts?.dateFrom) query = query.gte("created_at", `${opts.dateFrom}T00:00:00.000Z`);
+  if (opts?.dateTo) query = query.lte("created_at", `${opts.dateTo}T23:59:59.999Z`);
 
   return query;
 }
@@ -526,6 +538,109 @@ export async function getMembers(opts?: {
   } catch (err) {
     console.error("[ADMIN] Exception fetching members:", err);
     return [];
+  }
+}
+
+/**
+ * INEC ZIP export: load member rows **without** portraits first (fast), then attach
+ * `portrait_data_url` in small batches so Postgres/PostgREST does not hit statement timeouts.
+ */
+export async function getMembersForInecExport(opts?: {
+  search?: string;
+  state?: string;
+  lga?: string;
+  ward?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}): Promise<{ members: MemberRecord[]; error?: string }> {
+  const supabase = createAdminClient();
+  if (!supabase) {
+    const msg =
+      "Server is not configured for admin database access (missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY).";
+    console.warn("[ADMIN]", msg);
+    return { members: [], error: msg };
+  }
+
+  try {
+    const acc: MemberRecord[] = [];
+    for (let from = 0; ; from += POSTGREST_PAGE_SIZE) {
+      if (acc.length >= ADMIN_LIST_MAX_TOTAL_ROWS) {
+        console.warn(
+          `[ADMIN] INEC export capped at ${ADMIN_LIST_MAX_TOTAL_ROWS} rows (ADMIN_LIST_MAX_TOTAL_ROWS).`
+        );
+        break;
+      }
+      const to = from + POSTGREST_PAGE_SIZE - 1;
+      const { data, error } = await buildMembersListQuery(
+        supabase,
+        opts,
+        MEMBER_LIST_COLUMNS
+      ).range(from, to);
+
+      if (error) {
+        const msg =
+          typeof error === "object" && error !== null && "message" in error
+            ? String((error as { message?: string }).message)
+            : "Database query failed.";
+        console.error("[ADMIN] Error fetching members for INEC export:", error);
+        return { members: [], error: msg };
+      }
+
+      const rows = data ?? [];
+      for (const r of rows) {
+        if (acc.length >= ADMIN_LIST_MAX_TOTAL_ROWS) break;
+        acc.push(dbToMember({ ...(r as object), portrait_data_url: null } as DbMember));
+      }
+      if (rows.length === 0 || rows.length < POSTGREST_PAGE_SIZE) break;
+    }
+
+    const idToMember = new Map(acc.map((m) => [m.id, m]));
+    const allIds = acc.map((m) => m.id);
+
+    for (const idChunk of chunkIds(allIds, INEC_PORTRAIT_FETCH_CHUNK)) {
+      const { data: portraitRows, error: portraitError } = await supabase
+        .from("members")
+        .select("id, portrait_data_url")
+        .in("id", idChunk);
+
+      if (!portraitError) {
+        for (const row of portraitRows ?? []) {
+          const rec = row as { id: string; portrait_data_url: string | null };
+          const m = idToMember.get(rec.id);
+          if (m) m.portraitDataUrl = rec.portrait_data_url ?? "";
+        }
+        continue;
+      }
+
+      console.warn(
+        `[ADMIN] Portrait batch fetch failed for ${idChunk.length} member(s); retrying individually.`,
+        portraitError
+      );
+
+      for (const id of idChunk) {
+        const { data: singleRow, error: singleError } = await supabase
+          .from("members")
+          .select("id, portrait_data_url")
+          .eq("id", id)
+          .maybeSingle();
+
+        if (singleError) {
+          console.warn(`[ADMIN] Skipping portrait for member ${id}:`, singleError);
+          continue;
+        }
+
+        const rec = singleRow as { id: string; portrait_data_url: string | null } | null;
+        if (!rec) continue;
+        const m = idToMember.get(rec.id);
+        if (m) m.portraitDataUrl = rec.portrait_data_url ?? "";
+      }
+    }
+
+    return { members: acc };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : "Unexpected error loading members.";
+    console.error("[ADMIN] Exception fetching members for INEC export:", err);
+    return { members: [], error: msg };
   }
 }
 
