@@ -53,6 +53,20 @@ export async function portalLogin(
     return { success: false, error: "Invalid email or password." };
   }
 
+  if (user.status === "pending") {
+    return {
+      success: false,
+      error:
+        "Your agent registration is awaiting approval by the national secretariat. You can sign in once it has been approved.",
+    };
+  }
+  if (user.status === "rejected") {
+    return {
+      success: false,
+      error: "Your agent registration was not approved. Please contact the party secretariat for help.",
+    };
+  }
+
   const token = createPortalSessionToken(user.email, role, user.id);
   const cookieStore = await cookies();
   cookieStore.set(getPortalCookieName(), token, {
@@ -171,6 +185,7 @@ export async function getPortalSession(): Promise<PortalSession> {
 
   const user = await findPortalUserById(parsed.userId, parsed.role, parsed.email);
   if (!user) return { ok: false };
+  if (user.status && user.status !== "approved") return { ok: false };
 
   return { ok: true, email: user.email, role: parsed.role, userId: user.id };
 }

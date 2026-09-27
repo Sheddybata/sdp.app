@@ -6,6 +6,11 @@ const nextConfig = {
     outputFileTracingIncludes: {
       "*": ["./public/location-codes.csv"],
     },
+    // Agent registration sends three compressed images (~450 KB each) in one action.
+    // Keep below Vercel's 4.5 MB request limit.
+    serverActions: {
+      bodySizeLimit: "4mb",
+    },
   },
 
   // Prevent CDN/browser from caching HTML so users always get current chunk references

@@ -9,6 +9,8 @@ export interface PortalUserRow {
   email: string;
   password_hash: string;
   created_at: string;
+  /** Missing before migration 015; treat as approved. */
+  status?: "pending" | "approved" | "rejected";
 }
 
 export async function findPortalUserByEmailRole(
@@ -20,7 +22,7 @@ export async function findPortalUserByEmailRole(
   const normalized = email.trim().toLowerCase();
   const { data, error } = await supabase
     .from("portal_users")
-    .select("id, role, full_name, phone, email, password_hash, created_at")
+    .select("*")
     .eq("role", role)
     .eq("email", normalized)
     .maybeSingle();
@@ -38,7 +40,7 @@ export async function findPortalUserById(
   const normalized = email.trim().toLowerCase();
   const { data, error } = await supabase
     .from("portal_users")
-    .select("id, role, full_name, phone, email, password_hash, created_at")
+    .select("*")
     .eq("id", id)
     .eq("role", role)
     .eq("email", normalized)

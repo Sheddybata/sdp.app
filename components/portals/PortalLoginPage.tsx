@@ -35,12 +35,15 @@ export function PortalLoginPage({
   subtitle,
   dashboardPath,
   signupPath,
+  registerPath,
 }: {
   variant: PortalVariant;
   title: string;
   subtitle: string;
   dashboardPath: string;
   signupPath: string;
+  /** Open self-registration (reviewed by admin); shown above the invite-code link. */
+  registerPath?: string;
 }) {
   const router = useRouter();
   const [email, setEmail] = useState("");
@@ -164,12 +167,27 @@ export function PortalLoginPage({
               )}
             </Button>
 
-            <p className="text-center text-sm text-neutral-600">
-              First time here?{" "}
-              <Link href={signupPath} className="font-medium text-neutral-900 underline">
-                Create an account with your invitation code
-              </Link>
-            </p>
+            {registerPath ? (
+              <div className="space-y-3 border-t border-neutral-200 pt-4">
+                <p className="text-center text-sm text-neutral-600">New agent?</p>
+                <Button asChild variant="outline" className="w-full min-h-[44px]">
+                  <Link href={registerPath}>Register as an agent</Link>
+                </Button>
+                <p className="text-center text-sm text-neutral-600">
+                  Have an invitation code?{" "}
+                  <Link href={signupPath} className="font-medium text-neutral-900 underline">
+                    Create your account with it
+                  </Link>
+                </p>
+              </div>
+            ) : (
+              <p className="text-center text-sm text-neutral-600">
+                First time here?{" "}
+                <Link href={signupPath} className="font-medium text-neutral-900 underline">
+                  Create an account with your invitation code
+                </Link>
+              </p>
+            )}
           </form>
         </div>
       </div>

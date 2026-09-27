@@ -155,7 +155,9 @@ export async function middleware(request: NextRequest) {
   // --- Agent portal ---
   const agentLoginPath = "/agent/login";
   const agentSignupPath = "/agent/signup";
-  const isAgentPublic = path === agentLoginPath || path === agentSignupPath;
+  const agentApplyPath = "/agent/apply";
+  const isAgentPublic =
+    path === agentLoginPath || path === agentSignupPath || path === agentApplyPath;
   const isAgentProtected = path.startsWith("/agent") && !isAgentPublic;
 
   if (isAgentProtected) {

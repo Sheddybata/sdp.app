@@ -8,6 +8,7 @@ export default function AgentLoginPage() {
       subtitle="Sign in to upload CSV or Excel lists for bulk member registration."
       dashboardPath="/agent"
       signupPath="/agent/signup"
+      registerPath="/agent/apply"
     />
   );
 }

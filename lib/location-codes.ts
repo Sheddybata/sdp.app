@@ -17,6 +17,9 @@ type WardCodeEntry = {
 const wardLookupById = new Map<Key, WardCodeEntry>();
 const wardLookupByName = new Map<Key, WardCodeEntry>();
 const stateCodeMap = new Map<string, string>(); // keyed by state id
+const lgaCodeMap = new Map<Key, string>(); // keyed by state|lga ids
+/** Polling units per ward (state|lga|ward ids), in CSV order. */
+const pollingUnitsByWard = new Map<Key, { code: string; name: string }[]>();
 
 function resolveCodesCsvPath(): string | null {
   const candidates = [
@@ -63,7 +66,9 @@ function loadCsv() {
       wardCode,
       wardName,
       wardId,
-    ] = parts.slice(0, 9).map((p) => p.replace(/^\"|\"$/g, ""));
+      puCode,
+      puName,
+    ] = parts.slice(0, 11).map((p) => p.replace(/^\"|\"$/g, ""));
 
     const keyId = `${stateId}|${lgaId}|${wardId}`.toLowerCase();
     const keyName = `${stateName}|${lgaName}|${wardName}`.toLowerCase();
@@ -75,6 +80,15 @@ function loadCsv() {
       }
       if (!stateCodeMap.has(stateId.toLowerCase())) {
         stateCodeMap.set(stateId.toLowerCase(), stateCode);
+      }
+      const lgaKey = `${stateId}|${lgaId}`.toLowerCase();
+      if (!lgaCodeMap.has(lgaKey)) {
+        lgaCodeMap.set(lgaKey, lgaCode);
+      }
+      if (puCode) {
+        const list = pollingUnitsByWard.get(keyId);
+        if (list) list.push({ code: puCode, name: puName });
+        else pollingUnitsByWard.set(keyId, [{ code: puCode, name: puName }]);
       }
     }
     if (stateName && lgaName && wardName && !wardLookupByName.has(keyName)) {
@@ -92,4 +106,34 @@ export function getWardCodes(state: string, lga: string, ward: string) {
 export function getStateCode(state: string) {
   loadCsv();
   return stateCodeMap.get(state.toLowerCase()) || null;
+}
+
+export function getLgaCode(state: string, lga: string) {
+  loadCsv();
+  return lgaCodeMap.get(`${state}|${lga}`.toLowerCase()) || null;
+}
+
+function normalizePuName(name: string): string {
+  return name.replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+/**
+ * Polling unit code within a ward. Matches by name first; falls back to position
+ * (`index` from the INEC JSON id suffix, e.g. `ward-3` → 3) when names differ slightly.
+ */
+export function getPollingUnitCode(
+  state: string,
+  lga: string,
+  ward: string,
+  pollingUnitName: string,
+  index?: number
+) {
+  loadCsv();
+  const list = pollingUnitsByWard.get(`${state}|${lga}|${ward}`.toLowerCase());
+  if (!list?.length) return null;
+  const target = normalizePuName(pollingUnitName);
+  const byName = list.find((pu) => normalizePuName(pu.name) === target);
+  if (byName) return byName.code;
+  if (index != null && index >= 0 && index < list.length) return list[index].code;
+  return null;
 }
