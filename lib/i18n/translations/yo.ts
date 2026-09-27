@@ -141,6 +141,11 @@ export const yo = {
       reviewPwdOtherDetailLabel: "Other (details)",
       portraitLabel: "Foto Rẹ",
       portraitHint: "Gbe soke foto rẹ ti o yan (aṣayan)",
+      useCamera: "Use device camera",
+      cameraBack: "Back camera",
+      cameraFront: "Front camera",
+      cameraFacingHint:
+        "Front camera opens by default. Use Back camera to photograph the member with the rear lens.",
       takePhoto: "Mu Foto",
       uploadPhoto: "Gbe Foto Soke",
       agreedToConstitution: "Mo gba pẹlu iwe-ofin ẹgbẹ",

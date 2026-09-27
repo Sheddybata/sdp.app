@@ -141,6 +141,11 @@ export const ff = {
       reviewPwdOtherDetailLabel: "Other (details)",
       portraitLabel: "Njaayri Ma",
       portraitHint: "Jiggude njaayri maa ɓanngu (ciftaaɗo)",
+      useCamera: "Use device camera",
+      cameraBack: "Back camera",
+      cameraFront: "Front camera",
+      cameraFacingHint:
+        "Front camera opens by default. Use Back camera to photograph the member with the rear lens.",
       takePhoto: "Daw Njaayri",
       uploadPhoto: "Jiggude Njaayri",
       agreedToConstitution: "Mi seedii e ceerol leñol",

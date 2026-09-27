@@ -141,6 +141,11 @@ export const ig = {
       reviewPwdOtherDetailLabel: "Other (details)",
       portraitLabel: "Foto gị",
       portraitHint: "Bulite foto gị doro anya (nhọrọ)",
+      useCamera: "Use device camera",
+      cameraBack: "Back camera",
+      cameraFront: "Front camera",
+      cameraFacingHint:
+        "Front camera opens by default. Use Back camera to photograph the member with the rear lens.",
       takePhoto: "Were Foto",
       uploadPhoto: "Bulite Foto",
       agreedToConstitution: "Ekwenyere m na iwu otu",

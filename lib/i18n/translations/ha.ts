@@ -141,6 +141,11 @@ export const ha = {
       reviewPwdOtherDetailLabel: "Saura (bayani)",
       portraitLabel: "Hotunka",
       portraitHint: "Loda hoton ku mai kyau (na zaɓi)",
+      useCamera: "Use device camera",
+      cameraBack: "Back camera",
+      cameraFront: "Front camera",
+      cameraFacingHint:
+        "Front camera opens by default. Use Back camera to photograph the member with the rear lens.",
       takePhoto: "Dauki Hoto",
       uploadPhoto: "Loda Hoto",
       agreedToConstitution: "Na yarda da kundin tsarin mulkin jam'iyyar",

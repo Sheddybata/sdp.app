@@ -167,6 +167,10 @@ export const en = {
       takePhoto: "Take Photo",
       uploadPhoto: "Upload Photo",
       useCamera: "Use device camera",
+      cameraBack: "Back camera",
+      cameraFront: "Front camera",
+      cameraFacingHint:
+        "Front camera opens by default. Use Back camera to photograph the member with the rear lens.",
       capturePhoto: "Capture photo",
       removePhoto: "Remove photo",
       closeCamera: "Close camera",

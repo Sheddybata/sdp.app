@@ -115,6 +115,10 @@ export function Step4Verification({
   const uploadInputRef = useRef<HTMLInputElement>(null);
 
   const [showCamera, setShowCamera] = useState(false);
+  /** "user" = front/selfie (default). "environment" = back — switch with the button. */
+  const [cameraFacing, setCameraFacing] = useState<"user" | "environment">("user");
+  const [streamVersion, setStreamVersion] = useState(0);
+  const [cameraSwitching, setCameraSwitching] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -130,24 +134,79 @@ export function Step4Verification({
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
     }
+    if (videoRef.current) {
+      videoRef.current.srcObject = null;
+    }
     setShowCamera(false);
     setCameraError(null);
+    setCameraSwitching(false);
   }, []);
 
-  const startCamera = useCallback(async () => {
-    setCameraError(null);
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "user", width: { ideal: 640 }, height: { ideal: 480 } },
+  const startCamera = useCallback(
+    async (preferredFacing?: "user" | "environment") => {
+      setCameraError(null);
+      const facing = preferredFacing ?? cameraFacing;
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((t) => t.stop());
+        streamRef.current = null;
+      }
+      setCameraSwitching(true);
+      const videoConstraints = (face: "user" | "environment") => ({
+        video: {
+          facingMode: { ideal: face },
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
         audio: false,
-      });
+      } as const);
+
+      let stream: MediaStream | null = null;
+      let usedFacing: "user" | "environment" = facing;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia(videoConstraints(facing));
+      } catch (firstErr) {
+        if (facing === "environment") {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia(videoConstraints("user"));
+            usedFacing = "user";
+          } catch {
+            const msg = firstErr instanceof Error ? firstErr.message : "";
+            setCameraError(
+              msg.includes("Permission")
+                ? t.enrollment.step4.cameraPermissionDenied
+                : t.enrollment.step4.cameraNotAvailable
+            );
+            setCameraSwitching(false);
+            return;
+          }
+        } else {
+          try {
+            stream = await navigator.mediaDevices.getUserMedia(videoConstraints("environment"));
+            usedFacing = "environment";
+          } catch {
+            const msg = firstErr instanceof Error ? firstErr.message : "";
+            setCameraError(
+              msg.includes("Permission")
+                ? t.enrollment.step4.cameraPermissionDenied
+                : t.enrollment.step4.cameraNotAvailable
+            );
+            setCameraSwitching(false);
+            return;
+          }
+        }
+      }
+      if (!stream) {
+        setCameraSwitching(false);
+        return;
+      }
       streamRef.current = stream;
+      setCameraFacing(usedFacing);
       setShowCamera(true);
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : "Could not access camera";
-      setCameraError(msg.includes("Permission") ? t.enrollment.step4.cameraPermissionDenied : t.enrollment.step4.cameraNotAvailable);
-    }
-  }, []);
+      setStreamVersion((v) => v + 1);
+      setCameraSwitching(false);
+    },
+    [cameraFacing, t.enrollment.step4.cameraNotAvailable, t.enrollment.step4.cameraPermissionDenied]
+  );
 
   useEffect(() => {
     if (!showCamera || !streamRef.current) return;
@@ -155,14 +214,14 @@ export function Step4Verification({
     const stream = streamRef.current;
     if (video && stream) {
       video.srcObject = stream;
-      video.play().catch(() => {});
+      void video.play().catch(() => {});
     }
     return () => {
-      if (video && video.srcObject) {
-        (video.srcObject as MediaStream).getTracks().forEach((t) => t.stop());
+      if (video) {
+        video.srcObject = null;
       }
     };
-  }, [showCamera]);
+  }, [showCamera, streamVersion]);
 
   const capturePhoto = useCallback(() => {
     const video = videoRef.current;
@@ -433,27 +492,68 @@ export function Step4Verification({
                 playsInline
                 muted
                 className="h-full w-full object-cover"
-                style={{ transform: "scaleX(-1)" }}
+                style={{
+                  transform: cameraFacing === "user" ? "scaleX(-1)" : undefined,
+                }}
               />
               <Button
                 type="button"
                 variant="outline"
                 size="icon"
-                className="absolute right-2 top-2 h-8 w-8 rounded-full"
+                className="absolute right-2 top-2 h-8 w-8 rounded-full bg-white/90"
                 onClick={stopCamera}
-                aria-label="Close camera"
+                aria-label={t.enrollment.step4.closeCamera}
               >
                 <X className="h-4 w-4" />
               </Button>
             </div>
+            <p className="mt-2 text-xs text-neutral-300">
+              {t.enrollment.step4.cameraFacingHint ??
+                "Front camera opens by default. Use Back camera for the rear lens."}
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={
+                  `min-h-[40px] flex-1 ` +
+                  (cameraFacing === "environment"
+                    ? "border-sdp-primary bg-sdp-primary/20 text-white ring-2 ring-sdp-primary/80"
+                    : "border-white/30 bg-white/5 text-white hover:bg-white/10")
+                }
+                disabled={cameraSwitching}
+                aria-pressed={cameraFacing === "environment"}
+                onClick={() => void startCamera("environment")}
+              >
+                {t.enrollment.step4.cameraBack ?? "Back camera"}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className={
+                  `min-h-[40px] flex-1 ` +
+                  (cameraFacing === "user"
+                    ? "border-sdp-primary bg-sdp-primary/20 text-white ring-2 ring-sdp-primary/80"
+                    : "border-white/30 bg-white/5 text-white hover:bg-white/10")
+                }
+                disabled={cameraSwitching}
+                aria-pressed={cameraFacing === "user"}
+                onClick={() => void startCamera("user")}
+              >
+                {t.enrollment.step4.cameraFront ?? "Front camera"}
+              </Button>
+            </div>
             {cameraError && (
-              <p className="mt-2 text-sm text-red-600" role="alert">{cameraError}</p>
+              <p className="mt-2 text-sm text-red-400" role="alert">{cameraError}</p>
             )}
             <div className="mt-2 flex gap-2">
               <Button
                 type="button"
                 className="min-h-[44px] flex-1"
                 onClick={capturePhoto}
+                disabled={cameraSwitching}
               >
                 <Camera className="mr-2 h-4 w-4" />
                 {t.enrollment.step4.capturePhoto}
@@ -483,7 +583,7 @@ export function Step4Verification({
                 type="button"
                 variant="outline"
                 className="min-h-[44px] flex-1"
-                onClick={startCamera}
+                onClick={() => void startCamera()}
               >
                 <Camera className="h-4 w-4" />
                 {t.enrollment.step4.useCamera}
