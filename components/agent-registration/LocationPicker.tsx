@@ -169,60 +169,56 @@ export function LocationPicker({
         {depth >= 4 && (
           <div className="space-y-1.5">
             <Label htmlFor={`${idPrefix}-pu`}>Polling unit</Label>
-            {value.wardId && pollingUnits.length === 0 ? (
-              <Input
-                id={`${idPrefix}-pu`}
-                value={value.pollingUnitName}
-                onChange={(e) =>
-                  onChange({ ...value, pollingUnitId: "", pollingUnitName: e.target.value })
-                }
-                placeholder="Type polling unit name"
-                className="min-h-[44px]"
-              />
-            ) : (
-              <Select
-                key={`pu-${value.wardId}`}
-                value={value.pollingUnitId || undefined}
-                onValueChange={(id) =>
-                  onChange({
-                    ...value,
-                    pollingUnitId: id,
-                    pollingUnitName: pollingUnits.find((p) => p.id === id)?.name ?? "",
-                  })
-                }
-                disabled={!value.wardId}
-              >
-                <SelectTrigger id={`${idPrefix}-pu`} className="min-h-[44px]">
-                  <SelectValue placeholder="Select polling unit" />
-                </SelectTrigger>
-                <SelectContent className="max-h-[min(50vh,16rem)]">
-                  {pollingUnits.map((p) => (
-                    <SelectItem key={p.id} value={p.id}>
-                      {p.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
+            <Select
+              key={`pu-${value.wardId}`}
+              value={value.pollingUnitId || undefined}
+              onValueChange={(id) =>
+                onChange({
+                  ...value,
+                  pollingUnitId: id,
+                  pollingUnitName: pollingUnits.find((p) => p.id === id)?.name ?? "",
+                })
+              }
+              disabled={!value.wardId || pollingUnits.length === 0}
+            >
+              <SelectTrigger id={`${idPrefix}-pu`} className="min-h-[44px]">
+                <SelectValue
+                  placeholder={
+                    value.wardId && pollingUnits.length === 0
+                      ? "No polling units listed — contact the secretariat"
+                      : "Select polling unit"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent className="max-h-[min(50vh,16rem)]">
+                {pollingUnits.map((p) => (
+                  <SelectItem key={p.id} value={p.id}>
+                    {p.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
       </div>
 
       <div className="space-y-1.5">
-        <Label htmlFor={`${idPrefix}-code`}>Code</Label>
+        <Label htmlFor={`${idPrefix}-code`}>Code (filled in automatically)</Label>
         <div className="relative">
           <Input
             id={`${idPrefix}-code`}
             value={value.code}
             readOnly
+            tabIndex={-1}
+            aria-readonly
             placeholder={
               !complete
-                ? "Filled in automatically"
+                ? "Appears when you finish choosing above"
                 : lookingUp
                   ? "Looking up code…"
-                  : "Code not found — the secretariat will confirm it"
+                  : "Code not found — contact the SDP secretariat"
             }
-            className="min-h-[44px] bg-neutral-50 font-mono tracking-wide"
+            className="min-h-[44px] cursor-default bg-neutral-50 font-mono tracking-wide"
           />
           {lookingUp ? (
             <Loader2 className="absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 animate-spin text-neutral-400" />

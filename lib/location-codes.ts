@@ -21,6 +21,15 @@ const lgaCodeMap = new Map<Key, string>(); // keyed by state|lga ids
 /** Polling units per ward (state|lga|ward ids), in CSV order. */
 const pollingUnitsByWard = new Map<Key, { code: string; name: string }[]>();
 
+type LgaTally = { name: string; wards: Set<string>; pollingUnits: number };
+/** state id → name + LGAs (with ward set and polling unit count), for agent coverage targets. */
+const tallyByState = new Map<string, { name: string; lgas: Map<string, LgaTally> }>();
+/** Polling unit count under each state / LGA / ward code ("15", "15/01", "15/01/01"). */
+const puCountByCode = new Map<string, number>();
+
+export type LgaLocationTotals = { lgaId: string; lgaName: string; wards: number; pollingUnits: number };
+export type StateLocationTotals = { stateId: string; stateName: string; lgas: LgaLocationTotals[] };
+
 function resolveCodesCsvPath(): string | null {
   const candidates = [
     // Preferred: public asset in repo
@@ -90,6 +99,26 @@ function loadCsv() {
         if (list) list.push({ code: puCode, name: puName });
         else pollingUnitsByWard.set(keyId, [{ code: puCode, name: puName }]);
       }
+
+      const sKey = stateId.toLowerCase();
+      let st = tallyByState.get(sKey);
+      if (!st) {
+        st = { name: stateName, lgas: new Map() };
+        tallyByState.set(sKey, st);
+      }
+      const lKey = lgaId.toLowerCase();
+      let lg = st.lgas.get(lKey);
+      if (!lg) {
+        lg = { name: lgaName, wards: new Set(), pollingUnits: 0 };
+        st.lgas.set(lKey, lg);
+      }
+      lg.wards.add(wardId.toLowerCase());
+      if (puCode) {
+        lg.pollingUnits += 1;
+        for (const code of [stateCode, `${stateCode}/${lgaCode}`, `${stateCode}/${lgaCode}/${wardCode}`]) {
+          puCountByCode.set(code, (puCountByCode.get(code) ?? 0) + 1);
+        }
+      }
     }
     if (stateName && lgaName && wardName && !wardLookupByName.has(keyName)) {
       wardLookupByName.set(keyName, entry);
@@ -111,6 +140,40 @@ export function getStateCode(state: string) {
 export function getLgaCode(state: string, lga: string) {
   loadCsv();
   return lgaCodeMap.get(`${state}|${lga}`.toLowerCase()) || null;
+}
+
+/** Every state with its LGAs and their ward / polling unit counts (ids lower-cased). */
+export function getLocationTotals(): StateLocationTotals[] {
+  loadCsv();
+  return Array.from(tallyByState.entries())
+    .map(([stateId, st]) => ({
+      stateId,
+      stateName: st.name,
+      lgas: Array.from(st.lgas.entries())
+        .map(([lgaId, lg]) => ({ lgaId, lgaName: lg.name, wards: lg.wards.size, pollingUnits: lg.pollingUnits }))
+        .sort((a, b) => a.lgaName.localeCompare(b.lgaName)),
+    }))
+    .sort((a, b) => a.stateName.localeCompare(b.stateName));
+}
+
+/** Number of polling units under a state, LGA or ward code. */
+export function countPollingUnitsUnder(code: string): number {
+  loadCsv();
+  return puCountByCode.get(code) ?? 0;
+}
+
+/** Polling units in a ward with their full codes, e.g. `15/01/01/004`. */
+export function listPollingUnitsInWard(
+  state: string,
+  lga: string,
+  ward: string
+): { code: string; name: string }[] {
+  loadCsv();
+  const codes = getWardCodes(state, lga, ward);
+  const list = pollingUnitsByWard.get(`${state}|${lga}|${ward}`.toLowerCase());
+  if (!codes || !list) return [];
+  const prefix = `${codes.stateCode}/${codes.lgaCode}/${codes.wardCode}`;
+  return list.map((pu) => ({ code: `${prefix}/${pu.code}`, name: pu.name }));
 }
 
 function normalizePuName(name: string): string {

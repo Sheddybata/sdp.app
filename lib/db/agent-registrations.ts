@@ -5,6 +5,7 @@ import { ADMIN_LIST_MAX_TOTAL_ROWS, POSTGREST_PAGE_SIZE } from "@/lib/db/admin-l
 export type PortalUserStatus = "pending" | "approved" | "rejected";
 
 export interface AgentRegistrationInsert {
+  member_id: string;
   agent_level: AgentLevel;
   assigned_state_id: string;
   assigned_state_name: string;
@@ -17,13 +18,10 @@ export interface AgentRegistrationInsert {
   first_name: string;
   middle_name: string | null;
   surname: string;
-  date_of_birth: string;
   phone: string;
-  gender: string;
   email: string;
+  nin: string;
   voter_identification_number: string;
-  marital_status: string;
-  religion: string;
   sdp_membership_id: string;
   agent_polling_unit: LocationPick;
   agent_voting_unit: LocationPick;
@@ -37,10 +35,15 @@ export interface AgentRegistrationInsert {
 export interface AgentRegistrationRecord {
   id: string;
   userId: string;
+  /** Linked SDP member record; null for registrations made before the member check. */
+  memberId: string | null;
   status: PortalUserStatus;
   reviewedAt: string | null;
   reviewNote: string | null;
   agentLevel: AgentLevel;
+  assignedStateId: string;
+  assignedLgaId: string | null;
+  assignedWardId: string | null;
   assignedStateName: string;
   assignedLgaName: string | null;
   assignedWardName: string | null;
@@ -49,13 +52,11 @@ export interface AgentRegistrationRecord {
   firstName: string;
   middleName: string | null;
   surname: string;
-  dateOfBirth: string;
   phone: string;
-  gender: string;
   email: string;
+  /** Null for registrations made before NIN was collected. */
+  nin: string | null;
   voterIdentificationNumber: string;
-  maritalStatus: string;
-  religion: string;
   sdpMembershipId: string;
   agentPollingUnit: LocationPick;
   agentVotingUnit: LocationPick;
@@ -70,7 +71,7 @@ export interface AgentRegistrationRecord {
 
 /** List view — excludes the three base64 document columns. */
 const LIST_COLUMNS =
-  "id,user_id,agent_level,assigned_state_name,assigned_lga_name,assigned_ward_name,assigned_polling_unit_name,assigned_code,first_name,middle_name,surname,date_of_birth,phone,gender,email,voter_identification_number,marital_status,religion,sdp_membership_id,agent_polling_unit,agent_voting_unit,polling_unit,acknowledged_at,created_at,portal_users(status,reviewed_at,review_note)";
+  "id,user_id,member_id,agent_level,assigned_state_id,assigned_lga_id,assigned_ward_id,assigned_state_name,assigned_lga_name,assigned_ward_name,assigned_polling_unit_name,assigned_code,first_name,middle_name,surname,phone,email,nin,voter_identification_number,sdp_membership_id,agent_polling_unit,agent_voting_unit,polling_unit,acknowledged_at,created_at,portal_users(status,reviewed_at,review_note)";
 
 const DETAIL_COLUMNS = `${LIST_COLUMNS},photo_data_url,membership_id_card_data_url,pvc_data_url`;
 
@@ -84,10 +85,14 @@ function rowToRecord(r: Row): AgentRegistrationRecord {
   return {
     id: r.id as string,
     userId: r.user_id as string,
+    memberId: str("member_id"),
     status: ((pu?.status as PortalUserStatus) ?? "pending"),
     reviewedAt: pu?.reviewed_at ?? null,
     reviewNote: pu?.review_note ?? null,
     agentLevel: r.agent_level as AgentLevel,
+    assignedStateId: r.assigned_state_id as string,
+    assignedLgaId: str("assigned_lga_id"),
+    assignedWardId: str("assigned_ward_id"),
     assignedStateName: r.assigned_state_name as string,
     assignedLgaName: str("assigned_lga_name"),
     assignedWardName: str("assigned_ward_name"),
@@ -96,13 +101,10 @@ function rowToRecord(r: Row): AgentRegistrationRecord {
     firstName: r.first_name as string,
     middleName: str("middle_name"),
     surname: r.surname as string,
-    dateOfBirth: r.date_of_birth as string,
     phone: r.phone as string,
-    gender: r.gender as string,
     email: r.email as string,
+    nin: str("nin"),
     voterIdentificationNumber: r.voter_identification_number as string,
-    maritalStatus: r.marital_status as string,
-    religion: r.religion as string,
     sdpMembershipId: r.sdp_membership_id as string,
     agentPollingUnit: r.agent_polling_unit as LocationPick,
     agentVotingUnit: r.agent_voting_unit as LocationPick,
@@ -125,7 +127,9 @@ export async function createAgentRegistration(args: {
   email: string;
   passwordHash: string;
   registration: AgentRegistrationInsert;
-}): Promise<{ ok: true; id: string } | { ok: false; error: "email_taken" | "unavailable" }> {
+}): Promise<
+  { ok: true; id: string } | { ok: false; error: "email_taken" | "nin_taken" | "member_taken" | "unavailable" }
+> {
   const supabase = createAdminClient();
   if (!supabase) return { ok: false, error: "unavailable" };
 
@@ -162,8 +166,15 @@ export async function createAgentRegistration(args: {
     .single();
 
   if (regError || !regRow) {
-    console.error("[agent registration] insert details failed:", regError);
     await supabase.from("portal_users").delete().eq("id", userId);
+    const detail = `${regError?.message ?? ""} ${regError?.details ?? ""}`.toLowerCase();
+    if (regError?.code === "23505" && detail.includes("member_id")) {
+      return { ok: false, error: "member_taken" };
+    }
+    if (regError?.code === "23505" && detail.includes("nin")) {
+      return { ok: false, error: "nin_taken" };
+    }
+    console.error("[agent registration] insert details failed:", regError);
     return { ok: false, error: "unavailable" };
   }
 
@@ -206,6 +217,37 @@ export async function getAgentRegistrationById(id: string): Promise<AgentRegistr
   }
   if (!data) return null;
   return rowToRecord(data as unknown as Row);
+}
+
+/** The signed-in agent's own registration (no document images). */
+export async function getAgentRegistrationByUserId(userId: string): Promise<AgentRegistrationRecord | null> {
+  const supabase = createAdminClient();
+  if (!supabase) return null;
+  const { data, error } = await supabase
+    .from("agent_registrations")
+    .select(LIST_COLUMNS)
+    .eq("user_id", userId)
+    .maybeSingle();
+  if (error) {
+    console.error("[agent registration] by user failed:", error);
+    return null;
+  }
+  return data ? rowToRecord(data as unknown as Row) : null;
+}
+
+export async function agentExistsForMember(memberId: string): Promise<boolean> {
+  const supabase = createAdminClient();
+  if (!supabase) return false;
+  const { data, error } = await supabase
+    .from("agent_registrations")
+    .select("id")
+    .eq("member_id", memberId)
+    .limit(1);
+  if (error) {
+    console.error("[agent registration] member check failed:", error);
+    return false;
+  }
+  return (data ?? []).length > 0;
 }
 
 /** Passport photos only, for ID card generation. */

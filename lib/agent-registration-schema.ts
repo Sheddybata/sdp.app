@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { isDobWithinEnrollmentRules } from "@/lib/enrollment-dates";
 import { isValidEnrollmentNigerianPhone } from "@/lib/phone-nigeria";
 import { validateVoterId } from "@/lib/enrollment-schema";
 
@@ -24,9 +23,15 @@ export const AGENT_LEVEL_NAME_LABELS: Record<AgentLevel, string> = {
   state: "State name",
 };
 
-export const AGENT_GENDERS = ["Male", "Female"] as const;
-export const AGENT_MARITAL_STATUSES = ["Single", "Married", "Divorced", "Widowed", "Separated"] as const;
-export const AGENT_RELIGIONS = ["Christianity", "Islam", "Traditional", "Other"] as const;
+/** Same normalisation the member lookup uses (spaces removed, upper case). */
+export function normalizeMembershipId(raw: string): string {
+  return raw.replace(/\s/g, "").toUpperCase().trim();
+}
+
+export const MEMBERSHIP_NOT_VERIFIED_MESSAGE = "Tap “Check membership” to confirm your SDP membership ID.";
+
+export const LOCATION_CODE_MISSING_MESSAGE =
+  "The code for this location has not loaded. Wait a moment and try again — if it still does not appear, contact the SDP secretariat.";
 
 /** Placeholder until the party supplies the official declaration text. */
 export const AGENT_DECLARATION_TEXT =
@@ -88,8 +93,13 @@ export function formatLocationPick(loc: LocationPick, level: AgentLevel = "polli
   return loc.code ? `${text} (${loc.code})` : text;
 }
 
+/** Codes always come from the official list (never typed), so a location without one is not accepted. */
 function requireLocation(level: AgentLevel, message: string) {
-  return locationPickSchema.refine((loc) => isLocationComplete(loc, level), { message });
+  return locationPickSchema
+    .refine((loc) => isLocationComplete(loc, level), { message })
+    .refine((loc) => !isLocationComplete(loc, level) || !!loc.code.trim(), {
+      message: LOCATION_CODE_MISSING_MESSAGE,
+    });
 }
 
 const imageDataUrl = (message: string) =>
@@ -114,6 +124,8 @@ export const agentStep1Schema = z
         path: ["assignment"],
         message: `Select the ${AGENT_LEVEL_NAME_LABELS[val.agentLevel].toLowerCase()}.`,
       });
+    } else if (!val.assignment.code.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["assignment"], message: LOCATION_CODE_MISSING_MESSAGE });
     }
   });
 
@@ -121,23 +133,18 @@ export const agentStep2Schema = z.object({
   firstName: z.string().trim().min(2, "First name is required").max(80),
   middleName: z.string().trim().max(80).optional().default(""),
   surname: z.string().trim().min(2, "Surname is required").max(80),
-  dateOfBirth: z
-    .string()
-    .min(1, "Date of birth is required")
-    .refine(isDobWithinEnrollmentRules, {
-      message: "Enter a valid date of birth (you must be at least 18).",
-    }),
   phone: z.string().trim().refine(isValidEnrollmentNigerianPhone, {
     message: "Use a Nigerian mobile number, e.g. 08012345678 or +2348012345678.",
   }),
-  gender: z.enum(AGENT_GENDERS, { required_error: "Select your gender." }),
   email: z.string().trim().toLowerCase().email("Enter a valid email address (you will use it to sign in)."),
+  nin: z
+    .string()
+    .transform((s) => s.replace(/\s/g, ""))
+    .refine((s) => /^[0-9]{11}$/.test(s), { message: "NIN must be exactly 11 digits." }),
   voterIdentificationNumber: z
     .string()
     .transform((s) => s.replace(/\s/g, "").toUpperCase())
     .refine(validateVoterId, { message: "Voter ID must be 19 or 20 letters and numbers." }),
-  maritalStatus: z.enum(AGENT_MARITAL_STATUSES, { required_error: "Select your marital status." }),
-  religion: z.enum(AGENT_RELIGIONS, { required_error: "Select your religion." }),
   agentPollingUnit: requireLocation("polling_unit", "Select the agent's polling unit."),
   agentVotingUnit: requireLocation("polling_unit", "Select the agent voting unit."),
   sdpMembershipId: z.string().trim().min(3, "Enter your SDP membership ID").max(60),
@@ -182,6 +189,8 @@ export const agentRegistrationSchema = z
         path: ["assignment"],
         message: "Select where you will serve as an agent.",
       });
+    } else if (!val.assignment.code.trim()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["assignment"], message: LOCATION_CODE_MISSING_MESSAGE });
     }
     if (val.password !== val.confirmPassword) {
       ctx.addIssue({
@@ -201,16 +210,15 @@ export type AgentRegistrationDraft = {
   firstName: string;
   middleName: string;
   surname: string;
-  dateOfBirth: string;
   phone: string;
-  gender: string;
   email: string;
+  nin: string;
   voterIdentificationNumber: string;
-  maritalStatus: string;
-  religion: string;
   agentPollingUnit: LocationPick;
   agentVotingUnit: LocationPick;
   sdpMembershipId: string;
+  /** Membership ID (normalised) that passed the member check; names are filled from that record. */
+  memberVerifiedId: string;
   pollingUnit: LocationPick;
   photoDataUrl: string;
   membershipIdCardDataUrl: string;
@@ -226,16 +234,14 @@ export const EMPTY_AGENT_DRAFT: AgentRegistrationDraft = {
   firstName: "",
   middleName: "",
   surname: "",
-  dateOfBirth: "",
   phone: "",
-  gender: "",
   email: "",
+  nin: "",
   voterIdentificationNumber: "",
-  maritalStatus: "",
-  religion: "",
   agentPollingUnit: EMPTY_LOCATION,
   agentVotingUnit: EMPTY_LOCATION,
   sdpMembershipId: "",
+  memberVerifiedId: "",
   pollingUnit: EMPTY_LOCATION,
   photoDataUrl: "",
   membershipIdCardDataUrl: "",

@@ -10,6 +10,8 @@ import {
   agentStep1Schema,
   agentStep2Schema,
   agentStep3Schema,
+  MEMBERSHIP_NOT_VERIFIED_MESSAGE,
+  normalizeMembershipId,
   zodFieldErrors,
   type AgentRegistrationDraft,
 } from "@/lib/agent-registration-schema";
@@ -59,11 +61,18 @@ export function AgentRegistrationWizard() {
 
   const validateStep = (n: number): boolean => {
     const result = STEP_SCHEMAS[n - 1].safeParse(draft);
-    if (result.success) {
-      setErrors({});
-      return true;
+    const next = result.success ? {} : zodFieldErrors(result.error);
+    if (
+      n === 2 &&
+      (!draft.memberVerifiedId || draft.memberVerifiedId !== normalizeMembershipId(draft.sdpMembershipId))
+    ) {
+      delete next.firstName;
+      delete next.middleName;
+      delete next.surname;
+      next.sdpMembershipId = MEMBERSHIP_NOT_VERIFIED_MESSAGE;
     }
-    setErrors(zodFieldErrors(result.error));
+    setErrors(next);
+    if (Object.keys(next).length === 0) return true;
     window.scrollTo(0, 0);
     return false;
   };

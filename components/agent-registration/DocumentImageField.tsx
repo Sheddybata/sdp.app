@@ -22,6 +22,7 @@ export function DocumentImageField({
   error,
   defaultFacing = "environment",
   maxSide,
+  maxBytes,
 }: {
   id: string;
   label: string;
@@ -32,6 +33,7 @@ export function DocumentImageField({
   /** Camera to open first: "user" (front) for portraits, "environment" (back) for documents. */
   defaultFacing?: Facing;
   maxSide?: number;
+  maxBytes?: number;
 }) {
   const uploadRef = useRef<HTMLInputElement>(null);
   const nativeCameraRef = useRef<HTMLInputElement>(null);
@@ -103,7 +105,7 @@ export function DocumentImageField({
     const video = videoRef.current;
     if (!video || video.readyState < 2) return;
     try {
-      onChange(compressDrawable(video, video.videoWidth, video.videoHeight, { maxSide }));
+      onChange(compressDrawable(video, video.videoWidth, video.videoHeight, { maxSide, maxBytes }));
       closeCamera();
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : "Could not capture the photo.");
@@ -115,7 +117,7 @@ export function DocumentImageField({
     setLocalError(null);
     setBusy(true);
     try {
-      onChange(await compressImageFile(file, { maxSide }));
+      onChange(await compressImageFile(file, { maxSide, maxBytes }));
     } catch (e) {
       setLocalError(e instanceof Error ? e.message : "Could not load this image.");
     } finally {

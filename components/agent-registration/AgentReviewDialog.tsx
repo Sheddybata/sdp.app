@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { format, isValid, parseISO } from "date-fns";
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -34,11 +33,6 @@ function Section({ title }: { title: string }) {
       {title}
     </p>
   );
-}
-
-function formatDob(iso: string): string {
-  const d = parseISO(iso);
-  return isValid(d) ? format(d, "d MMM yyyy") : iso;
 }
 
 export function AgentReviewDialog({
@@ -84,13 +78,10 @@ export function AgentReviewDialog({
               label="Name"
               value={[draft.firstName, draft.middleName, draft.surname].filter(Boolean).join(" ")}
             />
-            <Row label="Date of birth" value={formatDob(draft.dateOfBirth)} />
             <Row label="Phone" value={draft.phone} />
-            <Row label="Gender" value={draft.gender} />
             <Row label="Email" value={draft.email} />
-            <Row label="Voter's ID number" value={formatVoterIdDisplay(draft.voterIdentificationNumber)} />
-            <Row label="Marital status" value={draft.maritalStatus} />
-            <Row label="Religion" value={draft.religion} />
+            <Row label="NIN" value={draft.nin} />
+            <Row label="Voter registration number" value={formatVoterIdDisplay(draft.voterIdentificationNumber)} />
             <Row label="SDP membership ID" value={draft.sdpMembershipId} />
             <Row label="Agent's polling unit" value={formatLocationPick(draft.agentPollingUnit)} />
             <Row label="Agent voting unit" value={formatLocationPick(draft.agentVotingUnit)} />

@@ -3,16 +3,59 @@
 import bcrypt from "bcryptjs";
 import {
   agentRegistrationSchema,
+  LOCATION_CODE_MISSING_MESSAGE,
+  normalizeMembershipId,
   zodFieldErrors,
   type AgentLevel,
   type LocationPick,
 } from "@/lib/agent-registration-schema";
-import { createAgentRegistration } from "@/lib/db/agent-registrations";
+import { agentExistsForMember, createAgentRegistration } from "@/lib/db/agent-registrations";
+import { getMemberByMembershipId } from "@/lib/db/members";
 import { lookupLocationCode } from "@/app/actions/locationCodes";
+import type { MemberRecord } from "@/lib/mock-members";
 
 export type AgentRegistrationResult =
   | { ok: true }
   | { ok: false; error: string; fieldErrors?: Record<string, string> };
+
+export type AgentMembershipCheck =
+  | { ok: true; membershipId: string; firstName: string; middleName: string; surname: string }
+  | { ok: false; error: string };
+
+const MEMBER_NOT_FOUND =
+  "We couldn't find this SDP membership ID. Check the number on your membership card, or register as a member first.";
+const MEMBER_ALREADY_AGENT =
+  "This member is already registered as an agent. Sign in instead, or contact the SDP secretariat.";
+
+async function resolveMember(
+  raw: string
+): Promise<{ ok: true; member: MemberRecord } | { ok: false; error: string }> {
+  const normalized = normalizeMembershipId(raw ?? "");
+  if (normalized.length < 6 || normalized.length > 96) return { ok: false, error: MEMBER_NOT_FOUND };
+  const member = await getMemberByMembershipId(normalized);
+  if (!member) return { ok: false, error: MEMBER_NOT_FOUND };
+  if (await agentExistsForMember(member.id)) return { ok: false, error: MEMBER_ALREADY_AGENT };
+  return { ok: true, member };
+}
+
+function memberDisplayId(member: MemberRecord, fallback: string): string {
+  return member.locationMembershipId || member.membershipId || normalizeMembershipId(fallback);
+}
+
+/** Only SDP members may register as agents; the name is taken from the member record. */
+export async function checkAgentMembership(membershipId: string): Promise<AgentMembershipCheck> {
+  if (typeof membershipId !== "string") return { ok: false, error: MEMBER_NOT_FOUND };
+  const found = await resolveMember(membershipId);
+  if (!found.ok) return found;
+  const m = found.member;
+  return {
+    ok: true,
+    membershipId: memberDisplayId(m, membershipId),
+    firstName: m.firstName,
+    middleName: m.otherNames ?? "",
+    surname: m.surname,
+  };
+}
 
 function puIndex(loc: LocationPick): number | undefined {
   const m = /-(\d+)$/.exec(loc.pollingUnitId);
@@ -44,6 +87,15 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
   }
   const v = parsed.data;
 
+  const found = await resolveMember(v.sdpMembershipId);
+  if (!found.ok) {
+    return { ok: false, error: found.error, fieldErrors: { sdpMembershipId: found.error } };
+  }
+  const member = found.member;
+  const firstName = member.firstName.trim();
+  const middleName = (member.otherNames ?? "").trim();
+  const surname = member.surname.trim();
+
   const [assignment, agentPollingUnit, agentVotingUnit, pollingUnit] = await Promise.all([
     withServerCode(v.assignment, v.agentLevel),
     withServerCode(v.agentPollingUnit, "polling_unit"),
@@ -51,9 +103,25 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
     withServerCode(v.pollingUnit, "polling_unit"),
   ]);
 
+  const missingCode = (
+    [
+      ["assignment", assignment],
+      ["agentPollingUnit", agentPollingUnit],
+      ["agentVotingUnit", agentVotingUnit],
+      ["pollingUnit", pollingUnit],
+    ] as const
+  ).find(([, loc]) => !loc.code);
+  if (missingCode) {
+    return {
+      ok: false,
+      error: LOCATION_CODE_MISSING_MESSAGE,
+      fieldErrors: { [missingCode[0]]: LOCATION_CODE_MISSING_MESSAGE },
+    };
+  }
+
   const level = v.agentLevel;
   const passwordHash = await bcrypt.hash(v.password, await bcrypt.genSalt(10));
-  const fullName = [v.firstName, v.middleName, v.surname].filter(Boolean).join(" ");
+  const fullName = [firstName, middleName, surname].filter(Boolean).join(" ");
 
   const result = await createAgentRegistration({
     fullName,
@@ -61,6 +129,7 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
     email: v.email,
     passwordHash,
     registration: {
+      member_id: member.id,
       agent_level: level,
       assigned_state_id: assignment.stateId,
       assigned_state_name: assignment.stateName,
@@ -71,17 +140,14 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
         level === "ward" || level === "polling_unit" ? assignment.wardName || null : null,
       assigned_polling_unit_name: level === "polling_unit" ? assignment.pollingUnitName || null : null,
       assigned_code: assignment.code || null,
-      first_name: v.firstName,
-      middle_name: v.middleName || null,
-      surname: v.surname,
-      date_of_birth: v.dateOfBirth,
+      first_name: firstName,
+      middle_name: middleName || null,
+      surname,
       phone: v.phone,
-      gender: v.gender,
       email: v.email,
+      nin: v.nin,
       voter_identification_number: v.voterIdentificationNumber,
-      marital_status: v.maritalStatus,
-      religion: v.religion,
-      sdp_membership_id: v.sdpMembershipId,
+      sdp_membership_id: memberDisplayId(member, v.sdpMembershipId),
       agent_polling_unit: agentPollingUnit,
       agent_voting_unit: agentVotingUnit,
       polling_unit: pollingUnit,
@@ -98,6 +164,16 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
         ok: false,
         error: "An agent account with this email already exists. Sign in instead, or use a different email.",
         fieldErrors: { email: "This email is already registered." },
+      };
+    }
+    if (result.error === "member_taken") {
+      return { ok: false, error: MEMBER_ALREADY_AGENT, fieldErrors: { sdpMembershipId: MEMBER_ALREADY_AGENT } };
+    }
+    if (result.error === "nin_taken") {
+      return {
+        ok: false,
+        error: "An agent with this NIN has already registered. Contact the SDP secretariat if this is a mistake.",
+        fieldErrors: { nin: "This NIN is already registered." },
       };
     }
     return { ok: false, error: "Registration is temporarily unavailable. Please try again later." };

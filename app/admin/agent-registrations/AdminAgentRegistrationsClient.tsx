@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, ChevronRight, IdCard, Loader2, Search, X } from "lucide-react";
+import Link from "next/link";
+import { BadgeCheck, ChevronLeft, ChevronRight, IdCard, Loader2, Map as MapIcon, Search, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -57,7 +58,7 @@ function assignmentText(r: AgentRegistrationRecord): string {
 
 function matchesSearch(r: AgentRegistrationRecord, q: string): boolean {
   if (!q) return true;
-  return [fullName(r), r.email, r.phone, r.sdpMembershipId, r.voterIdentificationNumber, assignmentText(r)]
+  return [fullName(r), r.email, r.phone, r.nin ?? "", r.sdpMembershipId, r.voterIdentificationNumber, assignmentText(r)]
     .join(" ")
     .toLowerCase()
     .includes(q);
@@ -179,13 +180,10 @@ export function AdminAgentRegistrationsClient({
     ? [
         ["Agent type", AGENT_LEVEL_LABELS[selected.agentLevel]],
         ["Assigned to", assignmentText(selected)],
-        ["Date of birth", selected.dateOfBirth],
         ["Phone", selected.phone],
         ["Email", selected.email],
-        ["Gender", selected.gender],
-        ["Voter's ID number", formatVoterIdDisplay(selected.voterIdentificationNumber)],
-        ["Marital status", selected.maritalStatus],
-        ["Religion", selected.religion],
+        ["NIN", selected.nin ?? "—"],
+        ["Voter registration number", formatVoterIdDisplay(selected.voterIdentificationNumber)],
         ["SDP membership ID", selected.sdpMembershipId],
         ["Agent's polling unit", formatLocationPick(selected.agentPollingUnit)],
         ["Agent voting unit", formatLocationPick(selected.agentVotingUnit)],
@@ -204,16 +202,24 @@ export function AdminAgentRegistrationsClient({
             Agents who registered themselves. Approve them to let them sign in to the agent portal.
           </p>
         </div>
-        <Button
-          type="button"
-          className="min-h-[44px] shrink-0 bg-sdp-primary text-white hover:bg-[#e0752a]"
-          onClick={() => setCardsOpen(true)}
-          disabled={cardAgents.length === 0}
-          title={cardAgents.length === 0 ? "Approve agents first to issue ID cards" : undefined}
-        >
-          <IdCard className="h-4 w-4" />
-          Download all ID cards ({cardAgents.length})
-        </Button>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <Button asChild variant="outline" className="min-h-[44px]">
+            <Link href="/admin/agent-coverage">
+              <MapIcon className="h-4 w-4" />
+              Coverage by state
+            </Link>
+          </Button>
+          <Button
+            type="button"
+            className="min-h-[44px] shrink-0 bg-sdp-primary text-white hover:bg-[#e0752a]"
+            onClick={() => setCardsOpen(true)}
+            disabled={cardAgents.length === 0}
+            title={cardAgents.length === 0 ? "Approve agents first to issue ID cards" : undefined}
+          >
+            <IdCard className="h-4 w-4" />
+            Download all ID cards ({cardAgents.length})
+          </Button>
+        </div>
       </div>
 
       <AgentIdCardsDialog open={cardsOpen} onOpenChange={setCardsOpen} agents={cardAgents} />
@@ -239,7 +245,7 @@ export function AdminAgentRegistrationsClient({
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <Input
               id="agent-search"
-              placeholder="Name, email, phone, membership ID, location"
+              placeholder="Name, email, phone, NIN, membership ID, location"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="min-h-[44px] pl-9"
@@ -344,8 +350,18 @@ export function AdminAgentRegistrationsClient({
                     <SheetTitle className="text-left text-base leading-snug sm:text-lg">
                       {fullName(selected)}
                     </SheetTitle>
-                    <div className="mt-1">
+                    <div className="mt-1 flex flex-wrap items-center gap-2">
                       <StatusBadge status={selected.status} />
+                      {selected.memberId ? (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800">
+                          <BadgeCheck className="h-3.5 w-3.5" />
+                          Verified SDP member
+                        </span>
+                      ) : (
+                        <span className="inline-block rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600">
+                          Not linked to a member record
+                        </span>
+                      )}
                     </div>
                   </div>
                   <SheetClose asChild>
