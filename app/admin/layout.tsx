@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, Users, Calendar, Ticket, Upload, UserCheck } from "lucide-react";
+import { LayoutDashboard, Users, Calendar, Ticket, Upload, UserCheck, Map as MapIcon, Vote } from "lucide-react";
 import { PullToRefresh } from "@/components/PullToRefresh";
 import { LogoutButton } from "@/components/admin/LogoutButton";
 
@@ -51,6 +51,20 @@ export default function AdminLayout({
               >
                 <UserCheck className="h-4 w-4" />
                 Agent registrations
+              </Link>
+              <Link
+                href="/admin/agent-coverage"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+              >
+                <MapIcon className="h-4 w-4" />
+                Agent coverage
+              </Link>
+              <Link
+                href="/admin/elections"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-100"
+              >
+                <Vote className="h-4 w-4" />
+                Elections
               </Link>
               <Link
                 href="/admin/portal-uploads"

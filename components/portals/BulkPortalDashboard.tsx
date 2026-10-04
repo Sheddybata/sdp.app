@@ -13,6 +13,7 @@ import {
   LogOut,
   UserPlus,
   Loader2,
+  Vote,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -247,6 +248,25 @@ export function BulkPortalDashboard({
       </header>
 
       <div className="mx-auto max-w-5xl space-y-8 px-4 py-8 sm:px-6">
+        {variant === "agent" ? (
+          <section className="rounded-xl border-2 border-sdp-primary/40 bg-gradient-to-br from-sdp-primary/10 to-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <h2 className="flex items-center gap-2 text-base font-semibold text-neutral-900">
+                  <Vote className="h-5 w-5 text-sdp-primary" aria-hidden />
+                  Election day reporting
+                </h2>
+                <p className="mt-1 max-w-xl text-sm text-neutral-600">
+                  Send results from your post (photo and figures), report incidents and check in through the day.
+                </p>
+              </div>
+              <Button className="min-h-[44px] shrink-0 bg-sdp-primary text-white hover:bg-sdp-primary/90" asChild>
+                <Link href="/agent/election">Open election day</Link>
+              </Button>
+            </div>
+          </section>
+        ) : null}
+
         <div
           className={cn(
             "rounded-lg border px-4 py-3 text-sm text-neutral-800",
