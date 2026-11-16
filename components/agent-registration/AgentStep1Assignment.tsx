@@ -25,7 +25,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { listConstituenciesForLevel } from "@/app/actions/constituencies";
-import type { ConstituencySeat } from "@/lib/constituency-data";
+import type { ConstituencySeat } from "@/lib/constituency-types";
 
 /** Drop location parts deeper than the chosen level so stale picks aren't kept. */
 function trimToLevel(loc: LocationPick, level: AgentLevel): LocationPick {

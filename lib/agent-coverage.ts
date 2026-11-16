@@ -1,12 +1,7 @@
 import type { AgentLevel } from "@/lib/agent-registration-schema";
 import type { PortalUserStatus } from "@/lib/db/agent-registrations";
 import type { StateLocationTotals } from "@/lib/location-codes";
-import {
-  listFederalConstituencies,
-  listSenatorialDistricts,
-  listStateAssemblyConstituencies,
-  listUnmappedConstituencies,
-} from "@/lib/constituency-data";
+import type { ConstituencySeatTotals } from "@/lib/constituency-types";
 
 /**
  * A post is "filled" when at least one approved agent holds it, and "pending" when it has
@@ -136,7 +131,16 @@ function tierCounts(
   return { required, filled, pending: Math.min(pend, Math.max(0, required - filled)) };
 }
 
-export function computeAgentCoverage(totals: StateLocationTotals[], agents: CoverageAgent[]): AgentCoverageReport {
+export function computeAgentCoverage(
+  totals: StateLocationTotals[],
+  agents: CoverageAgent[],
+  seatTotals: ConstituencySeatTotals = {
+    senatorial: 109,
+    federal: 360,
+    stateAssembly: 989,
+    unmapped: 0,
+  }
+): AgentCoverageReport {
   const approvedPosts = emptyLevelSets();
   const pendingPosts = emptyLevelSets();
   const agentsByState = new Map<string, { approved: number; pending: number }>();
@@ -249,22 +253,14 @@ export function computeAgentCoverage(totals: StateLocationTotals[], agents: Cove
 
   const constituencies: ConstituencyTierCoverage = {
     national: tierCounts(1, approvedPosts.national, pendingPosts.national),
-    senatorial: tierCounts(
-      listSenatorialDistricts().length,
-      approvedPosts.senatorial,
-      pendingPosts.senatorial
-    ),
-    houseOfReps: tierCounts(
-      listFederalConstituencies().length,
-      approvedPosts.house_of_reps,
-      pendingPosts.house_of_reps
-    ),
+    senatorial: tierCounts(seatTotals.senatorial, approvedPosts.senatorial, pendingPosts.senatorial),
+    houseOfReps: tierCounts(seatTotals.federal, approvedPosts.house_of_reps, pendingPosts.house_of_reps),
     stateAssembly: tierCounts(
-      listStateAssemblyConstituencies().length,
+      seatTotals.stateAssembly,
       approvedPosts.state_assembly,
       pendingPosts.state_assembly
     ),
-    unmappedSeats: listUnmappedConstituencies().length,
+    unmappedSeats: seatTotals.unmapped,
   };
 
   return { states, national, constituencies };

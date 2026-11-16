@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { LocationPicker } from "@/components/agent-registration/LocationPicker";
 import { EMPTY_LOCATION, type LocationPick } from "@/lib/agent-registration-schema";
 import { saveManualConstituencyLink } from "@/app/actions/constituencies";
-import type { UnmappedSeat } from "@/lib/constituency-data";
+import type { UnmappedSeat } from "@/lib/constituency-types";
 import { cn } from "@/lib/utils";
 
 type ManualMap = Record<string, Array<string | { stateId: string; lgaId: string; wardId: string }>>;
