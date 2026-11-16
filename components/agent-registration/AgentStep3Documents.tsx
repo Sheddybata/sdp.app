@@ -8,6 +8,8 @@ import { DocumentImageField } from "./DocumentImageField";
 import type { AgentStepProps } from "./types";
 
 export function AgentStep3Documents({ draft, update, errors }: AgentStepProps) {
+  const isMember = draft.membershipPath === "member";
+
   return (
     <div className="space-y-6">
       <div className="space-y-5 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
@@ -22,14 +24,16 @@ export function AgentStep3Documents({ draft, update, errors }: AgentStepProps) {
           defaultFacing="user"
           maxSide={960}
         />
-        <DocumentImageField
-          id="agent-membership-card"
-          label="SDP membership ID card"
-          hint="Photo of your membership card with all details readable."
-          value={draft.membershipIdCardDataUrl}
-          onChange={(membershipIdCardDataUrl) => update({ membershipIdCardDataUrl })}
-          error={errors.membershipIdCardDataUrl}
-        />
+        {isMember ? (
+          <DocumentImageField
+            id="agent-membership-card"
+            label="SDP membership ID card"
+            hint="Photo of your membership card with all details readable."
+            value={draft.membershipIdCardDataUrl}
+            onChange={(membershipIdCardDataUrl) => update({ membershipIdCardDataUrl })}
+            error={errors.membershipIdCardDataUrl}
+          />
+        ) : null}
         <DocumentImageField
           id="agent-pvc"
           label="PVC (Permanent Voter's Card)"
@@ -62,8 +66,9 @@ export function AgentStep3Documents({ draft, update, errors }: AgentStepProps) {
         <div>
           <h2 className="text-sm font-semibold text-neutral-900">Create your sign-in password</h2>
           <p className="mt-0.5 text-xs text-neutral-500">
-            You will sign in with <span className="font-medium">{draft.email || "your email"}</span> once
-            the secretariat approves your registration.
+            You will sign in with{" "}
+            <span className="font-medium">{draft.phone || "your phone number"}</span> once the secretariat
+            approves your registration.
           </p>
         </div>
         <div className="grid gap-4 sm:grid-cols-2">

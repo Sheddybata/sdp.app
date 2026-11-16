@@ -161,7 +161,7 @@ export function PortalSignupPage({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="su-email">Email</Label>
+              <Label htmlFor="su-email">{variant === "agent" ? "Email (optional)" : "Email"}</Label>
               <div className="relative">
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
                 <Input
@@ -174,7 +174,11 @@ export function PortalSignupPage({
                   disabled={isLoading}
                 />
               </div>
-              <p className="text-xs text-neutral-500">You will use this email to sign in.</p>
+              <p className="text-xs text-neutral-500">
+                {variant === "agent"
+                  ? "Optional contact email. You sign in with your phone number."
+                  : "You will use this email to sign in."}
+              </p>
             </div>
 
             <div className="space-y-2">

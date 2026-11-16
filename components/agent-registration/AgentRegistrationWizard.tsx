@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
   EMPTY_AGENT_DRAFT,
+  AGENT_STEP2_FIELD_KEYS,
   agentStep1Schema,
   agentStep2Schema,
   agentStep3Schema,
@@ -33,7 +34,7 @@ const STEP_SCHEMAS = [agentStep1Schema, agentStep2Schema, agentStep3Schema] as c
 const FIELD_STEP: Record<string, number> = {
   agentLevel: 1,
   assignment: 1,
-  ...Object.fromEntries(Object.keys(agentStep2Schema.shape).map((k) => [k, 2])),
+  ...Object.fromEntries(AGENT_STEP2_FIELD_KEYS.map((k) => [k, 2])),
 };
 
 export function AgentRegistrationWizard() {
@@ -64,6 +65,7 @@ export function AgentRegistrationWizard() {
     const next = result.success ? {} : zodFieldErrors(result.error);
     if (
       n === 2 &&
+      draft.membershipPath === "member" &&
       (!draft.memberVerifiedId || draft.memberVerifiedId !== normalizeMembershipId(draft.sdpMembershipId))
     ) {
       delete next.firstName;
@@ -121,7 +123,7 @@ export function AgentRegistrationWizard() {
           <h1 className="mt-4 text-2xl font-semibold text-neutral-900">Registration submitted</h1>
           <p className="mt-2 text-sm text-neutral-600">
             Thank you, {draft.firstName}. The national secretariat will review your details. Once
-            approved, sign in to the agent portal with <strong>{draft.email}</strong> and the password
+            approved, sign in to the agent portal with <strong>{draft.phone}</strong> and the password
             you created.
           </p>
           <Button asChild className="mt-6 min-h-[44px] w-full bg-sdp-primary text-white hover:bg-sdp-primary/90">

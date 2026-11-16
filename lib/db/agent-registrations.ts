@@ -1,11 +1,12 @@
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { AgentLevel, LocationPick } from "@/lib/agent-registration-schema";
 import { ADMIN_LIST_MAX_TOTAL_ROWS, POSTGREST_PAGE_SIZE } from "@/lib/db/admin-list-limits";
+import { normalizePhone } from "@/lib/otp/termii";
 
 export type PortalUserStatus = "pending" | "approved" | "rejected";
 
 export interface AgentRegistrationInsert {
-  member_id: string;
+  member_id: string | null;
   agent_level: AgentLevel;
   assigned_state_id: string;
   assigned_state_name: string;
@@ -20,16 +21,17 @@ export interface AgentRegistrationInsert {
   first_name: string;
   middle_name: string | null;
   surname: string;
+  gender?: string | null;
   phone: string;
-  email: string;
+  email: string | null;
   nin: string;
   voter_identification_number: string;
-  sdp_membership_id: string;
+  sdp_membership_id: string | null;
   agent_polling_unit: LocationPick;
   agent_voting_unit: LocationPick;
   polling_unit: LocationPick;
   photo_data_url: string;
-  membership_id_card_data_url: string;
+  membership_id_card_data_url: string | null;
   pvc_data_url: string;
   acknowledged_at: string;
 }
@@ -57,11 +59,13 @@ export interface AgentRegistrationRecord {
   middleName: string | null;
   surname: string;
   phone: string;
-  email: string;
+  email: string | null;
+  gender: string | null;
   /** Null for registrations made before NIN was collected. */
   nin: string | null;
   voterIdentificationNumber: string;
-  sdpMembershipId: string;
+  /** Null for non-member applicants. */
+  sdpMembershipId: string | null;
   agentPollingUnit: LocationPick;
   agentVotingUnit: LocationPick;
   pollingUnit: LocationPick;
@@ -75,7 +79,7 @@ export interface AgentRegistrationRecord {
 
 /** List view — excludes the three base64 document columns. */
 const LIST_COLUMNS =
-  "id,user_id,member_id,agent_level,assigned_state_id,assigned_lga_id,assigned_ward_id,assigned_state_name,assigned_lga_name,assigned_ward_name,assigned_polling_unit_name,assigned_code,assigned_constituency_code,assigned_constituency_name,first_name,middle_name,surname,phone,email,nin,voter_identification_number,sdp_membership_id,agent_polling_unit,agent_voting_unit,polling_unit,acknowledged_at,created_at,portal_users(status,reviewed_at,review_note)";
+  "id,user_id,member_id,agent_level,assigned_state_id,assigned_lga_id,assigned_ward_id,assigned_state_name,assigned_lga_name,assigned_ward_name,assigned_polling_unit_name,assigned_code,assigned_constituency_code,assigned_constituency_name,first_name,middle_name,surname,gender,phone,email,nin,voter_identification_number,sdp_membership_id,agent_polling_unit,agent_voting_unit,polling_unit,acknowledged_at,created_at,portal_users(status,reviewed_at,review_note)";
 
 const DETAIL_COLUMNS = `${LIST_COLUMNS},photo_data_url,membership_id_card_data_url,pvc_data_url`;
 
@@ -108,10 +112,11 @@ function rowToRecord(r: Row): AgentRegistrationRecord {
     middleName: str("middle_name"),
     surname: r.surname as string,
     phone: r.phone as string,
-    email: r.email as string,
+    email: str("email"),
+    gender: str("gender"),
     nin: str("nin"),
     voterIdentificationNumber: r.voter_identification_number as string,
-    sdpMembershipId: r.sdp_membership_id as string,
+    sdpMembershipId: str("sdp_membership_id"),
     agentPollingUnit: r.agent_polling_unit as LocationPick,
     agentVotingUnit: r.agent_voting_unit as LocationPick,
     pollingUnit: r.polling_unit as LocationPick,
@@ -126,28 +131,29 @@ function rowToRecord(r: Row): AgentRegistrationRecord {
 /**
  * Create a pending agent login (portal_users) plus the registration details.
  * Removes the login row again if the details insert fails.
+ * Agents sign in with phone + password (email is not required).
  */
 export async function createAgentRegistration(args: {
   fullName: string;
   phone: string;
-  email: string;
   passwordHash: string;
   registration: AgentRegistrationInsert;
 }): Promise<
-  { ok: true; id: string } | { ok: false; error: "email_taken" | "nin_taken" | "member_taken" | "unavailable" }
+  | { ok: true; id: string }
+  | { ok: false; error: "phone_taken" | "nin_taken" | "member_taken" | "unavailable" }
 > {
   const supabase = createAdminClient();
   if (!supabase) return { ok: false, error: "unavailable" };
 
-  const email = args.email.trim().toLowerCase();
+  const phone = normalizePhone(args.phone) || args.phone.trim();
 
   const { data: userRow, error: userError } = await supabase
     .from("portal_users")
     .insert({
       role: "agent",
       full_name: args.fullName.trim(),
-      phone: args.phone.trim(),
-      email,
+      phone,
+      email: null,
       password_hash: args.passwordHash,
       status: "pending",
     })
@@ -157,7 +163,7 @@ export async function createAgentRegistration(args: {
   if (userError || !userRow) {
     const msg = String(userError?.message || "").toLowerCase();
     if (userError?.code === "23505" || msg.includes("unique") || msg.includes("duplicate")) {
-      return { ok: false, error: "email_taken" };
+      return { ok: false, error: "phone_taken" };
     }
     console.error("[agent registration] insert portal user failed:", userError);
     return { ok: false, error: "unavailable" };
@@ -167,7 +173,7 @@ export async function createAgentRegistration(args: {
 
   const { data: regRow, error: regError } = await supabase
     .from("agent_registrations")
-    .insert({ ...args.registration, user_id: userId })
+    .insert({ ...args.registration, user_id: userId, phone })
     .select("id")
     .single();
 

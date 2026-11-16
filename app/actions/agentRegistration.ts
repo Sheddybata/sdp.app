@@ -20,6 +20,7 @@ import { getMemberByMembershipId } from "@/lib/db/members";
 import { lookupLocationCode } from "@/app/actions/locationCodes";
 import { verifyConstituencyAssignment } from "@/app/actions/constituencies";
 import { nationalAgentPost } from "@/lib/constituency-data";
+import { normalizePhone } from "@/lib/otp/termii";
 import type { MemberRecord } from "@/lib/mock-members";
 
 export type AgentRegistrationResult =
@@ -36,6 +37,8 @@ const MEMBER_ALREADY_AGENT =
   "This member is already registered as an agent. Sign in instead, or contact the SDP secretariat.";
 const POST_TAKEN =
   "This post already has an approved agent. Choose a different assignment, or contact the SDP secretariat.";
+const PHONE_TAKEN =
+  "An agent account with this phone number already exists. Sign in instead, or use a different number.";
 
 async function resolveMember(
   raw: string
@@ -52,7 +55,7 @@ function memberDisplayId(member: MemberRecord, fallback: string): string {
   return member.locationMembershipId || member.membershipId || normalizeMembershipId(fallback);
 }
 
-/** Only SDP members may register as agents; the name is taken from the member record. */
+/** Look up an SDP membership ID for the member apply path. */
 export async function checkAgentMembership(membershipId: string): Promise<AgentMembershipCheck> {
   if (typeof membershipId !== "string") return { ok: false, error: MEMBER_NOT_FOUND };
   const found = await resolveMember(membershipId);
@@ -96,15 +99,28 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
     };
   }
   const v = parsed.data;
+  const isMember = v.membershipPath === "member";
 
-  const found = await resolveMember(v.sdpMembershipId);
-  if (!found.ok) {
-    return { ok: false, error: found.error, fieldErrors: { sdpMembershipId: found.error } };
+  let memberId: string | null = null;
+  let firstName = v.firstName.trim();
+  let middleName = (v.middleName ?? "").trim();
+  let surname = v.surname.trim();
+  let sdpMembershipId: string | null = null;
+  let gender: string | null = v.gender ?? null;
+
+  if (isMember) {
+    const found = await resolveMember(v.sdpMembershipId ?? "");
+    if (!found.ok) {
+      return { ok: false, error: found.error, fieldErrors: { sdpMembershipId: found.error } };
+    }
+    const member = found.member;
+    memberId = member.id;
+    firstName = member.firstName.trim();
+    middleName = (member.otherNames ?? "").trim();
+    surname = member.surname.trim();
+    sdpMembershipId = memberDisplayId(member, v.sdpMembershipId ?? "");
+    gender = member.gender ?? null;
   }
-  const member = found.member;
-  const firstName = member.firstName.trim();
-  const middleName = (member.otherNames ?? "").trim();
-  const surname = member.surname.trim();
 
   const level = v.agentLevel;
   let assignment = v.assignment;
@@ -183,15 +199,15 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
 
   const passwordHash = await bcrypt.hash(v.password, await bcrypt.genSalt(10));
   const fullName = [firstName, middleName, surname].filter(Boolean).join(" ");
+  const phone = normalizePhone(v.phone) || v.phone.trim();
 
   const isAdminLadder = usesAdminLocationPicker(level);
   const result = await createAgentRegistration({
     fullName,
-    phone: v.phone,
-    email: v.email,
+    phone,
     passwordHash,
     registration: {
-      member_id: member.id,
+      member_id: memberId,
       agent_level: level,
       assigned_state_id: assignment.stateId,
       assigned_state_name: assignment.stateName,
@@ -207,27 +223,29 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
       first_name: firstName,
       middle_name: middleName || null,
       surname,
-      phone: v.phone,
-      email: v.email,
+      gender,
+      phone,
+      email: null,
       nin: v.nin,
       voter_identification_number: v.voterIdentificationNumber,
-      sdp_membership_id: memberDisplayId(member, v.sdpMembershipId),
+      sdp_membership_id: sdpMembershipId,
       agent_polling_unit: agentPollingUnit,
       agent_voting_unit: agentVotingUnit,
       polling_unit: pollingUnit,
       photo_data_url: v.photoDataUrl,
-      membership_id_card_data_url: v.membershipIdCardDataUrl,
+      membership_id_card_data_url:
+        isMember && v.membershipIdCardDataUrl ? v.membershipIdCardDataUrl : null,
       pvc_data_url: v.pvcDataUrl,
       acknowledged_at: new Date().toISOString(),
     },
   });
 
   if (!result.ok) {
-    if (result.error === "email_taken") {
+    if (result.error === "phone_taken") {
       return {
         ok: false,
-        error: "An agent account with this email already exists. Sign in instead, or use a different email.",
-        fieldErrors: { email: "This email is already registered." },
+        error: PHONE_TAKEN,
+        fieldErrors: { phone: "This phone number is already registered." },
       };
     }
     if (result.error === "member_taken") {

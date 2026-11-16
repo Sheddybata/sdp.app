@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Lock, Mail, Loader2 } from "lucide-react";
+import { ArrowLeft, Lock, Mail, Phone, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,17 +46,18 @@ export function PortalLoginPage({
   registerPath?: string;
 }) {
   const router = useRouter();
-  const [email, setEmail] = useState("");
+  const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const s = variantStyles[variant];
+  const usePhone = variant === "agent";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    if (!email.trim()) {
-      setError("Please enter your email.");
+    if (!login.trim()) {
+      setError(usePhone ? "Please enter your phone number." : "Please enter your email.");
       return;
     }
     if (!password) {
@@ -64,7 +65,7 @@ export function PortalLoginPage({
       return;
     }
     setIsLoading(true);
-    const result = await portalLogin(variant, email, password);
+    const result = await portalLogin(variant, login, password);
     setIsLoading(false);
     if (result.success) {
       const next = new URLSearchParams(
@@ -119,17 +120,22 @@ export function PortalLoginPage({
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="portal-email">Email</Label>
+              <Label htmlFor="portal-login">{usePhone ? "Phone number" : "Email"}</Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                {usePhone ? (
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                ) : (
+                  <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
+                )}
                 <Input
-                  id="portal-email"
-                  type="email"
-                  placeholder="you@sdp.org"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  id="portal-login"
+                  type={usePhone ? "tel" : "email"}
+                  inputMode={usePhone ? "tel" : "email"}
+                  placeholder={usePhone ? "08012345678" : "you@sdp.org"}
+                  value={login}
+                  onChange={(e) => setLogin(e.target.value)}
                   className="pl-10 min-h-[44px]"
-                  autoComplete="email"
+                  autoComplete={usePhone ? "tel" : "email"}
                   disabled={isLoading}
                 />
               </div>

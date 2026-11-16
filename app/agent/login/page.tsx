@@ -5,7 +5,7 @@ export default function AgentLoginPage() {
     <PortalLoginPage
       variant="agent"
       title="Agent portal"
-      subtitle="Sign in to upload CSV or Excel lists for bulk member registration."
+      subtitle="Sign in with your phone number and password to access the agent portal."
       dashboardPath="/agent"
       signupPath="/agent/signup"
       registerPath="/agent/apply"

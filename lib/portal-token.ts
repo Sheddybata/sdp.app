@@ -1,7 +1,8 @@
 /**
  * Signed portal session token (Node.js server actions only).
- * Format: base64(email:role:userId:timestamp:signatureHex)
- * Signature = HMAC-SHA256(SESSION_SECRET, `${email}:${role}:${userId}:${timestamp}`)
+ * Format: base64(identity:role:userId:timestamp:signatureHex)
+ * identity = email (cluster) or E.164 phone (agent), lowercased.
+ * Signature = HMAC-SHA256(SESSION_SECRET, `${identity}:${role}:${userId}:${timestamp}`)
  *
  * Middleware uses the same algorithm with Web Crypto (see middleware.ts).
  */

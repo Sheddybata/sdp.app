@@ -1,4 +1,5 @@
 import { createAdminClient } from "@/lib/supabase/admin";
+import { normalizePhone } from "@/lib/otp/termii";
 import type { PortalRole } from "@/lib/portal-token";
 
 export interface PortalUserRow {
@@ -6,7 +7,7 @@ export interface PortalUserRow {
   role: PortalRole;
   full_name: string;
   phone: string;
-  email: string;
+  email: string | null;
   password_hash: string;
   created_at: string;
   /** Missing before migration 015; treat as approved. */
@@ -30,23 +31,69 @@ export async function findPortalUserByEmailRole(
   return data as PortalUserRow;
 }
 
-export async function findPortalUserById(
-  id: string,
-  role: PortalRole,
-  email: string
+/** Agents sign in with phone; matches E.164 and common legacy local formats. */
+export async function findPortalUserByPhoneRole(
+  phone: string,
+  role: PortalRole
 ): Promise<PortalUserRow | null> {
   const supabase = createAdminClient();
   if (!supabase) return null;
-  const normalized = email.trim().toLowerCase();
+  const normalized = normalizePhone(phone);
+  if (!normalized) return null;
+
+  const candidates = new Set<string>([normalized, phone.trim()]);
+  if (normalized.startsWith("+234") && normalized.length === 14) {
+    candidates.add(`0${normalized.slice(4)}`);
+    candidates.add(normalized.slice(1));
+  }
+
+  const { data, error } = await supabase
+    .from("portal_users")
+    .select("*")
+    .eq("role", role)
+    .in("phone", Array.from(candidates))
+    .limit(1)
+    .maybeSingle();
+  if (error || !data) return null;
+  return data as PortalUserRow;
+}
+
+function identityMatchesUser(user: PortalUserRow, identity: string): boolean {
+  const raw = identity.trim().toLowerCase();
+  if (!raw) return false;
+  if (user.email && user.email.trim().toLowerCase() === raw) return true;
+  const storedPhone = (normalizePhone(user.phone) || user.phone).trim().toLowerCase();
+  if (storedPhone && storedPhone === raw) return true;
+  const fromIdentity = normalizePhone(identity);
+  if (fromIdentity && storedPhone === fromIdentity.toLowerCase()) return true;
+  return false;
+}
+
+export async function findPortalUserById(
+  id: string,
+  role: PortalRole,
+  identity: string
+): Promise<PortalUserRow | null> {
+  const supabase = createAdminClient();
+  if (!supabase) return null;
   const { data, error } = await supabase
     .from("portal_users")
     .select("*")
     .eq("id", id)
     .eq("role", role)
-    .eq("email", normalized)
     .maybeSingle();
   if (error || !data) return null;
-  return data as PortalUserRow;
+  const user = data as PortalUserRow;
+  if (!identityMatchesUser(user, identity)) return null;
+  return user;
+}
+
+/** Login key stored in the session cookie: email for cluster, phone for agent. */
+export function portalSessionIdentity(user: PortalUserRow): string {
+  if (user.role === "agent") {
+    return (normalizePhone(user.phone) || user.phone).trim().toLowerCase();
+  }
+  return (user.email || user.phone).trim().toLowerCase();
 }
 
 export interface ValidInviteRow {
@@ -83,20 +130,24 @@ export async function createPortalUserWithInvite(args: {
   role: PortalRole;
   fullName: string;
   phone: string;
-  email: string;
+  email: string | null;
   passwordHash: string;
-}): Promise<{ ok: true; userId: string } | { ok: false; error: "email_taken" | "invite_invalid" | "unavailable" }> {
+}): Promise<
+  | { ok: true; userId: string }
+  | { ok: false; error: "email_taken" | "phone_taken" | "invite_invalid" | "unavailable" }
+> {
   const supabase = createAdminClient();
   if (!supabase) return { ok: false, error: "unavailable" };
 
-  const normalizedEmail = args.email.trim().toLowerCase();
+  const normalizedEmail = args.email?.trim().toLowerCase() || null;
+  const normalizedPhone = normalizePhone(args.phone) || args.phone.trim();
 
   const { data: userRow, error: insertError } = await supabase
     .from("portal_users")
     .insert({
       role: args.role,
       full_name: args.fullName.trim(),
-      phone: args.phone.trim(),
+      phone: normalizedPhone,
       email: normalizedEmail,
       password_hash: args.passwordHash,
     })
@@ -107,6 +158,7 @@ export async function createPortalUserWithInvite(args: {
     const msg = String(insertError.message || "").toLowerCase();
     const code = insertError.code;
     if (code === "23505" || msg.includes("unique") || msg.includes("duplicate")) {
+      if (msg.includes("phone")) return { ok: false, error: "phone_taken" };
       return { ok: false, error: "email_taken" };
     }
     console.error("[portal signup] insert user failed:", insertError);

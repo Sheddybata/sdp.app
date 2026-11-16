@@ -6,18 +6,26 @@ import { BadgeCheck, Copy, Loader2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { formatVoterIdDisplay, normalizeVoterIdInput } from "@/lib/enrollment-schema";
 import {
+  AGENT_GENDERS,
   isLocationComplete,
   normalizeMembershipId,
+  type AgentMembershipPath,
   type AgentRegistrationDraft,
   type LocationPick,
 } from "@/lib/agent-registration-schema";
 import { checkAgentMembership } from "@/app/actions/agentRegistration";
 import { LocationPicker } from "./LocationPicker";
 import type { AgentStepProps } from "./types";
-
-type TextKey = "phone" | "email";
+import { cn } from "@/lib/utils";
 
 function Field({
   id,
@@ -119,18 +127,26 @@ function LockedName({ id, label, value, optional }: { id: string; label: string;
 export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
   const [checking, setChecking] = useState(false);
   const [checkError, setCheckError] = useState<string | null>(null);
+  const isMember = draft.membershipPath === "member";
 
   const verified =
-    !!draft.memberVerifiedId && draft.memberVerifiedId === normalizeMembershipId(draft.sdpMembershipId);
+    isMember &&
+    !!draft.memberVerifiedId &&
+    draft.memberVerifiedId === normalizeMembershipId(draft.sdpMembershipId);
 
-  const text = (key: TextKey) => ({
-    id: `agent-${key}`,
-    value: draft[key],
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) =>
-      update({ [key]: e.target.value } as Partial<AgentRegistrationDraft>),
-    className: "min-h-[44px]",
-    "aria-invalid": !!errors[key],
-  });
+  const setPath = (membershipPath: AgentMembershipPath) => {
+    setCheckError(null);
+    update({
+      membershipPath,
+      sdpMembershipId: "",
+      memberVerifiedId: "",
+      firstName: "",
+      middleName: "",
+      surname: "",
+      gender: "",
+      membershipIdCardDataUrl: "",
+    });
+  };
 
   const onMembershipIdChange = (value: string) => {
     setCheckError(null);
@@ -185,96 +201,186 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
         <div>
           <h3 className="text-sm font-semibold text-neutral-900">SDP membership</h3>
           <p className="mt-0.5 text-xs text-neutral-500">
-            Only registered SDP members can become agents. Enter the membership ID on your card and tap Check
-            membership.
+            Members verify their membership ID. Non-members can still apply with their name, gender and
+            phone — photo, PVC and NIN are required either way.
           </p>
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="agent-sdpMembershipId">SDP membership ID</Label>
-          <div className="flex flex-col gap-2 sm:flex-row">
-            <Input
-              id="agent-sdpMembershipId"
-              value={draft.sdpMembershipId}
-              onChange={(e) => onMembershipIdChange(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter") {
-                  e.preventDefault();
-                  void checkMembership();
-                }
-              }}
-              placeholder="e.g. 17-09-11-AA123"
-              autoComplete="off"
-              autoCapitalize="characters"
-              className="min-h-[44px] flex-1 font-mono uppercase tracking-wide"
-              aria-invalid={!!membershipError}
-            />
-            <Button
+        <div className="grid grid-cols-2 gap-2">
+          {(
+            [
+              ["member", "I am an SDP member"],
+              ["non_member", "I am not a member yet"],
+            ] as const
+          ).map(([value, label]) => (
+            <button
+              key={value}
               type="button"
-              className={
-                verified
-                  ? "min-h-[44px] bg-sdp-accent text-white hover:bg-sdp-accent"
-                  : "min-h-[44px] bg-sdp-primary text-white hover:bg-sdp-primary/90"
-              }
-              onClick={checkMembership}
-              disabled={checking || verified}
+              onClick={() => setPath(value)}
+              className={cn(
+                "min-h-[44px] rounded-lg border px-3 text-sm font-medium transition-colors",
+                draft.membershipPath === value
+                  ? "border-sdp-primary bg-sdp-primary/10 text-sdp-primary"
+                  : "border-neutral-200 bg-white text-neutral-700 hover:bg-neutral-50"
+              )}
             >
-              {checking ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : verified ? (
-                <BadgeCheck className="h-4 w-4" />
-              ) : null}
-              {verified ? "Verified" : checking ? "Checking…" : "Check membership"}
-            </Button>
-          </div>
+              {label}
+            </button>
+          ))}
         </div>
 
-        {verified ? (
-          <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
-            <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" aria-hidden />
-            <p>
-              <span className="font-semibold">Verified SDP member:</span> {fullName}
-            </p>
-          </div>
-        ) : membershipError ? (
-          <div className="space-y-1">
-            <p className="text-sm text-red-600" role="alert">
-              {membershipError}
-            </p>
-            <Link href="/enroll" className="text-sm font-medium text-sdp-primary underline underline-offset-2">
-              Not a member yet? Register as an SDP member
-            </Link>
-          </div>
-        ) : null}
+        {isMember ? (
+          <>
+            <div className="space-y-1.5">
+              <Label htmlFor="agent-sdpMembershipId">SDP membership ID</Label>
+              <div className="flex flex-col gap-2 sm:flex-row">
+                <Input
+                  id="agent-sdpMembershipId"
+                  value={draft.sdpMembershipId}
+                  onChange={(e) => onMembershipIdChange(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      void checkMembership();
+                    }
+                  }}
+                  placeholder="e.g. 17-09-11-AA123"
+                  autoComplete="off"
+                  autoCapitalize="characters"
+                  className="min-h-[44px] flex-1 font-mono uppercase tracking-wide"
+                  aria-invalid={!!membershipError}
+                />
+                <Button
+                  type="button"
+                  className={
+                    verified
+                      ? "min-h-[44px] bg-sdp-accent text-white hover:bg-sdp-accent"
+                      : "min-h-[44px] bg-sdp-primary text-white hover:bg-sdp-primary/90"
+                  }
+                  onClick={checkMembership}
+                  disabled={checking || verified}
+                >
+                  {checking ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : verified ? (
+                    <BadgeCheck className="h-4 w-4" />
+                  ) : null}
+                  {verified ? "Verified" : checking ? "Checking…" : "Check membership"}
+                </Button>
+              </div>
+            </div>
 
-        <div className="grid gap-4 sm:grid-cols-3">
-          <LockedName id="agent-firstName" label="First name" value={draft.firstName} />
-          <LockedName id="agent-middleName" label="Middle name" value={draft.middleName} optional={verified} />
-          <LockedName id="agent-surname" label="Surname" value={draft.surname} />
-        </div>
-        <p className="text-xs text-neutral-500">
-          Your name comes from the SDP membership register and appears on your agent ID card exactly as shown.
-        </p>
+            {verified ? (
+              <div className="flex items-start gap-2 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+                <BadgeCheck className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" aria-hidden />
+                <p>
+                  <span className="font-semibold">Verified SDP member:</span> {fullName}
+                </p>
+              </div>
+            ) : membershipError ? (
+              <div className="space-y-1">
+                <p className="text-sm text-red-600" role="alert">
+                  {membershipError}
+                </p>
+                <Link href="/enroll" className="text-sm font-medium text-sdp-primary underline underline-offset-2">
+                  Not a member yet? Register as an SDP member
+                </Link>
+              </div>
+            ) : null}
+
+            <div className="grid gap-4 sm:grid-cols-3">
+              <LockedName id="agent-firstName" label="First name" value={draft.firstName} />
+              <LockedName id="agent-middleName" label="Middle name" value={draft.middleName} optional={verified} />
+              <LockedName id="agent-surname" label="Surname" value={draft.surname} />
+            </div>
+            <p className="text-xs text-neutral-500">
+              Your name comes from the SDP membership register and appears on your agent ID card exactly as
+              shown.
+            </p>
+          </>
+        ) : (
+          <>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <Field id="agent-firstName" label="First name" error={errors.firstName}>
+                <Input
+                  id="agent-firstName"
+                  value={draft.firstName}
+                  onChange={(e) => update({ firstName: e.target.value })}
+                  className="min-h-[44px]"
+                  autoComplete="given-name"
+                  aria-invalid={!!errors.firstName}
+                />
+              </Field>
+              <Field id="agent-middleName" label="Middle name" error={errors.middleName} hint="Optional">
+                <Input
+                  id="agent-middleName"
+                  value={draft.middleName}
+                  onChange={(e) => update({ middleName: e.target.value })}
+                  className="min-h-[44px]"
+                  autoComplete="additional-name"
+                />
+              </Field>
+              <Field id="agent-surname" label="Surname" error={errors.surname}>
+                <Input
+                  id="agent-surname"
+                  value={draft.surname}
+                  onChange={(e) => update({ surname: e.target.value })}
+                  className="min-h-[44px]"
+                  autoComplete="family-name"
+                  aria-invalid={!!errors.surname}
+                />
+              </Field>
+            </div>
+            <Field id="agent-gender" label="Gender" error={errors.gender}>
+              <Select
+                value={draft.gender || undefined}
+                onValueChange={(gender) =>
+                  update({ gender: gender as AgentRegistrationDraft["gender"] })
+                }
+              >
+                <SelectTrigger id="agent-gender" className="min-h-[44px]" aria-invalid={!!errors.gender}>
+                  <SelectValue placeholder="Select gender" />
+                </SelectTrigger>
+                <SelectContent>
+                  {AGENT_GENDERS.map((g) => (
+                    <SelectItem key={g} value={g}>
+                      {g}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+            <p className="text-xs text-neutral-500">
+              You can apply without an SDP membership ID. Upload photo, PVC and NIN in the next step.
+            </p>
+          </>
+        )}
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Field id="agent-phone" label="Phone number" error={errors.phone}>
-          <Input {...text("phone")} type="tel" inputMode="tel" placeholder="08012345678" autoComplete="tel" />
-        </Field>
-        <Field
-          id="agent-email"
-          label="Email"
-          error={errors.email}
-          hint="You will use this email to sign in to the agent portal."
-        >
-          <Input {...text("email")} type="email" inputMode="email" autoComplete="email" />
-        </Field>
-      </div>
+      <Field
+        id="agent-phone"
+        label="Phone number"
+        error={errors.phone}
+        hint="You will use this phone number to sign in to the agent portal."
+      >
+        <Input
+          id="agent-phone"
+          value={draft.phone}
+          onChange={(e) => update({ phone: e.target.value })}
+          type="tel"
+          inputMode="tel"
+          placeholder="08012345678"
+          autoComplete="tel"
+          className="min-h-[44px]"
+          aria-invalid={!!errors.phone}
+        />
+      </Field>
 
       <div className="space-y-4 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
         <div>
           <h3 className="text-sm font-semibold text-neutral-900">Identification</h3>
           <p className="mt-0.5 text-xs text-neutral-500">
-            The secretariat checks these against the PVC and membership card you upload in the next step.
+            The secretariat checks these against the PVC{isMember ? " and membership card" : ""} you upload
+            in the next step.
           </p>
         </div>
         <Field

@@ -65,9 +65,22 @@ function assignmentText(r: AgentRegistrationRecord): string {
   return r.assignedCode ? `${text} (${r.assignedCode})` : text;
 }
 
+function isMemberApplicant(r: AgentRegistrationRecord): boolean {
+  return !!(r.memberId || r.sdpMembershipId);
+}
+
 function matchesSearch(r: AgentRegistrationRecord, q: string): boolean {
   if (!q) return true;
-  return [fullName(r), r.email, r.phone, r.nin ?? "", r.sdpMembershipId, r.voterIdentificationNumber, assignmentText(r)]
+  return [
+    fullName(r),
+    r.email ?? "",
+    r.phone,
+    r.nin ?? "",
+    r.sdpMembershipId ?? "",
+    r.voterIdentificationNumber,
+    assignmentText(r),
+    isMemberApplicant(r) ? "member" : "non-member",
+  ]
     .join(" ")
     .toLowerCase()
     .includes(q);
@@ -207,7 +220,9 @@ export function AdminAgentRegistrationsClient({
   const docs: [string, string | null][] = selected
     ? [
         ["Photo", selected.photoDataUrl],
-        ["Membership ID card", selected.membershipIdCardDataUrl],
+        ...(selected.membershipIdCardDataUrl
+          ? ([["Membership ID card", selected.membershipIdCardDataUrl]] as [string, string | null][])
+          : []),
         ["PVC", selected.pvcDataUrl],
       ]
     : [];
@@ -216,11 +231,12 @@ export function AdminAgentRegistrationsClient({
     ? [
         ["Agent type", AGENT_LEVEL_LABELS[selected.agentLevel]],
         ["Assigned to", assignmentText(selected)],
+        ["Applicant", isMemberApplicant(selected) ? "SDP member" : "Non-member"],
         ["Phone", selected.phone],
-        ["Email", selected.email],
+        ...(selected.gender ? ([["Gender", selected.gender]] as [string, string][]) : []),
         ["NIN", selected.nin ?? "—"],
         ["Voter registration number", formatVoterIdDisplay(selected.voterIdentificationNumber)],
-        ["SDP membership ID", selected.sdpMembershipId],
+        ["SDP membership ID", selected.sdpMembershipId ?? "—"],
         ["Agent's polling unit", formatLocationPick(selected.agentPollingUnit)],
         ["Agent voting unit", formatLocationPick(selected.agentVotingUnit)],
         ["Polling unit (name/code)", formatLocationPick(selected.pollingUnit)],
@@ -281,7 +297,7 @@ export function AdminAgentRegistrationsClient({
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <Input
               id="agent-search"
-              placeholder="Name, email, phone, NIN, membership ID, location"
+              placeholder="Name, phone, NIN, membership ID, location"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="min-h-[44px] pl-9"
@@ -330,7 +346,12 @@ export function AdminAgentRegistrationsClient({
                     className="min-h-[44px] cursor-pointer hover:bg-sdp-primary/5 focus:bg-sdp-primary/5 focus:outline-none"
                     aria-label={`Review ${fullName(r)}`}
                   >
-                    <td className="px-4 py-3 font-medium text-neutral-900">{fullName(r)}</td>
+                    <td className="px-4 py-3 font-medium text-neutral-900">
+                      <div>{fullName(r)}</div>
+                      <div className="mt-0.5 text-xs font-normal text-neutral-500">
+                        {isMemberApplicant(r) ? "SDP member" : "Non-member"}
+                      </div>
+                    </td>
                     <td className="px-4 py-3 text-neutral-600">{AGENT_LEVEL_LABELS[r.agentLevel]}</td>
                     <td className="px-4 py-3 text-neutral-600">{assignmentText(r)}</td>
                     <td className="px-4 py-3 font-mono text-neutral-700">{r.phone}</td>
@@ -513,7 +534,7 @@ export function AdminAgentRegistrationsClient({
                   </div>
                   <p className="text-xs text-neutral-500">
                     Approved agents can sign in at <span className="font-mono">/agent/login</span> with the
-                    email and password they registered with. Rejecting blocks sign-in.
+                    phone number and password they registered with. Rejecting blocks sign-in.
                   </p>
                 </div>
               </div>

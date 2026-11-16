@@ -51,9 +51,12 @@ export function AgentReviewDialog({
   error: string | null;
 }) {
   const level = draft.agentLevel;
+  const isMember = draft.membershipPath === "member";
   const docs: [string, string][] = [
     ["Photo", draft.photoDataUrl],
-    ["Membership ID", draft.membershipIdCardDataUrl],
+    ...(isMember && draft.membershipIdCardDataUrl
+      ? ([["Membership ID", draft.membershipIdCardDataUrl]] as [string, string][])
+      : []),
     ["PVC", draft.pvcDataUrl],
   ];
 
@@ -78,11 +81,12 @@ export function AgentReviewDialog({
               label="Name"
               value={[draft.firstName, draft.middleName, draft.surname].filter(Boolean).join(" ")}
             />
+            <Row label="Applicant type" value={isMember ? "SDP member" : "Non-member"} />
             <Row label="Phone" value={draft.phone} />
-            <Row label="Email" value={draft.email} />
+            {!isMember ? <Row label="Gender" value={draft.gender || "—"} /> : null}
             <Row label="NIN" value={draft.nin} />
             <Row label="Voter registration number" value={formatVoterIdDisplay(draft.voterIdentificationNumber)} />
-            <Row label="SDP membership ID" value={draft.sdpMembershipId} />
+            <Row label="SDP membership ID" value={isMember ? draft.sdpMembershipId : "— (non-member)"} />
             <Row label="Agent's polling unit" value={formatLocationPick(draft.agentPollingUnit)} />
             <Row label="Agent voting unit" value={formatLocationPick(draft.agentVotingUnit)} />
             <Row label="Polling unit (name/code)" value={formatLocationPick(draft.pollingUnit)} />

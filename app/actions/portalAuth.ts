@@ -11,11 +11,15 @@ import {
 } from "@/lib/portal-token";
 import {
   findPortalUserByEmailRole,
+  findPortalUserByPhoneRole,
   findPortalUserById,
   findValidInvite,
   createPortalUserWithInvite,
+  portalSessionIdentity,
 } from "@/lib/db/portal-users";
 import { hashInviteCode, normalizeInviteCode } from "@/lib/portal-invite";
+import { isValidEnrollmentNigerianPhone } from "@/lib/phone-nigeria";
+import { normalizePhone } from "@/lib/otp/termii";
 
 export type PortalLoginResult =
   | { success: true }
@@ -33,24 +37,38 @@ function validatePassword(password: string): string | null {
   return null;
 }
 
+/**
+ * Agents sign in with phone + password; cluster leads with email + password.
+ * `login` is phone (agent) or email (cluster).
+ */
 export async function portalLogin(
   role: PortalRole,
-  email: string,
+  login: string,
   password: string
 ): Promise<PortalLoginResult> {
-  const normalizedEmail = email.trim().toLowerCase();
-  if (!normalizedEmail || !EMAIL_RE.test(normalizedEmail)) {
-    return { success: false, error: "Invalid email or password." };
-  }
+  const invalidMsg =
+    role === "agent" ? "Invalid phone number or password." : "Invalid email or password.";
 
-  const user = await findPortalUserByEmailRole(normalizedEmail, role);
+  let user =
+    role === "agent"
+      ? await (async () => {
+          const phone = login.trim();
+          if (!phone || !isValidEnrollmentNigerianPhone(phone)) return null;
+          return findPortalUserByPhoneRole(phone, role);
+        })()
+      : await (async () => {
+          const email = login.trim().toLowerCase();
+          if (!email || !EMAIL_RE.test(email)) return null;
+          return findPortalUserByEmailRole(email, role);
+        })();
+
   if (!user) {
-    return { success: false, error: "Invalid email or password." };
+    return { success: false, error: invalidMsg };
   }
 
   const ok = await bcrypt.compare(password, user.password_hash);
   if (!ok) {
-    return { success: false, error: "Invalid email or password." };
+    return { success: false, error: invalidMsg };
   }
 
   if (user.status === "pending") {
@@ -67,7 +85,8 @@ export async function portalLogin(
     };
   }
 
-  const token = createPortalSessionToken(user.email, role, user.id);
+  const identity = portalSessionIdentity(user);
+  const token = createPortalSessionToken(identity, role, user.id);
   const cookieStore = await cookies();
   cookieStore.set(getPortalCookieName(), token, {
     httpOnly: true,
@@ -96,10 +115,18 @@ export async function portalSignup(args: {
   if (fullName.length < 2) {
     return { success: false, error: "Please enter your full name." };
   }
-  if (phone.replace(/\D/g, "").length < 10) {
+  if (args.role === "agent") {
+    if (!isValidEnrollmentNigerianPhone(phone)) {
+      return { success: false, error: "Please enter a valid Nigerian mobile number." };
+    }
+  } else if (phone.replace(/\D/g, "").length < 10) {
     return { success: false, error: "Please enter a valid phone number." };
   }
-  if (!email || !EMAIL_RE.test(email)) {
+  // Cluster leads sign in with email; agents sign in with phone (email optional).
+  if (args.role === "cluster" && (!email || !EMAIL_RE.test(email))) {
+    return { success: false, error: "Please enter a valid email address." };
+  }
+  if (email && !EMAIL_RE.test(email)) {
     return { success: false, error: "Please enter a valid email address." };
   }
 
@@ -131,7 +158,7 @@ export async function portalSignup(args: {
     role: args.role,
     fullName,
     phone,
-    email,
+    email: email || null,
     passwordHash,
   });
 
@@ -140,6 +167,12 @@ export async function portalSignup(args: {
       return {
         success: false,
         error: "An account with this email already exists for this portal. Sign in instead.",
+      };
+    }
+    if (created.error === "phone_taken") {
+      return {
+        success: false,
+        error: "An account with this phone number already exists for this portal. Sign in instead.",
       };
     }
     if (created.error === "invite_invalid") {
@@ -154,7 +187,11 @@ export async function portalSignup(args: {
     };
   }
 
-  const token = createPortalSessionToken(email, args.role, created.userId);
+  const sessionIdentity =
+    args.role === "agent"
+      ? (normalizePhone(phone) || phone).trim().toLowerCase()
+      : email;
+  const token = createPortalSessionToken(sessionIdentity, args.role, created.userId);
   const cookieStore = await cookies();
   cookieStore.set(getPortalCookieName(), token, {
     httpOnly: true,
@@ -187,5 +224,6 @@ export async function getPortalSession(): Promise<PortalSession> {
   if (!user) return { ok: false };
   if (user.status && user.status !== "approved") return { ok: false };
 
-  return { ok: true, email: user.email, role: parsed.role, userId: user.id };
+  // `email` is the audit identity: phone for agents without email, otherwise email.
+  return { ok: true, email: portalSessionIdentity(user), role: parsed.role, userId: user.id };
 }
