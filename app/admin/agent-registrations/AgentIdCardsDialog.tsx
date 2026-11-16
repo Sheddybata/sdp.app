@@ -18,10 +18,14 @@ import { fetchAgentCardPhotos } from "@/app/actions/adminAgentRegistrations";
 type Phase = "idle" | "working" | "done" | "error";
 
 const LEGEND: [string, string][] = [
-  ["#01a85a", "Polling Unit"],
-  ["#2563eb", "Ward"],
-  ["#7c3aed", "Local Government"],
+  ["#b45309", "National"],
   ["#dc2626", "State"],
+  ["#0369a1", "Senatorial"],
+  ["#0f766e", "House of Reps"],
+  ["#a16207", "State Assembly"],
+  ["#7c3aed", "Local Government"],
+  ["#2563eb", "Ward"],
+  ["#01a85a", "Polling Unit"],
 ];
 
 export function AgentIdCardsDialog({

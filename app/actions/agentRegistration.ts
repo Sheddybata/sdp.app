@@ -3,15 +3,23 @@
 import bcrypt from "bcryptjs";
 import {
   agentRegistrationSchema,
+  isConstituencyAgentLevel,
   LOCATION_CODE_MISSING_MESSAGE,
   normalizeMembershipId,
+  usesAdminLocationPicker,
   zodFieldErrors,
   type AgentLevel,
   type LocationPick,
 } from "@/lib/agent-registration-schema";
-import { agentExistsForMember, createAgentRegistration } from "@/lib/db/agent-registrations";
+import {
+  agentExistsForMember,
+  agentPostTaken,
+  createAgentRegistration,
+} from "@/lib/db/agent-registrations";
 import { getMemberByMembershipId } from "@/lib/db/members";
 import { lookupLocationCode } from "@/app/actions/locationCodes";
+import { verifyConstituencyAssignment } from "@/app/actions/constituencies";
+import { nationalAgentPost } from "@/lib/constituency-data";
 import type { MemberRecord } from "@/lib/mock-members";
 
 export type AgentRegistrationResult =
@@ -26,6 +34,8 @@ const MEMBER_NOT_FOUND =
   "We couldn't find this SDP membership ID. Check the number on your membership card, or register as a member first.";
 const MEMBER_ALREADY_AGENT =
   "This member is already registered as an agent. Sign in instead, or contact the SDP secretariat.";
+const POST_TAKEN =
+  "This post already has an approved agent. Choose a different assignment, or contact the SDP secretariat.";
 
 async function resolveMember(
   raw: string
@@ -96,8 +106,55 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
   const middleName = (member.otherNames ?? "").trim();
   const surname = member.surname.trim();
 
-  const [assignment, agentPollingUnit, agentVotingUnit, pollingUnit] = await Promise.all([
-    withServerCode(v.assignment, v.agentLevel),
+  const level = v.agentLevel;
+  let assignment = v.assignment;
+  let constituencyCode: string | null = null;
+  let constituencyName: string | null = null;
+
+  if (level === "national") {
+    const nat = nationalAgentPost();
+    assignment = {
+      ...assignment,
+      stateId: "national",
+      stateName: "Nationwide",
+      code: nat.code,
+      lgaId: "",
+      lgaName: "",
+      wardId: "",
+      wardName: "",
+      pollingUnitId: "",
+      pollingUnitName: "",
+    };
+    constituencyCode = nat.code;
+    constituencyName = nat.name;
+  } else if (isConstituencyAgentLevel(level)) {
+    const verified = await verifyConstituencyAssignment({
+      level,
+      stateId: assignment.stateId,
+      code: assignment.code,
+    });
+    if (!verified.ok) {
+      return { ok: false, error: verified.error, fieldErrors: { assignment: verified.error } };
+    }
+    assignment = {
+      ...assignment,
+      code: verified.seat.code,
+      pollingUnitName: verified.seat.name,
+      stateId: verified.seat.stateId,
+      stateName: verified.seat.stateName,
+      lgaId: "",
+      lgaName: "",
+      wardId: "",
+      wardName: "",
+      pollingUnitId: verified.seat.code,
+    };
+    constituencyCode = verified.seat.code;
+    constituencyName = verified.seat.name;
+  } else if (usesAdminLocationPicker(level)) {
+    assignment = await withServerCode(v.assignment, level);
+  }
+
+  const [agentPollingUnit, agentVotingUnit, pollingUnit] = await Promise.all([
     withServerCode(v.agentPollingUnit, "polling_unit"),
     withServerCode(v.agentVotingUnit, "polling_unit"),
     withServerCode(v.pollingUnit, "polling_unit"),
@@ -119,10 +176,15 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
     };
   }
 
-  const level = v.agentLevel;
+  // Only an approved holder locks the seat — multiple people may apply and await review.
+  if (await agentPostTaken({ agentLevel: level, assignedCode: assignment.code, approvedOnly: true })) {
+    return { ok: false, error: POST_TAKEN, fieldErrors: { assignment: POST_TAKEN } };
+  }
+
   const passwordHash = await bcrypt.hash(v.password, await bcrypt.genSalt(10));
   const fullName = [firstName, middleName, surname].filter(Boolean).join(" ");
 
+  const isAdminLadder = usesAdminLocationPicker(level);
   const result = await createAgentRegistration({
     fullName,
     phone: v.phone,
@@ -133,13 +195,15 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
       agent_level: level,
       assigned_state_id: assignment.stateId,
       assigned_state_name: assignment.stateName,
-      assigned_lga_id: level === "state" ? null : assignment.lgaId || null,
-      assigned_lga_name: level === "state" ? null : assignment.lgaName || null,
+      assigned_lga_id: isAdminLadder && level !== "state" ? assignment.lgaId || null : null,
+      assigned_lga_name: isAdminLadder && level !== "state" ? assignment.lgaName || null : null,
       assigned_ward_id: level === "ward" || level === "polling_unit" ? assignment.wardId || null : null,
       assigned_ward_name:
         level === "ward" || level === "polling_unit" ? assignment.wardName || null : null,
       assigned_polling_unit_name: level === "polling_unit" ? assignment.pollingUnitName || null : null,
       assigned_code: assignment.code || null,
+      assigned_constituency_code: constituencyCode,
+      assigned_constituency_name: constituencyName,
       first_name: firstName,
       middle_name: middleName || null,
       surname,

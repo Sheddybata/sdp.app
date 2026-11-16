@@ -36,7 +36,16 @@ export const DEFAULT_PARTIES = [
   "APP", "BP", "LP", "NNPP", "NRM", "PDP", "PRP", "YPP", "ZLP",
 ];
 
-export const RESULT_LEVELS = ["polling_unit", "ward", "lga", "state"] as const;
+export const RESULT_LEVELS = [
+  "polling_unit",
+  "ward",
+  "lga",
+  "state",
+  "state_constituency",
+  "federal_constituency",
+  "senatorial",
+  "national",
+] as const;
 export type ResultLevel = (typeof RESULT_LEVELS)[number];
 
 export const RESULT_LEVEL_LABELS: Record<ResultLevel, string> = {
@@ -44,25 +53,64 @@ export const RESULT_LEVEL_LABELS: Record<ResultLevel, string> = {
   ward: "Ward collation",
   lga: "LGA collation",
   state: "State collation",
+  state_constituency: "State assembly constituency",
+  federal_constituency: "Federal constituency",
+  senatorial: "Senatorial district",
+  national: "National collation",
 };
 
 /**
- * Highest level our agents collate for each race. Senate, House of Reps and State Assembly
- * are declared at constituency level, so the last collation we track is the LGA.
+ * Highest collation level tracked for each race (constituency races use real jurisdictions).
  */
 export const RACE_TOP_LEVEL: Record<Race, ResultLevel> = {
-  presidential: "state",
+  presidential: "national",
   governorship: "state",
-  senate: "lga",
-  house_of_reps: "lga",
-  state_assembly: "lga",
+  senate: "senatorial",
+  house_of_reps: "federal_constituency",
+  state_assembly: "state_constituency",
   lg_chairman: "lga",
   councillor: "ward",
   other: "state",
 };
 
+/** Levels an agent may submit for a given race (not a single ladder for constituency races). */
+export const RACE_ALLOWED_LEVELS: Record<Race, readonly ResultLevel[]> = {
+  presidential: ["polling_unit", "ward", "lga", "state", "national"],
+  governorship: ["polling_unit", "ward", "lga", "state"],
+  senate: ["polling_unit", "ward", "lga", "senatorial"],
+  house_of_reps: ["polling_unit", "ward", "lga", "federal_constituency"],
+  state_assembly: ["polling_unit", "ward", "state_constituency"],
+  lg_chairman: ["polling_unit", "ward", "lga"],
+  councillor: ["polling_unit", "ward"],
+  other: ["polling_unit", "ward", "lga", "state"],
+};
+
 export function raceAllowsLevel(race: Race, level: ResultLevel): boolean {
-  return RESULT_LEVELS.indexOf(level) <= RESULT_LEVELS.indexOf(RACE_TOP_LEVEL[race]);
+  return RACE_ALLOWED_LEVELS[race].includes(level);
+}
+
+/** Map agent registration level → election result level for their own post. */
+export function resultLevelForAgentLevel(agentLevel: string): ResultLevel | null {
+  switch (agentLevel) {
+    case "national":
+      return "national";
+    case "state":
+      return "state";
+    case "senatorial":
+      return "senatorial";
+    case "house_of_reps":
+      return "federal_constituency";
+    case "state_assembly":
+      return "state_constituency";
+    case "lga":
+      return "lga";
+    case "ward":
+      return "ward";
+    case "polling_unit":
+      return "polling_unit";
+    default:
+      return null;
+  }
 }
 
 export function raceLabel(race: string): string {
@@ -79,6 +127,10 @@ export const RESULT_FORM_NAMES: Record<ResultLevel, string> = {
   ward: "Form EC8B",
   lga: "Form EC8C",
   state: "Form EC8D",
+  state_constituency: "Form EC8C (State constituency)",
+  federal_constituency: "Form EC8C (Federal constituency)",
+  senatorial: "Form EC8C (Senatorial)",
+  national: "Form EC8D (National)",
 };
 
 export const INCIDENT_CATEGORIES = [

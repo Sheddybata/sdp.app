@@ -1,6 +1,12 @@
 import type { AgentLevel } from "@/lib/agent-registration-schema";
 import type { PortalUserStatus } from "@/lib/db/agent-registrations";
 import type { StateLocationTotals } from "@/lib/location-codes";
+import {
+  listFederalConstituencies,
+  listSenatorialDistricts,
+  listStateAssemblyConstituencies,
+  listUnmappedConstituencies,
+} from "@/lib/constituency-data";
 
 /**
  * A post is "filled" when at least one approved agent holds it, and "pending" when it has
@@ -30,6 +36,14 @@ export type StateCoverage = {
   lgaBreakdown: LgaCoverage[];
 };
 
+export type ConstituencyTierCoverage = {
+  national: CoverageCounts;
+  senatorial: CoverageCounts;
+  houseOfReps: CoverageCounts;
+  stateAssembly: CoverageCounts;
+  unmappedSeats: number;
+};
+
 export type AgentCoverageReport = {
   states: StateCoverage[];
   national: {
@@ -41,6 +55,7 @@ export type AgentCoverageReport = {
     pendingAgents: number;
     completeStates: number;
   };
+  constituencies: ConstituencyTierCoverage;
 };
 
 export type CoverageAgent = {
@@ -51,6 +66,7 @@ export type CoverageAgent = {
   assignedWardId: string | null;
   assignedPollingUnitName: string | null;
   assignedCode: string | null;
+  assignedConstituencyCode?: string | null;
 };
 
 export function pct(c: CoverageCounts): number {
@@ -64,6 +80,15 @@ export function isComplete(c: CoverageCounts): boolean {
 const lc = (s: string | null | undefined) => (s ?? "").trim().toLowerCase();
 
 function postKey(a: CoverageAgent): string | null {
+  if (a.agentLevel === "national") return "national";
+  if (
+    a.agentLevel === "senatorial" ||
+    a.agentLevel === "house_of_reps" ||
+    a.agentLevel === "state_assembly"
+  ) {
+    const code = (a.assignedCode || a.assignedConstituencyCode || "").trim();
+    return code ? code.toUpperCase() : null;
+  }
   const s = lc(a.assignedStateId);
   if (!s) return null;
   if (a.agentLevel === "state") return s;
@@ -85,19 +110,35 @@ function add(into: CoverageCounts, from: CoverageCounts) {
   into.pending += from.pending;
 }
 
+function emptyLevelSets(): Record<AgentLevel, Set<string>> {
+  return {
+    national: new Set(),
+    state: new Set(),
+    senatorial: new Set(),
+    house_of_reps: new Set(),
+    state_assembly: new Set(),
+    lga: new Set(),
+    ward: new Set(),
+    polling_unit: new Set(),
+  };
+}
+
+function tierCounts(
+  required: number,
+  approved: Set<string>,
+  pending: Set<string>
+): CoverageCounts {
+  const filled = Math.min(approved.size, required);
+  let pend = 0;
+  Array.from(pending).forEach((k) => {
+    if (!approved.has(k)) pend += 1;
+  });
+  return { required, filled, pending: Math.min(pend, Math.max(0, required - filled)) };
+}
+
 export function computeAgentCoverage(totals: StateLocationTotals[], agents: CoverageAgent[]): AgentCoverageReport {
-  const approvedPosts: Record<AgentLevel, Set<string>> = {
-    state: new Set(),
-    lga: new Set(),
-    ward: new Set(),
-    polling_unit: new Set(),
-  };
-  const pendingPosts: Record<AgentLevel, Set<string>> = {
-    state: new Set(),
-    lga: new Set(),
-    ward: new Set(),
-    polling_unit: new Set(),
-  };
+  const approvedPosts = emptyLevelSets();
+  const pendingPosts = emptyLevelSets();
   const agentsByState = new Map<string, { approved: number; pending: number }>();
 
   for (const a of agents) {
@@ -106,6 +147,7 @@ export function computeAgentCoverage(totals: StateLocationTotals[], agents: Cove
     if (!key) continue;
     (a.status === "approved" ? approvedPosts : pendingPosts)[a.agentLevel].add(key);
     const s = lc(a.assignedStateId);
+    if (!s || s === "national") continue;
     const tally = agentsByState.get(s) ?? { approved: 0, pending: 0 };
     if (a.status === "approved") tally.approved += 1;
     else tally.pending += 1;
@@ -196,5 +238,34 @@ export function computeAgentCoverage(totals: StateLocationTotals[], agents: Cove
     };
   });
 
-  return { states, national };
+  // Count national-level agents in national.approvedAgents
+  for (const a of agents) {
+    if (a.status === "rejected") continue;
+    if (a.agentLevel === "national" || a.agentLevel === "senatorial" || a.agentLevel === "house_of_reps" || a.agentLevel === "state_assembly") {
+      if (a.status === "approved") national.approvedAgents += 1;
+      else national.pendingAgents += 1;
+    }
+  }
+
+  const constituencies: ConstituencyTierCoverage = {
+    national: tierCounts(1, approvedPosts.national, pendingPosts.national),
+    senatorial: tierCounts(
+      listSenatorialDistricts().length,
+      approvedPosts.senatorial,
+      pendingPosts.senatorial
+    ),
+    houseOfReps: tierCounts(
+      listFederalConstituencies().length,
+      approvedPosts.house_of_reps,
+      pendingPosts.house_of_reps
+    ),
+    stateAssembly: tierCounts(
+      listStateAssemblyConstituencies().length,
+      approvedPosts.state_assembly,
+      pendingPosts.state_assembly
+    ),
+    unmappedSeats: listUnmappedConstituencies().length,
+  };
+
+  return { states, national, constituencies };
 }

@@ -2,8 +2,11 @@
 
 import { isAuthenticated } from "@/app/actions/auth";
 import {
+  agentPostTaken,
   getAgentPhotosByIds,
   getAgentRegistrationById,
+  getAgentRegistrationByUserId,
+  rejectPendingApplicantsForPost,
   setPortalUserStatus,
   type PortalUserStatus,
 } from "@/lib/db/agent-registrations";
@@ -26,11 +29,42 @@ export async function adminSetAgentRegistrationStatus(args: {
   userId: string;
   status: Exclude<PortalUserStatus, "pending">;
   note?: string;
-}): Promise<{ ok: true } | { ok: false; error: string }> {
+}): Promise<{ ok: true; autoRejected?: number } | { ok: false; error: string }> {
   if (!(await isAuthenticated())) return { ok: false, error: "Unauthorized." };
   if (args.status !== "approved" && args.status !== "rejected") {
     return { ok: false, error: "Invalid status." };
   }
+
+  const reg =
+    args.status === "approved" ? await getAgentRegistrationByUserId(args.userId) : null;
+
+  if (args.status === "approved" && reg?.assignedCode) {
+    const taken = await agentPostTaken({
+      agentLevel: reg.agentLevel,
+      assignedCode: reg.assignedCode,
+      excludeUserId: args.userId,
+      approvedOnly: true,
+    });
+    if (taken) {
+      return {
+        ok: false,
+        error:
+          "Another approved agent already holds this post. Reject this application or reassign the other agent first.",
+      };
+    }
+  }
+
   const ok = await setPortalUserStatus(args);
-  return ok ? { ok: true } : { ok: false, error: "Could not update this agent. Please try again." };
+  if (!ok) return { ok: false, error: "Could not update this agent. Please try again." };
+
+  let autoRejected = 0;
+  if (args.status === "approved" && reg?.assignedCode) {
+    autoRejected = await rejectPendingApplicantsForPost({
+      agentLevel: reg.agentLevel,
+      assignedCode: reg.assignedCode,
+      approvedUserId: args.userId,
+    });
+  }
+
+  return { ok: true, autoRejected };
 }

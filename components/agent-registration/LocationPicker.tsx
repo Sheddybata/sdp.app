@@ -20,7 +20,13 @@ import {
   type LocationPick,
 } from "@/lib/agent-registration-schema";
 
-const DEPTH: Record<AgentLevel, number> = { state: 1, lga: 2, ward: 3, polling_unit: 4 };
+/** Classic admin ladder only — constituency / national levels use a different picker. */
+const DEPTH: Partial<Record<AgentLevel, number>> = {
+  state: 1,
+  lga: 2,
+  ward: 3,
+  polling_unit: 4,
+};
 
 export function LocationPicker({
   idPrefix,
@@ -35,7 +41,7 @@ export function LocationPicker({
   onChange: (next: LocationPick) => void;
   error?: string;
 }) {
-  const depth = DEPTH[level];
+  const depth = DEPTH[level] ?? 1;
   const { states, loading, stateData, stateDataLoading } = useInecGeo(value.stateId || undefined);
   const lgas = stateData?.lgas ?? [];
   const wards = lgas.find((l) => l.id === value.lgaId)?.wards ?? [];

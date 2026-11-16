@@ -1,0 +1,2882 @@
+[
+  {
+    "code": "FC/001/AB",
+    "name": "Aba North/Aba South",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "The entire Geographical Areas of Aba North and Aba South L.G.As",
+    "collationCentre": "ABA TOWN HALL ABA SOUTH LGA"
+  },
+  {
+    "code": "FC/002/AB",
+    "name": "Arochukwu/Ohafia",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "The entire Geographical Areas of Arochukwu and Ohafia L.A.As",
+    "collationCentre": "COUNCIL HALL OHAFIA LGA HQ"
+  },
+  {
+    "code": "FC/003/AB",
+    "name": "Bende",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "The Bende Geographical Areas of Bende L.G.As",
+    "collationCentre": "COUNCIL HALL BENDE LGA HQ"
+  },
+  {
+    "code": "FC/004/AB",
+    "name": "Isiala Ngwa North /Isiala Ngwa South",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "The entire Geographical Areas of Isiala Ngwa North and South L.G.As",
+    "collationCentre": "COUNCIL HALL ISIALA NGWA NORTH LGA HQ"
+  },
+  {
+    "code": "FC/005/AB",
+    "name": "Isuikwuato/Umu-Nneochi",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "The entire Geographical Areas of Isiukwuato and Umunneochi L.G.As",
+    "collationCentre": "COUNCIL HALL ISUIKWUATO LGA HQ"
+  },
+  {
+    "code": "FC/006/AB",
+    "name": "Obingwa/Ugwunagbo/Osisioma",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "The entire Geographical Areas of Obingwa, Ugwunagbo and Osisioma L.G.As",
+    "collationCentre": "OBINGWA LGA HQ"
+  },
+  {
+    "code": "FC/007/AB",
+    "name": "Umuahia North/ Umuahia South/ Ikwuano",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "The entire Geographical Areas of Umuahia North, Umuahia South and Ikwuano L.G.As",
+    "collationCentre": "COUNCIL HALL UMUAHIA NORTH LGA HQ"
+  },
+  {
+    "code": "FC/008/AB",
+    "name": "Ukwa East/Ukwa West",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "The entire Geographical Areas of Ukwa East and East L.G.As",
+    "collationCentre": "UKWA WEST LGA HQ"
+  },
+  {
+    "code": "FC/009/AD",
+    "name": "Demsa/Numan/Lamurde",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "The entire Geographical Area of Demsa, Numan and Lamurde L.G.As",
+    "collationCentre": "GSS NUMAN"
+  },
+  {
+    "code": "FC/010/AD",
+    "name": "Furore/Song",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "The entire Geographical Area of Furore and Song L.G.As",
+    "collationCentre": "GSS FUFORE"
+  },
+  {
+    "code": "FC/011/AD",
+    "name": "Mayo Belwa/Ganye/Jada /Toungo",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "The entire Geographical Area of Mayo Belwa, Ganye, Jada and Toungo L.G.As",
+    "collationCentre": "GSS JADA"
+  },
+  {
+    "code": "FC/012/AD",
+    "name": "Gombi/Hong",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "The entire Geographical Area of Gombi and Hong L.G.As",
+    "collationCentre": "GSS GOMBI"
+  },
+  {
+    "code": "FC/013/AD",
+    "name": "Guyuk/Shelleng",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "The entire Geographical Area of Guyuk and Shelleng L.G.As",
+    "collationCentre": "GSS KIRI"
+  },
+  {
+    "code": "FC/014/AD",
+    "name": "Madagali/Michika",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "The entire Geographical Area of Madagali and Michika L.G.As",
+    "collationCentre": "GSS MICHIKA"
+  },
+  {
+    "code": "FC/015/AD",
+    "name": "Maiha/Mubi North/Mubi South",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "The entire Geographical Area of Maiha, Mubi North and Mubi South",
+    "collationCentre": "GSS MUBI"
+  },
+  {
+    "code": "FC/016/AD",
+    "name": "Yola North/Yola South/Girei",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "The entire Geographical Area of Yola North, Yola South and Girei",
+    "collationCentre": "GMMC YOLA"
+  },
+  {
+    "code": "FC/027/AN",
+    "name": "Anambra East/Anambra West",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area of Anambra East and West L.G.As",
+    "collationCentre": "INEC OFFICE OTUOCHA"
+  },
+  {
+    "code": "FC/028/AN",
+    "name": "Onitsha North/Onitsha South",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area of Onitsha North and South L.G.As",
+    "collationCentre": "INEC OFFICE ONITSH NORTH LGA"
+  },
+  {
+    "code": "FC/029/AN",
+    "name": "Ogbaru",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area of Ogbaru L.G.A",
+    "collationCentre": "LG COUNCIL HALL ATANI"
+  },
+  {
+    "code": "FC/030/AN",
+    "name": "Aguata",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area of Aguata L.G.A.",
+    "collationCentre": "AGUATA LG SECRETARIAT"
+  },
+  {
+    "code": "FC/031/AN",
+    "name": "Oyi/Ayamelum",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area of Oyi and Anyamelum L.G.As",
+    "collationCentre": "INEC OFFICE NTEJE"
+  },
+  {
+    "code": "FC/032/AN",
+    "name": "Awka North/Awka South",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area of Awka North and South L.G.As",
+    "collationCentre": "INEC OFFICE AWKA SOUTH LGA"
+  },
+  {
+    "code": "FC/033/AN",
+    "name": "Njikoka/Dunukofia/Anaocha",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area ofNjikoka, Dunkofia and Anaocha L.G.As",
+    "collationCentre": "INEC OFFICE ABAGANA NJIKOKA"
+  },
+  {
+    "code": "FC/034/AN",
+    "name": "Idemili North/Idemili South",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area ofIdemili North and South L.G.As",
+    "collationCentre": "NO DATA"
+  },
+  {
+    "code": "FC/035/AN",
+    "name": "Ihiala",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area ofIhiala L.G.A",
+    "collationCentre": "IHIALA LG COUNCIL HALL"
+  },
+  {
+    "code": "FC/036/AN",
+    "name": "Nnewi North/Nnewi South/ Ekwusigo",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area of Nnewi North, NNewi South and Ekusigo L.G.As",
+    "collationCentre": "NNEWI NORTH LG SECRETARIAT"
+  },
+  {
+    "code": "FC/037/AN",
+    "name": "Orumba North/Orumba South",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "The entire Geographical Area of Orumba North/Orumba South L.G.A.",
+    "collationCentre": "ORUMBA NORTH LGA COUNCIL HALL AJALLI"
+  },
+  {
+    "code": "FC/017/AK",
+    "name": "Abak/Etim Ekpo/Ika",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "The entire Geographical Area of Abak, Etim Ekpo and Ika L.G.As",
+    "collationCentre": "INEC OFFICE ABAK LGA"
+  },
+  {
+    "code": "FC/018/AK",
+    "name": "Eket/Onna/Esit Eket/Ibeno",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "The entire Geographical Area of Eket, Onna, Esit Eket and Ibeno L.G.As",
+    "collationCentre": "INEC OFFICE EKET LGA"
+  },
+  {
+    "code": "FC/019/AK",
+    "name": "Etinan/Nsit Ibom/Nsit ubium",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "The entire Geographical Area of Etinan, Nsit Ibom, and Nsit Ubium L.G.As",
+    "collationCentre": "INEC OFFICE ETINAN LGA"
+  },
+  {
+    "code": "FC/020/AK",
+    "name": "Ikono/Ini",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "The entire Geographical Area of Ikono and Ini L.G.As",
+    "collationCentre": "INEC OFFICE IKONO LGA"
+  },
+  {
+    "code": "FC/021/AK",
+    "name": "Ikot Abasi/Mkpat Enin/Eastern Obolo",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "The entire Geographical Area of Ikot Abasi, Mkpat Enin and Eastern Obolo L.G.As",
+    "collationCentre": "INEC OFFICE IKOT ABASI LGA"
+  },
+  {
+    "code": "FC/022/AK",
+    "name": "Ikot Ekpene/Essien Udim/ Obot Akara",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "The entire Geographical Area of Ikot Ekpene, Essien Udim and Obot Akara L.G.As",
+    "collationCentre": "INEC OFFICE IKOT EKPENE LGA"
+  },
+  {
+    "code": "FC/023/AK",
+    "name": "Itu/Ibiono Ibom",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "The entire Geographical Area of Itu and Ibiono Ibom L.G.As",
+    "collationCentre": "INEC OFFICE ITU LGA"
+  },
+  {
+    "code": "FC/024/AK",
+    "name": "Oron/Mbo/Okobo/Udung Uko/Urue Offong/Oruko",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "The entire Geographical Area of Oron, Mbo, Okobo, Udung Uko Urue Offong and Oruko L.G.As",
+    "collationCentre": "INEC OFFICE ORON LGA"
+  },
+  {
+    "code": "FC/025/AK",
+    "name": "Ukanafun/Oruk Anam",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "The entire Geographical Area of Ukanafun and Oruko Anam L.G.As",
+    "collationCentre": "INEC OFFICE UKANAFUN LGA"
+  },
+  {
+    "code": "FC/026/AK",
+    "name": "Uyo/Uruan/Nsit Atai/ Ibesikpo Asutan",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "The entire Geographical Area of Uyo, Uruan, Nsiti Atai and Ibesikpo Asutan L.G.As",
+    "collationCentre": "INEC OFFICE UYO LGA"
+  },
+  {
+    "code": "FC/038/BA",
+    "name": "Alkaleri/Kirfi",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Alkaleri/ Kirfi L.G.A.",
+    "collationCentre": "Alkaleri Inec Office"
+  },
+  {
+    "code": "FC/039/BA",
+    "name": "Bauchi",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Bauchi L.G.A.",
+    "collationCentre": "Bauchi Inec Office"
+  },
+  {
+    "code": "FC/040/BA",
+    "name": "Bogoro/Dass/Tafawa Balewa",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Bogoro/Dass/Tafawa Balewa L.G.As",
+    "collationCentre": "Tafawa Balewa Inec Office"
+  },
+  {
+    "code": "FC/041/BA",
+    "name": "Toro",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Toro L.G.A",
+    "collationCentre": "Toro Inec Office"
+  },
+  {
+    "code": "FC/042/BA",
+    "name": "Ningi/Warji",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Ningi/Warji L.G.As",
+    "collationCentre": "Ningi Inec Office"
+  },
+  {
+    "code": "FC/043/BA",
+    "name": "Darazo/Gunjuwa",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Darazo/Gunjuwa L.G.As",
+    "collationCentre": "Darazo Inec Office"
+  },
+  {
+    "code": "FC/044/BA",
+    "name": "Misau/Dambam",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Misau/Dambam L.G.As",
+    "collationCentre": "Misau Inec Office"
+  },
+  {
+    "code": "FC/045/BA",
+    "name": "Zaki",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Zaki L.G.A",
+    "collationCentre": "Zaki Inec Office"
+  },
+  {
+    "code": "FC/046/BA",
+    "name": "Gamawa",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Gamawa L.G.A",
+    "collationCentre": "Gamawa Inec Office"
+  },
+  {
+    "code": "FC/047/BA",
+    "name": "Jama’are/Itas-Gadau",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Jama’are and Itas-Gidau L.G.As",
+    "collationCentre": "Jama’are Inec Office"
+  },
+  {
+    "code": "FC/048/BA",
+    "name": "Shira/Giade",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area of Shira and Giade L.G.As",
+    "collationCentre": "Shira Inec Office"
+  },
+  {
+    "code": "FC/049/BA",
+    "name": "Katagum",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "The entire Geographical Area ofKatagum L.G.As",
+    "collationCentre": "Katagum Inec Office"
+  },
+  {
+    "code": "FC/050/BY",
+    "name": "Brass/Nembe",
+    "stateId": "bayelsa",
+    "stateName": "BAYELSA",
+    "composition": "The entire Geographical Area of Brass and Nember L.G.As",
+    "collationCentre": "INEC OFFICE BRASS LGA"
+  },
+  {
+    "code": "FC/051/BY",
+    "name": "Ogbia",
+    "stateId": "bayelsa",
+    "stateName": "BAYELSA",
+    "composition": "The entire Geographical Area of Ogbia L.G.A.",
+    "collationCentre": "OGBIA LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/052/BY",
+    "name": "Sagbama/Ekeremor",
+    "stateId": "bayelsa",
+    "stateName": "BAYELSA",
+    "composition": "The entire Geographical Area of Sagbama Ekeremor L.G.As",
+    "collationCentre": "INEC OFFICE SAGBAMA"
+  },
+  {
+    "code": "FC/053/BY",
+    "name": "Southern Ijaw",
+    "stateId": "bayelsa",
+    "stateName": "BAYELSA",
+    "composition": "The entire Geographical Area of Southern Ijaw L.G.A.",
+    "collationCentre": "COUNCIL HALL SOUTHERN LGA"
+  },
+  {
+    "code": "FC/054/BY",
+    "name": "Yenagoa/Kolokuna/Opokuma",
+    "stateId": "bayelsa",
+    "stateName": "BAYELSA",
+    "composition": "The entire Geographical Area of Yenagoa, Kolokuma and Opokuma L.G.As",
+    "collationCentre": "YENAGOA LGA COUNCIL HALL YENAGOA"
+  },
+  {
+    "code": "FC/055/BN",
+    "name": "Ado/Obadigbo/Okpokwu",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the present Ado, Obadigbo and Okpokwu L.G.As",
+    "collationCentre": "OKPOGA"
+  },
+  {
+    "code": "FC/056/BN",
+    "name": "Apa/Agatu",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the Present Apa and Agatu L.G.As",
+    "collationCentre": "UGBOKPO"
+  },
+  {
+    "code": "FC/057/BN",
+    "name": "Buruku",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the present Buruku L.G.A.",
+    "collationCentre": "BURUKU"
+  },
+  {
+    "code": "FC/058/BN",
+    "name": "Gboko/Tarka",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the present Gboko and Tarka L.G.As",
+    "collationCentre": "GBOKO"
+  },
+  {
+    "code": "FC/059/BN",
+    "name": "Guma/Makurdi",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the present Guma and Makurdi L.G.As",
+    "collationCentre": "MAKURDI"
+  },
+  {
+    "code": "FC/060/BN",
+    "name": "Gwer East/Gwer West",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the present Gwer East and Gwer West L.G.As",
+    "collationCentre": "ALIADE"
+  },
+  {
+    "code": "FC/061/BN",
+    "name": "Katsina-Ala/Ukum/Logo",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the present  Katsina-Ala, Ukum and Logo L.G.As",
+    "collationCentre": "KATSINA ALA"
+  },
+  {
+    "code": "FC/062/BN",
+    "name": "Konshisha/Vandeikya",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the present Konshisha and Vandeikya L.G.As",
+    "collationCentre": "VANDEIKYA"
+  },
+  {
+    "code": "FC/063/BN",
+    "name": "Kwande/Ushongo",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the present Kwande and Ushongo L.G.As",
+    "collationCentre": "ADIKPO"
+  },
+  {
+    "code": "FC/064/BN",
+    "name": "Oju/Obi",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the present Oju and Obi L.G.As",
+    "collationCentre": "OJU"
+  },
+  {
+    "code": "FC/065/BN",
+    "name": "Otukpo/Ohimini",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "The entire Geographical Area of the presentOtukpo and Ohimini   L.G.As",
+    "collationCentre": "OTUKPO"
+  },
+  {
+    "code": "FC/066/BO",
+    "name": "Askira-Uba/Hawul",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "The entire Geographical Area of the present Askira-Uba and Hawul L.G.As",
+    "collationCentre": "LGA COUNCIL CHAMBERS ASKIRA-UBA"
+  },
+  {
+    "code": "FC/067/BO",
+    "name": "Bama/Ngala/Kala-Balge",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "The entire Geographical Area of the present Bama, Ngala and  Kala-Balge L.G.As",
+    "collationCentre": "BAMA LGA COUNCIL CHAMBERS"
+  },
+  {
+    "code": "FC/068/BO",
+    "name": "Biu/Kwaya-Kusar, Shani/Bayo",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "The entire Geographical Area of the present Biu, Kwaya-Kusar, Shami and Bayo L.G.As",
+    "collationCentre": "BIU LGA COUNCIL CHAMBERS"
+  },
+  {
+    "code": "FC/069/BO",
+    "name": "Dikwa/Mafa/Konduga",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "The entire Geographical Area of the present Dikwa, Mafa and Konduga L.G.As",
+    "collationCentre": "COLL. OF BUSS. AND ADMIN STUDIES"
+  },
+  {
+    "code": "FC/070/BO",
+    "name": "Damboa/Gwoza/Chibok",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "The entire Geographical Area of the present Damboa, Gwoza and Chibok L.G.As",
+    "collationCentre": "DAMBOA LGA INEC OFFICE"
+  },
+  {
+    "code": "FC/071/BO",
+    "name": "Kaga/Gubio/Magumeri",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "The entire Geographical Area of the present Kaga, Gubio and Magumeri L.G.As",
+    "collationCentre": "MAGUMERI LGA COUNCIL CHAMBER"
+  },
+  {
+    "code": "FC/072/BO",
+    "name": "Monguno/Nganzai/Marte",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "The entire Geographical Area of Monguno, Nganzai and Marte L.G.As",
+    "collationCentre": "MONGUNO LGA INEC OFFICE"
+  },
+  {
+    "code": "FC/073/BO",
+    "name": "Kukawa/Mobbar/Abadam/ Guzamali",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "The entire Geographical Area of Kukawa, Mobbar, Abadam and Guzamali L.G.As",
+    "collationCentre": "INEC OFFICE KUKAWA"
+  },
+  {
+    "code": "FC/074/BO",
+    "name": "Maiduguri (Metropolitan)",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "The entire Geographical Area of  Maiduguri (Metropolitan) L.G.A",
+    "collationCentre": "MMC INEC OFFICE"
+  },
+  {
+    "code": "FC/075/BO",
+    "name": "Jere",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "The entire Geographical Area of Jere L.G.A",
+    "collationCentre": "LGA COUNCIL CHAMBER KHADDAMARI"
+  },
+  {
+    "code": "FC/076/CR",
+    "name": "Yakurr/Abi",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "The entire Geographical Area of Yakurr and Abi L.G.As",
+    "collationCentre": "INEC AREA OFFICE YAKURR"
+  },
+  {
+    "code": "FC/077/CR",
+    "name": "Akamkpa/Biase",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "The entire Geographical Area of Akamkpa and Biase L.G.As",
+    "collationCentre": "INEC AREA OFFICE AKAMKPA"
+  },
+  {
+    "code": "FC/078/CR",
+    "name": "Boki/Ikom",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "The entire Geographical Area of Boki and Ikom L.G.As",
+    "collationCentre": "INEC AREA OFFICE IKOM"
+  },
+  {
+    "code": "FC/079/CR",
+    "name": "Calabar South/Akpabuyo/ Bakassi",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "The entire Geographical Area of Calabar South, Akpabuyo and Bakassi L.G.As",
+    "collationCentre": "INEC AREA OFFICECALABAR SOUTH"
+  },
+  {
+    "code": "FC/080/CR",
+    "name": "Calabar Municipal/Odukpani",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "The entire Geographical Area of Calabar Municipal and Odukpani L.G.As",
+    "collationCentre": "INEC AREA OFFICE CALABAR MUNICIPAL"
+  },
+  {
+    "code": "FC/081/CR",
+    "name": "Obanliku/Obudu/Bekwarra",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "The entire Geographical Area of Obanliku, Obudu and Bekwarra L.G.As",
+    "collationCentre": "INEC AREA OFFICE OBUDU"
+  },
+  {
+    "code": "FC/082/CR",
+    "name": "Obubra/Etung",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "The entire Geographical Area of Obubra and Etung L.G.As",
+    "collationCentre": "INEC AREA OFFICE OBUBRA"
+  },
+  {
+    "code": "FC/083/CR",
+    "name": "Ogoja/Yala",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "The entire Geographical Area of Ogoja and Yala L.G.As",
+    "collationCentre": "INEC AREA OFFICE OGOJA"
+  },
+  {
+    "code": "FC/084/DT",
+    "name": "Aniocha North/Aniocha South/ Oshimili North & South",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "The entire Geographical Area of Aniocha North, Aniocha South and Oshimili North and South L.G.As",
+    "collationCentre": "INEC OFFICE ASABA, OSHIMILI SOUTH LGA AREA"
+  },
+  {
+    "code": "FC/085/DT",
+    "name": "Bomadi/Patani",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "The entire Geographical Area of Bomadi and Patani L.G.As",
+    "collationCentre": "OLOU PRY. SCH. BOMADI"
+  },
+  {
+    "code": "FC/086/DT",
+    "name": "Ethiope East/Ethiope West",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "The entire Geographical Area of Ethiope East and Ethiope West L.G.As",
+    "collationCentre": "ETHIOPE EAST LG COUNCIL HALL ISIOKOLO"
+  },
+  {
+    "code": "FC/087/DT",
+    "name": "Ika North East/Ika South",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "The entire Geographical Area of Ika North and Ika South LGAs",
+    "collationCentre": "INEC OFFICE, AGBOR, IKA SOUTH LGA"
+  },
+  {
+    "code": "FC/088/DT",
+    "name": "Isoko North/Isoko South",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "The entire Geographical Area of Isoko North and Isoko South L.G.As",
+    "collationCentre": "ISOKO SOUTH COUNCIL HALL OLEH"
+  },
+  {
+    "code": "FC/089/DT",
+    "name": "Nkokwa East/Ndokwa West/ Ukwuani",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "The entire Geographical Area of Nkokwa East, Ndokwa West and Ukwuani L.G.As",
+    "collationCentre": "INEC OFFICE, KWALE, NDOKWA WEST LGA"
+  },
+  {
+    "code": "FC/090/DT",
+    "name": "Okpe/Sapele/Uvwie",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "The entire Geographical Area of Okpe/Sapele/Uvwie L.G.As",
+    "collationCentre": "INEC OFFICE, OREROKPE OKPE LGA"
+  },
+  {
+    "code": "FC/091/DT",
+    "name": "Burutu",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "The entire Geographical Area of Burutu L.G.A",
+    "collationCentre": "AREA CUSTOMARY COURT HALL, BURUTU"
+  },
+  {
+    "code": "FC/092/DT",
+    "name": "Ughelli North, Ughelli South/Udu",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "The entire Geographical Area ofUghelli North/Ughelli South/Udu L.G.As",
+    "collationCentre": "INEC OFFICE, UGHELLI, UGHELLI NORTH LGA"
+  },
+  {
+    "code": "FC/093/DT",
+    "name": "Warri North/Warri South/ Warri South West",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "The entire Geographical Area of Warri North, Warri South and Warri South West L.G.As",
+    "collationCentre": "INEC OFFICE, WARRI, WARRI SOUTH LGA"
+  },
+  {
+    "code": "FC/094/EB",
+    "name": "Ebonyi/Ohaukwu",
+    "stateId": "ebonyi",
+    "stateName": "EBONYI",
+    "composition": "The entire Geographical Area of Ebonyi/Ohaukwu L.G.As",
+    "collationCentre": "OHAUKWU LG COUNCIL HALL, EZZAMGBO"
+  },
+  {
+    "code": "FC/095/EB",
+    "name": "Abakaliki/Izzi",
+    "stateId": "ebonyi",
+    "stateName": "EBONYI",
+    "composition": "The entire Geographical Area of Abakaliki/ Izzi L.G.As",
+    "collationCentre": "ABAKALIKI LG COUNCIL HALL"
+  },
+  {
+    "code": "FC/096/EB",
+    "name": "Ezza North/Ishielu",
+    "stateId": "ebonyi",
+    "stateName": "EBONYI",
+    "composition": "The entire Geographical Area of Ezza North/Ishielu L.G.As",
+    "collationCentre": "ISHIELU LG COUNCIL HALL ISHIELU"
+  },
+  {
+    "code": "FC/097/EB",
+    "name": "Ezza South/Ikwo",
+    "stateId": "ebonyi",
+    "stateName": "EBONYI",
+    "composition": "The entire Geographical Area of Ezza South/Ikwo L.G.As",
+    "collationCentre": "EZZA SOUTH LG COUNICL HALL ONUEKE"
+  },
+  {
+    "code": "FC/098/EB",
+    "name": "Ivo-Ohaozara/Onicha",
+    "stateId": "ebonyi",
+    "stateName": "EBONYI",
+    "composition": "The entire Geographical Area of Ivo-Ohaozara/Onicha L.G.As",
+    "collationCentre": "OHAOZARA LG COUNCIL HALL OBI OZARA"
+  },
+  {
+    "code": "FC/099/EB",
+    "name": "Afikpo North/Afikpo South",
+    "stateId": "ebonyi",
+    "stateName": "EBONYI",
+    "composition": "The entire Geographical Area of Afikpo North/Afikpo South L.G.As",
+    "collationCentre": "AFIKPO NORTH LGA COUNCIL HALL AFIKPO"
+  },
+  {
+    "code": "FC/100/ED",
+    "name": "Akoko-Edo",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "The entire Geographical Area of Akoko-Edo L.G.A",
+    "collationCentre": "COUNCIL HALL, IGARRA"
+  },
+  {
+    "code": "FC/101/ED",
+    "name": "Esan Central/Esan South/ Igueben",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "The entire Geographical Area of Esan Central/Esan South/Igueben L.G.As",
+    "collationCentre": "OKAIJESAN HALL, IRRUA"
+  },
+  {
+    "code": "FC/102/ED",
+    "name": "Esan North East/Esan South East",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "The entire Geographical Area of Esan North East/Esan South East L.G.As",
+    "collationCentre": "OKAIJESAN HALL, IRRUA"
+  },
+  {
+    "code": "FC/103/ED",
+    "name": "Etsako East/Etsako West/ Etsako Central",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "The entire Geographical Area of Etsako East/Etsako West/Etsako Central L.G.As",
+    "collationCentre": "COUNCIL HALL, AUCHI"
+  },
+  {
+    "code": "FC/104/ED",
+    "name": "Egor/Ikpoba-Okha",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "The entire Geographical Area of Egor/Ikpoba-Okha L.G.As",
+    "collationCentre": "EGHOSA GRAMMAR SCH, B/C"
+  },
+  {
+    "code": "FC/105/ED",
+    "name": "Oredo",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "The entire Geographical Area of Oredo L.G.A",
+    "collationCentre": "URHOKPOTA HALL,B/CITY"
+  },
+  {
+    "code": "FC/106/ED",
+    "name": "Orhionmwon/Uhunmwonde",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "The entire Geographical Area of Orhionmwon/Uhunmwonde L.G.As",
+    "collationCentre": "ESIGIE COLL. HALL, ABUDU"
+  },
+  {
+    "code": "FC/107/ED",
+    "name": "Ovia North East/Ovia South West",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "The entire Geographical Area of Ovia North East/Ovia South West L.G.As",
+    "collationCentre": "Council Hall, Iguobazuwa, Ovia South West LGA"
+  },
+  {
+    "code": "FC/108/ED",
+    "name": "Owan East/Owan West",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "The entire Geographical Area of Owan East/Owan West L.G.As",
+    "collationCentre": "INST. OF PHYSICAL EDU. AFUZE"
+  },
+  {
+    "code": "FC/109/EK",
+    "name": "Ado Ekiti/Irepodun/Ifelodun",
+    "stateId": "ekiti",
+    "stateName": "EKITI",
+    "composition": "The entire Geographical Area of Ado Ekiti/Irepodun/Ifelodun L.G.As",
+    "collationCentre": "MARY IMMACULATE GIRLS GRAMMAR SCH. ADO"
+  },
+  {
+    "code": "FC/110/EK",
+    "name": "Ekiti South West/Ikere/Orun/ Ise",
+    "stateId": "ekiti",
+    "stateName": "EKITI",
+    "composition": "The entire Geographical Area of Ekiti South West/Ikere/Orun Ise L.G.As",
+    "collationCentre": "HOLY TRINITY PRI. SCH. ODO OJA IKERE-EKITI"
+  },
+  {
+    "code": "FC/111/EK",
+    "name": "Emure/Gbonyin/Ekiti East",
+    "stateId": "ekiti",
+    "stateName": "EKITI",
+    "composition": "The entire Geographical Area of Emure/Gboyin/Ekiti East L.G.As",
+    "collationCentre": "ST. MARY’S PRY. SCH.IDE-EKITI"
+  },
+  {
+    "code": "FC/112/EK",
+    "name": "Ido/Osi, Moba/Ilejeme",
+    "stateId": "ekiti",
+    "stateName": "EKITI",
+    "composition": "The entire Geographical Area of Ido Osi/Moba/Ilejemeje L.G.As",
+    "collationCentre": "ST. DAVID ANGLICAN PRY. SCH. IDO EKITI"
+  },
+  {
+    "code": "FC/113/EK",
+    "name": "Ijero/Ekiti West/Efon",
+    "stateId": "ekiti",
+    "stateName": "EKITI",
+    "composition": "The entire Geographical Area of Ijero/Ekiti West/Efon L.G.As",
+    "collationCentre": "LOCAL GOVT. SEC. ARAMOKO EKITI"
+  },
+  {
+    "code": "FC/114/EK",
+    "name": "Ikole/Oye",
+    "stateId": "ekiti",
+    "stateName": "EKITI",
+    "composition": "The entire Geographical Area of Ikole/Oye L.G.As",
+    "collationCentre": "ST. AUGUSTINE COMPREHENSIVE HIGH SCH. OYE EKITI"
+  },
+  {
+    "code": "FC/115/EN",
+    "name": "Aninri/Awgu/Oji River",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "The entire Geographical Area of Aniniri/Awgu/Oji River L.G.As",
+    "collationCentre": "AWGU LG COUNCIL HALL"
+  },
+  {
+    "code": "FC/116/EN",
+    "name": "Enugu East/Isi Uzo",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "The entire Geographical Area of Enugu East/Isi Uzo L.G.As",
+    "collationCentre": "ENUGU EAST LG COUNCIL HALL ENUGU EAST"
+  },
+  {
+    "code": "FC/117/EN",
+    "name": "Enugu North/Enugu South",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "The entire Geographical Area ofEnugu North/Enugu South L.G.As",
+    "collationCentre": "ENUGU NORTH LG COUNCIL HALL"
+  },
+  {
+    "code": "FC/118/EN",
+    "name": "Ezeagu/Udi",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "The entire Geographical Area of Ezeagu/Udi L.G.As",
+    "collationCentre": "UDI LG COUNCIL HALL UDI"
+  },
+  {
+    "code": "FC/119/EN",
+    "name": "Igbo-Etiti/Uzo-Uwani",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "The entire Geographical Area of Igbo-Etiti/Uzo-Uwani L.G.As",
+    "collationCentre": "IGBO ETITI LG COUNCIL HALL IGBO ETITI"
+  },
+  {
+    "code": "FC/120/EN",
+    "name": "Igbo-Eze North/Udenu",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "The entire Geographical Area of Igbo-Eze North/Udenu L.G.As",
+    "collationCentre": "UDENU LG COUNCIL HALL IGBO EZE NORTH"
+  },
+  {
+    "code": "FC/121/EN",
+    "name": "Nkanu East/Nkanu West",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "The entire Geographical Area of Nkanu East/Nkanu West L.G.As",
+    "collationCentre": "NKANU WEST LG COUNCIL HALL NKANU EAST"
+  },
+  {
+    "code": "FC/122/EN",
+    "name": "Nsukka/Igbo-Eze South",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "The entire Geographical Area of Nsukka/Igbo-Eze South L.G.As",
+    "collationCentre": "NSUKKA LG CONCIL HALL"
+  },
+  {
+    "code": "FC/123/GM",
+    "name": "Akko",
+    "stateId": "gombe",
+    "stateName": "GOMBE",
+    "composition": "The entire Geographical Area of Ako L.G.A",
+    "collationCentre": "GOVT. TECH. SCH. KUMO"
+  },
+  {
+    "code": "FC/124/GM",
+    "name": "Yamaltu/Deba",
+    "stateId": "gombe",
+    "stateName": "GOMBE",
+    "composition": "The entire Geographical Area of Yamaltu Delba L.G.A",
+    "collationCentre": "GDSS DEBA"
+  },
+  {
+    "code": "FC/125/GM",
+    "name": "Balanga/Billiri",
+    "stateId": "gombe",
+    "stateName": "GOMBE",
+    "composition": "The entire Geographical Area of Balanga/Billiri L.G.As",
+    "collationCentre": "FED. GOVT. COLLEGE BILLIRI"
+  },
+  {
+    "code": "FC/126/GM",
+    "name": "Kaltungo/Shongom",
+    "stateId": "gombe",
+    "stateName": "GOMBE",
+    "composition": "The entire Geographical Area of Kaltungo/Shongom L.G.As",
+    "collationCentre": "GGASS KALTUNGO"
+  },
+  {
+    "code": "FC/127/GM",
+    "name": "Gombe/Kwami/Funakaye",
+    "stateId": "gombe",
+    "stateName": "GOMBE",
+    "composition": "The entire Geographical Area of Gombe/Kwami/Funakaye L.G.As",
+    "collationCentre": "GSS MALAM SIDI"
+  },
+  {
+    "code": "FC/128/GM",
+    "name": "Dukku/Nafada",
+    "stateId": "gombe",
+    "stateName": "GOMBE",
+    "composition": "The entire Geographical Area of Dukku/Nafada L.G.As",
+    "collationCentre": "GSS DUKKU"
+  },
+  {
+    "code": "FC/129/IM",
+    "name": "Ehime Mbano/Ihite-Uboma/ Obowo",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "The entire Geographical Area of Ehime Mbano/Ihite-Uboma/Obowo L.G.As",
+    "collationCentre": "IHITTE UBOMA LGA COUCIL HALL HQ ISIWEKE"
+  },
+  {
+    "code": "FC/130/IM",
+    "name": "Isiala Mbano/Okigwe/Onuimo",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "The entire Geographical Area of Isiala Mbano/Okigwe/Onuimo L.G.As",
+    "collationCentre": "ONUIMO LG COUNCIL HQ"
+  },
+  {
+    "code": "FC/131/IM",
+    "name": "Ideato North/Ideato South",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "The entire Geographical Area of Ideato North/ Ideato South L.G.As",
+    "collationCentre": "IDEATO NORTH COUNCIL HQ URUALLA"
+  },
+  {
+    "code": "FC/132/IM",
+    "name": "Isu/Njaba/Nkwerre/Nwangele",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "The entire Geographical Area of Isu/Njaba/Nkwerre/Nwagele L.G.As",
+    "collationCentre": "NWANGELE LG COUNCIL HQ AMIGBO"
+  },
+  {
+    "code": "FC/133/IM",
+    "name": "Oguta/Ohaji-Egbema/Oru West",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "The entire Geographical Area of Oguta/Ohajji-Egbema/Oru West L.G.s",
+    "collationCentre": "OGUTA LG COUNCIL HQ OGUTA"
+  },
+  {
+    "code": "FC/134/IM",
+    "name": "Oru East/Orsu/Orlu",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "The entire Geographical Area of Oru East/Orsu/Orlu L.G.As",
+    "collationCentre": "ORLU LG HQ"
+  },
+  {
+    "code": "FC/135/IM",
+    "name": "Aboh Mbaise/Ngor Okpala",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "The entire Geographical Area of Aboh Mbaise/Ngor Okpala L.G.As",
+    "collationCentre": "NGOR OKPALA LG COUNCIL HQ UMUNEKE"
+  },
+  {
+    "code": "FC/136/IM",
+    "name": "Ahiazu Mbaise/Ezinihitte",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "The entire Geographical Area of Ahiazu Mbaise/Ezinihitte L.G.As",
+    "collationCentre": "AHIAZU MBAISE LG COUNCIL HQ AFOR-ORU"
+  },
+  {
+    "code": "FC/137/IM",
+    "name": "Ikeduru/Mbaitoli",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "The entire Geographical Area of Ikeduru/Mbaitoli L.G.As",
+    "collationCentre": "MBAITOLU LG COUNCIL HQ NWAORIEUBI"
+  },
+  {
+    "code": "FC/138/IM",
+    "name": "Owerri Municipal/Owerri North/Owerri West",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "The entire Geographical Area of Owerri Municipal/Owerri North/Owerri West L.G.As",
+    "collationCentre": "OWERRI MUNICIPAL COUNCIL HQ OWERRI"
+  },
+  {
+    "code": "FC/139/JG",
+    "name": "Babura/Garki",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area ofBabura/Garki L.G.As",
+    "collationCentre": "BABURA"
+  },
+  {
+    "code": "FC/140/JG",
+    "name": "Birnin Kudu/Buji",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area of Birnin Kudu/Buji L.G.As",
+    "collationCentre": "BIRNIN KUDU"
+  },
+  {
+    "code": "FC/141/JG",
+    "name": "Birniwa Guri/Kirikasamma",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area of Birniwa Guri/Kirikasamma L.G.As",
+    "collationCentre": "BIRNIWA"
+  },
+  {
+    "code": "FC/142/JG",
+    "name": "Dutse/Kiyawa",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area of Dutse/Kiyawa L.G.As",
+    "collationCentre": "DUTSE"
+  },
+  {
+    "code": "FC/143/JG",
+    "name": "Gwaram",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area of Gwaram L.G.As",
+    "collationCentre": "GWARAM"
+  },
+  {
+    "code": "FC/144/JG",
+    "name": "Gumel/Maigatari/Sule Tankarkar/Gagarawa",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area of Gumel/Maigatari/Sule Tankarkar/Gagarawa L.G.As",
+    "collationCentre": "GUMEL"
+  },
+  {
+    "code": "FC/145/JG",
+    "name": "Hadejia/Kafin Hausa",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area of Hadejia/Kafin Hausa L.G.As",
+    "collationCentre": "HADEJIA"
+  },
+  {
+    "code": "FC/146/JG",
+    "name": "Jahun/Miga",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area of Jahun/Miga L.G.As",
+    "collationCentre": "JAHUN"
+  },
+  {
+    "code": "FC/147/JG",
+    "name": "Mallam Madori/Kaugama",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area of Mallam Madori/ Kaugama L.G.As",
+    "collationCentre": "KAUGAMA"
+  },
+  {
+    "code": "FC/148/JG",
+    "name": "Kazaure/Roni/Gwiwa/Yankwashi",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area of Kazaure/Roni/Gwiwa/Yankwashi L.G.As",
+    "collationCentre": "RINGIM"
+  },
+  {
+    "code": "FC/149/JG",
+    "name": "Ringim/Taura",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "The entire Geographical Area of Ringim/Taura L.G.As",
+    "collationCentre": "KAZAURE"
+  },
+  {
+    "code": "FC/150/KD",
+    "name": "Kaduna North",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Kaduna North L.G.A",
+    "collationCentre": "COUNCIL CHAMBERS"
+  },
+  {
+    "code": "FC/151/KD",
+    "name": "Zaria",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Zaria L.G.A",
+    "collationCentre": "INEC OFFICE ZARIA"
+  },
+  {
+    "code": "FC/152/KD",
+    "name": "Soba",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Soba L.G.A",
+    "collationCentre": "INEC OFFICE SOBA"
+  },
+  {
+    "code": "FC/153/KD",
+    "name": "Igabi",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Igabi L.G.A",
+    "collationCentre": "GOVERNMENT SEC. SCHOOL ZIGACHIKUN"
+  },
+  {
+    "code": "FC/154/KD",
+    "name": "Ikara/Kubau",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Ikara/Kubau L.G.As",
+    "collationCentre": "INEC OFFICE IKARA LGA"
+  },
+  {
+    "code": "FC/155/KD",
+    "name": "Makarfi/Kudan",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Makarfi/Kudan L.G.As",
+    "collationCentre": "MAKARFI LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/156/KD",
+    "name": "Lere",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Lere L.G.A",
+    "collationCentre": "INEC OFFICE LERE LGA"
+  },
+  {
+    "code": "FC/157/KD",
+    "name": "Kachia/Kagarko",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Kachia/Kagarko L.G.As",
+    "collationCentre": "INEC OFFICE KACHIA LGA"
+  },
+  {
+    "code": "FC/158/KD",
+    "name": "Chikun/Kajuru",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Chikun/Kajuru L.G.As",
+    "collationCentre": "INEC OFFICE CHIKUN LGA"
+  },
+  {
+    "code": "FC/159/KD",
+    "name": "Jema’a/Sanga",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Jema'a/Sanga LGAs",
+    "collationCentre": "INEC OFFICE JEMA'A LGA"
+  },
+  {
+    "code": "FC/160/KD",
+    "name": "Birnin Gwari/Giwa",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Birnin Gwari/Giwa L.G.As",
+    "collationCentre": "INEC BIRNI GWARI"
+  },
+  {
+    "code": "FC/161/KD",
+    "name": "Sabon Gari",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Sabon Gari L.G.A",
+    "collationCentre": "LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/162/KD",
+    "name": "Kaduna South",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Kaduna South L.G.A",
+    "collationCentre": "INEC OFFICE KADUNA SOUTH LGA"
+  },
+  {
+    "code": "FC/163/KD",
+    "name": "Kaura",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Kaura L.G.A",
+    "collationCentre": "INEC OFFICE KAURA LGA"
+  },
+  {
+    "code": "FC/164/KD",
+    "name": "Kauru",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Kauru L.G.A",
+    "collationCentre": "INEC OFFICE KAURU LGA"
+  },
+  {
+    "code": "FC/165/KD",
+    "name": "Zangon Kataf/Jaba",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "The entire Geographical Area of Zangon Kataf/Jaba L.G.As",
+    "collationCentre": "INEC OFFICE ZANGGWA, Z/KAFAR"
+  },
+  {
+    "code": "FC/166/KN",
+    "name": "Alabasu/Gaya/Ajingi",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Alabasu/Gaya/Ajingi L.G.As",
+    "collationCentre": "GAYA LGA"
+  },
+  {
+    "code": "FC/167/KN",
+    "name": "Shanono/Bagwai",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Shanono/Bagwai L.G.As",
+    "collationCentre": "SHANONO LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/168/KN",
+    "name": "Bebeji/Kiru",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Bebeji/Kiru L.G.As",
+    "collationCentre": "KIRU LGA SEC."
+  },
+  {
+    "code": "FC/169/KN",
+    "name": "Bichi",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Bichi L.G.A",
+    "collationCentre": "BICHI LGA SEC."
+  },
+  {
+    "code": "FC/170/KN",
+    "name": "Rano/Bunkure/Kibiya",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Rano/Bunkure/Kibiya L.G.As",
+    "collationCentre": "RANO LGA SEC."
+  },
+  {
+    "code": "FC/171/KN",
+    "name": "Dala",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Dala L.G.A",
+    "collationCentre": "LGA SEC. DALA"
+  },
+  {
+    "code": "FC/172/KN",
+    "name": "Gwale",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Gwale L.G.A",
+    "collationCentre": "GWALE GSS"
+  },
+  {
+    "code": "FC/173/KN",
+    "name": "Dambatta/Makoda",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Damatta/Makoda L.G.As",
+    "collationCentre": "DANBATTA GOVT. GIRLS ARABIC SEC. SCH."
+  },
+  {
+    "code": "FC/174/KN",
+    "name": "Dawakin Kudu/Warawa",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Dawakin Kudu/Warawa L.G.s",
+    "collationCentre": "LGA SEC. D/KUDU"
+  },
+  {
+    "code": "FC/175/KN",
+    "name": "Dawakin Tofa/Tofa/Rimin Gado",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Dawakin Tofa/Tofa/Rimin Gado L.G.As",
+    "collationCentre": "D/TOFA LGA SEC."
+  },
+  {
+    "code": "FC/176/KN",
+    "name": "Doguwa/Tudun Wada",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Doguwa/Tudun Wada L.G.As",
+    "collationCentre": "T/WADA GOVT. GIRLS ARABIC SEC. SCH."
+  },
+  {
+    "code": "FC/177/KN",
+    "name": "Gezawa/Gabasawa",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Gezawa/Gabasawa L.G.As",
+    "collationCentre": "GEZAWA LGA SEC"
+  },
+  {
+    "code": "FC/178/KN",
+    "name": "Gwarzo/Ikabo",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Gwarzo/Ikabo L.G.As",
+    "collationCentre": "GWARZO (LG SEC."
+  },
+  {
+    "code": "FC/179/KN",
+    "name": "Municipal",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Municipal L.G.A",
+    "collationCentre": "INEC OFFICE KMC"
+  },
+  {
+    "code": "FC/180/KN",
+    "name": "Tarauni",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Tarauni L.G.A",
+    "collationCentre": "FGC KANO"
+  },
+  {
+    "code": "FC/181/KN",
+    "name": "Karaye/Rogo",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Karaye/Rogo L.G.As",
+    "collationCentre": "KARAYE LGA SEC."
+  },
+  {
+    "code": "FC/182/KN",
+    "name": "Kumbotso",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Kumbotso L.G.A",
+    "collationCentre": "KUMBOTSO INEC OFFICE"
+  },
+  {
+    "code": "FC/183/KN",
+    "name": "Kura/Madobi/Garun Mallam",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Kura/Madobi/Garun Mallam L.G.As",
+    "collationCentre": "KURA INEC OFFICE"
+  },
+  {
+    "code": "FC/184/KN",
+    "name": "Nassarawa",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Nasarawa L.G.A",
+    "collationCentre": "SCH. OF HEALTH"
+  },
+  {
+    "code": "FC/185/KN",
+    "name": "Fagge",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Fagge L.G.A",
+    "collationCentre": "FAGGE INEC OFFICE"
+  },
+  {
+    "code": "FC/186/KN",
+    "name": "Sumaila/Takai",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Sumaila/Takai L.G.As",
+    "collationCentre": "TAKAI LGA SEC."
+  },
+  {
+    "code": "FC/187/KN",
+    "name": "Minjibir/Ungogo",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Minjibir/Ungogo L.G.As",
+    "collationCentre": "UNGOGO LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/188/KN",
+    "name": "Tsanyawa/Kunchi",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Tsanyawa/Kunchi L.G.As",
+    "collationCentre": "TSANYAWA LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/189/KN",
+    "name": "Wudil/Garko",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "The entire Geographical Area of Wudil/Garko L.G.As",
+    "collationCentre": "WUDIL LGA SEC."
+  },
+  {
+    "code": "FC/190/KT",
+    "name": "Bakori/Danja",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Bakori/Danja L.G.As",
+    "collationCentre": "BAKORI L.G CAHAMBER"
+  },
+  {
+    "code": "FC/191/KT",
+    "name": "Batagarawa/Charanchi/Rimi",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area ofBatagarawa/Charanchi/Rimi L.G.As",
+    "collationCentre": "RIMI L.G CHAMBER"
+  },
+  {
+    "code": "FC/192/KT",
+    "name": "Batsari/Safana/Danmusa",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Batsari/Safana/Danmusa L.G.As",
+    "collationCentre": "SAFANA L.G CHAMBER"
+  },
+  {
+    "code": "FC/193/KT",
+    "name": "Bindawa/Mani",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Bindawa/Mani L.G.As",
+    "collationCentre": "MANI L.G CHAAMBER"
+  },
+  {
+    "code": "FC/194/KT",
+    "name": "Daura/Sandamu/Mai’adua",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Daura/Sandamu/Mai'adua L.G.As",
+    "collationCentre": "DAURA L.G CHAMBER"
+  },
+  {
+    "code": "FC/195/KT",
+    "name": "Dutsin-ma/Kurfi",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Dutsin-ma/Kurfi L.G.As",
+    "collationCentre": "DUTSIN-MA L.G CHAMBER"
+  },
+  {
+    "code": "FC/196/KT",
+    "name": "Faskari/Kankara/Sabuwa",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Faskari/Kankara/Sabuwa L.G.As",
+    "collationCentre": "KANKARA L.G CHAMBER"
+  },
+  {
+    "code": "FC/197/KT",
+    "name": "Funtua/Dandume",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Funtua/Dandume L.G.As",
+    "collationCentre": "INEC OFFICE FUNTUA LG"
+  },
+  {
+    "code": "FC/198/KT",
+    "name": "Ingawa/Kankia/Kusada",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Ingwa/Kankia/Kusada L.G.As",
+    "collationCentre": "KANKIA L.G CHAMBER"
+  },
+  {
+    "code": "FC/199/KT",
+    "name": "Jibia/Kaita",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Jibia/aita L.G.As",
+    "collationCentre": "JIBIA L.G  CHAMBER"
+  },
+  {
+    "code": "FC/200/KT",
+    "name": "Malumfashi/Kafur",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Malumfashi/Kafur L.G.As",
+    "collationCentre": "MALUMFASHI L.G CHAMBER"
+  },
+  {
+    "code": "FC/201/KT",
+    "name": "Katsina",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Katsina L.G.A",
+    "collationCentre": "KATSINA INEC OFFICE"
+  },
+  {
+    "code": "FC/202/KT",
+    "name": "Mashi/Dutsi",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Mashi/Dutsi L.G.As",
+    "collationCentre": "MASHI INEC OFFICE"
+  },
+  {
+    "code": "FC/203/KT",
+    "name": "Matazu/Musawa",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Matazu/Musawa L.G.As",
+    "collationCentre": "MUSAWA L.G CHAMBER"
+  },
+  {
+    "code": "FC/204/KT",
+    "name": "Zango/Baure",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "The entire Geographical Area of Zango/Baure L.G.As",
+    "collationCentre": "BAURE L.G CHAMBERS"
+  },
+  {
+    "code": "FC/205/KB",
+    "name": "Arewa/Dandi",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "The entire Geographical Area of Arewa/Dandi L.G.As",
+    "collationCentre": "Kanba LGA Sectariat"
+  },
+  {
+    "code": "FC/206/KB",
+    "name": "Argungu/Augie",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "The entire Geographical Area of Argungu/Augie L.G.As",
+    "collationCentre": "INEC Office Arugungu"
+  },
+  {
+    "code": "FC/207/KB",
+    "name": "Bagudo/Suru",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "The entire Geographical Area of Bagudo/Suru L.G.As",
+    "collationCentre": "INEC Office, Babudo"
+  },
+  {
+    "code": "FC/208/KB",
+    "name": "Bunza/Birnin Kebbi/Kalgo",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "The entire Geographical Area of Bunza/Birnin Kebbi/Kalgo L.G.As",
+    "collationCentre": "INEC Office Birnin Kebbi"
+  },
+  {
+    "code": "FC/209/KB",
+    "name": "Aleiro/Gwandu/Jega",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "The entire Geographical Area of Aleiro/Gwandu/Jega L.G.As",
+    "collationCentre": "INEC Office, Jega"
+  },
+  {
+    "code": "FC/210/KB",
+    "name": "Koko-Besse/Maiyama",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "The entire Geographical Area of Koko-Besse/Maiyama L.G.As",
+    "collationCentre": "INEC Office Maiyama"
+  },
+  {
+    "code": "FC/211/KB",
+    "name": "Fakai/Sakaba/Wasagu/Danko/ Zuru",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "The entire Geographical Area of Fakai/Sakaba/Wasagu/Danko/Zuru L.G.As",
+    "collationCentre": "INEC Office, Zuru"
+  },
+  {
+    "code": "FC/212/KB",
+    "name": "Ngaski/Shanga/Yauri",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "The entire Geographical Area of Ngaski/Shanga/Yauri L.G.As",
+    "collationCentre": "INEC Office, Yahuri"
+  },
+  {
+    "code": "FC/213/KG",
+    "name": "Adavi/Okehi",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "The entire Geographical Area of Adavi/Okehi L.G.As",
+    "collationCentre": "ADAVI LG COUNCIL SEC."
+  },
+  {
+    "code": "FC/214/KG",
+    "name": "Ankpa/Omala/Olamaboro",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "The entire Geographical Area of Ankpa/Omala/Olamabaro L.G.As",
+    "collationCentre": "ANKPA LG COUNCIL SEC."
+  },
+  {
+    "code": "FC/215/KG",
+    "name": "Bassa/Dekina",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "The entire Geographical Area of Bassa/Dekina L.G.As",
+    "collationCentre": "DEKINA LG COUNCIL SEC."
+  },
+  {
+    "code": "FC/216/KG",
+    "name": "Idah/Igalamela Odolu/Ibaji/ Ofu",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "The entire Geographical Area ofIdah/Igalamela Odolu/Ibaji/Ofu L.G.As",
+    "collationCentre": "IDAH LG COUNCIL SEC"
+  },
+  {
+    "code": "FC/217/KG",
+    "name": "Ijumu/Kabba-Bunu",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "The entire Geographical Area of Ijumu/Kabba-Bunu L.G.As",
+    "collationCentre": "KABBA LGA COUNCIL SEC."
+  },
+  {
+    "code": "FC/218/KG",
+    "name": "Ajaokuta",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "The entire Geographical Area of Ajaokuta L.G.A",
+    "collationCentre": "AJAOKUTA LGA COUNCIL SEC."
+  },
+  {
+    "code": "FC/219/KG",
+    "name": "Kogi (Lokoja)/Kogi (K.K.)",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "The entire Geographical Area of Kogi (Lokoja)/Kogi (K.K.) L.G.As",
+    "collationCentre": "LOKOJA LGA COUNCIL SEC."
+  },
+  {
+    "code": "FC/220/KG",
+    "name": "Okene/Ogori-Magogo",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "The entire Geographical Area of Okene/Ogori-Magongo L.G.As",
+    "collationCentre": "OKENE LG COUNCILM SEC."
+  },
+  {
+    "code": "FC/221/KG",
+    "name": "Yagba East/Yagba West/ Mopamuro",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "The entire Geographical Area of Yagba East/Yagba West/Mopamuro L.G.As",
+    "collationCentre": "INEC OFFICE ISANLU"
+  },
+  {
+    "code": "FC/222/KW",
+    "name": "Baruten/Kaiama",
+    "stateId": "kwara",
+    "stateName": "KWARA",
+    "composition": "The entire Geographical Area of Baruten/Kaima L.G.As",
+    "collationCentre": "INEC LGA OFFICE, KAIAMA"
+  },
+  {
+    "code": "FC/223/KW",
+    "name": "Edu/Moro/Pategi",
+    "stateId": "kwara",
+    "stateName": "KWARA",
+    "composition": "The entire Geographical Area of Edu/Moro/Pategi L.G.As",
+    "collationCentre": "INEC LGA OFFICE, BODE SAADU"
+  },
+  {
+    "code": "FC/224/KW",
+    "name": "Ekiti/Isin/Irepodun/Oke-Ero",
+    "stateId": "kwara",
+    "stateName": "KWARA",
+    "composition": "The entire Geographical Area of Ekiti/Isin/Irepodun/Oke-Ero L.G.As",
+    "collationCentre": "INEC LGA OFFICE, OMU-ARAN"
+  },
+  {
+    "code": "FC/225/KW",
+    "name": "Ilorin East/Ilorin South",
+    "stateId": "kwara",
+    "stateName": "KWARA",
+    "composition": "The entire Geographical Area of Ilorin East/Ilorin South L.G.As",
+    "collationCentre": "INEC LGA OFFICE, ILORIN EAST"
+  },
+  {
+    "code": "FC/226/KW",
+    "name": "Ilorin West/Asa",
+    "stateId": "kwara",
+    "stateName": "KWARA",
+    "composition": "The entire Geographical Area of Ilorin West/Asa L.G.As",
+    "collationCentre": "INEC LGA OFFICE, ILORIN WEST"
+  },
+  {
+    "code": "FC/227/KW",
+    "name": "Ifelodun/Offa/Oyun",
+    "stateId": "kwara",
+    "stateName": "KWARA",
+    "composition": "The entire Geographical Area of Ifelodun/Offa/Oyun L.G.As",
+    "collationCentre": "INEC LGA OFFICE, OFFA"
+  },
+  {
+    "code": "FC/228/LA",
+    "name": "Agege",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Agege L.G.A",
+    "collationCentre": "AGEGE LGA SECTARIAT HALL"
+  },
+  {
+    "code": "FC/229/LA",
+    "name": "Ifako/Ijaiye",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Ifako- Ijaye L.G.A",
+    "collationCentre": "COUNCIL HALL IFAKO-IJAYE LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/230/LA",
+    "name": "Alimosho",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Alimosho LGA",
+    "collationCentre": "COUNCIL HALL ALIMOSO LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/231/LA",
+    "name": "Badagry",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Badagry LGA",
+    "collationCentre": "COUNCIL HALL BADAGRY LGA SEC"
+  },
+  {
+    "code": "FC/232/LA",
+    "name": "Epe",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Epe LGA",
+    "collationCentre": "COUNCIL HALL EPE LGA SEC"
+  },
+  {
+    "code": "FC/233/LA",
+    "name": "Ibeju Lekki",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Ibeju Lekki LGA",
+    "collationCentre": "COUNCIL HALL IBEJU LEKKI LGA"
+  },
+  {
+    "code": "FC/234/LA",
+    "name": "Eti-Osa",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Eti-Osa LGA",
+    "collationCentre": "ETI-OSA LGA HALL"
+  },
+  {
+    "code": "FC/235/LA",
+    "name": "Apapa",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Apapa LGA",
+    "collationCentre": "APAPA LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/236/LA",
+    "name": "Ikeja",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Ikeja LGA",
+    "collationCentre": "IKEJA LOCAL GOVERNMENT COUNCIL CHAMBER"
+  },
+  {
+    "code": "FC/237/LA",
+    "name": "Ikorodu",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Ikorodu LGA",
+    "collationCentre": "COUNCIL HALL IKORODU LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/238/LA",
+    "name": "Lagos Island I",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "Part of Lagos Island LGA",
+    "collationCentre": "CITY HALL, LAGOS ISLAND"
+  },
+  {
+    "code": "FC/239/LA",
+    "name": "Lagos Island II",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "Part of Lagos Island LGA",
+    "collationCentre": "CITY HALL, LAGOS ISLAND"
+  },
+  {
+    "code": "FC/240/LA",
+    "name": "Lagos Mainland",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Lagos Mainland LGA",
+    "collationCentre": "COUNCIL HALL LAGOS MAINLAND LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/241/LA",
+    "name": "Mushin I",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "Part of Mushin LGA",
+    "collationCentre": "COUNCIL HALL MUSHIN LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/242/LA",
+    "name": "Mushin II",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "Part of Mushin LGA",
+    "collationCentre": "COUNCIL HALL MUSHIN LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/243/LA",
+    "name": "Ojo",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Ojo LGA",
+    "collationCentre": "COUNCIL CHAMBER OJO, LGA SEC"
+  },
+  {
+    "code": "FC/244/LA",
+    "name": "Amuwo-Odofin",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Amuwo-Odofin LGA",
+    "collationCentre": "COUNCIL CHAMBER AMUWO ODOFIN LGA SEC"
+  },
+  {
+    "code": "FC/245/LA",
+    "name": "Ajeromi/Ifelodun",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Ajeromi/Ifelodun LGA",
+    "collationCentre": "COUNCIL HALL AJEROMI IFELODUN LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/246/LA",
+    "name": "Oshodi/Isolo I",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "Part of Oshodi/Isolo LGA",
+    "collationCentre": "SECRETARIAT OSHODI-ISOLO LGA"
+  },
+  {
+    "code": "FC/247/LA",
+    "name": "Oshodi/Isolo II",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "Part of Oshodi/Isolo LGA",
+    "collationCentre": "SECRETARIAT OSHODI-ISOLO LGA"
+  },
+  {
+    "code": "FC/248/LA",
+    "name": "Shomolu",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Shomolu LGA",
+    "collationCentre": "COUNCIL HALL SOMOLU LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/249/LA",
+    "name": "Kosofe",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "The entire Geographical Area of Kosofe LGA",
+    "collationCentre": "COUNCIL HALL KOSOFE LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/250/LA",
+    "name": "Surulere I",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "Part of Surulere LGA",
+    "collationCentre": "COUNCIL HALL SURULERE LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/251/LA",
+    "name": "Surulere II",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "Part of Surulere LGA",
+    "collationCentre": "COUNCIL HALL SURULERE LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/252/NW",
+    "name": "Akwanga/Nassarawa Eggon/ Wamba",
+    "stateId": "nasarawa",
+    "stateName": "NASARAWA",
+    "composition": "The entire Geographical Area of Akwanga/Nasarawa-Egon/Wamba LGAs",
+    "collationCentre": "VIP CHAMBER AKWANGA"
+  },
+  {
+    "code": "FC/253/NW",
+    "name": "Awe/Doma/Keana",
+    "stateId": "nasarawa",
+    "stateName": "NASARAWA",
+    "composition": "The entire Geographical Area of Awe/Doma/Keana LGAs",
+    "collationCentre": "COUNCIL CHAMBERS AWE"
+  },
+  {
+    "code": "FC/254/NW",
+    "name": "Keffi/Karu/Kokona",
+    "stateId": "nasarawa",
+    "stateName": "NASARAWA",
+    "composition": "The entire Geographical Area of Keffi/Karu/Kokona LGAs",
+    "collationCentre": "MAIN AUDITORIUM NAS. STATE UNI. KEFFI"
+  },
+  {
+    "code": "FC/255/NW",
+    "name": "Lafia/Obi",
+    "stateId": "nasarawa",
+    "stateName": "NASARAWA",
+    "composition": "The entire Geographical Area of Lafia/Obi LGAs",
+    "collationCentre": "COLLEGE OF AGRIC. LAFIA"
+  },
+  {
+    "code": "FC/256/NW",
+    "name": "Nassarawa/Toto",
+    "stateId": "nasarawa",
+    "stateName": "NASARAWA",
+    "composition": "The entire Geographical Area of Nasarawa/Toto LGAs",
+    "collationCentre": "FED. POLY NASARAWA"
+  },
+  {
+    "code": "FC/257/NG",
+    "name": "Agaie/Lapai",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "The entire Geographical Area of Agaie/Lapai LGAs",
+    "collationCentre": "DENDO SEC. SCH, AGAIE"
+  },
+  {
+    "code": "FC/258/NG",
+    "name": "Agwara/Borgu",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "The entire Geographical Area of Agwara/Borgu LGAs",
+    "collationCentre": "GOVT SCIENCE SEC. SCHOOL NEW BUSSA"
+  },
+  {
+    "code": "FC/259/NG",
+    "name": "Bida/Gbako/Katcha",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "The entire Geographical Area of Bida/Gbako/Katcha LGAs",
+    "collationCentre": "GOVT. COLLEGE BIDA"
+  },
+  {
+    "code": "FC/260/NG",
+    "name": "Booso/Paikoro",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "The entire Geographical Area of Booso/Paikoro LGAs",
+    "collationCentre": "COLLEGE OF EDUCATION MINNA"
+  },
+  {
+    "code": "FC/261/NG",
+    "name": "Chanchaga",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "The entire Geographical Area of Chanchaga LGA",
+    "collationCentre": "EDUCATION RESOURCE CENTRE MINNA"
+  },
+  {
+    "code": "FC/262/NG",
+    "name": "Gurara/Suleja/Tapa",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "The entire Geographical Area of Gurara/Suleja/Tapa LGAs",
+    "collationCentre": "SULEIMAN BARAU TECH. COLLEGE SULEJA"
+  },
+  {
+    "code": "FC/263/NG",
+    "name": "Lavun/Mokwa/Edati",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "The entire Geographical Area of Lavun/Mokwa/Edati LGAs",
+    "collationCentre": "GOVT. SCIENCE COLLEGE KUTIGI"
+  },
+  {
+    "code": "FC/264/NG",
+    "name": "Magama/Rijau",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "The entire Geographical Area of Magama/Rijau LGAs",
+    "collationCentre": "GOVT. SEC. SCH. RIJAU"
+  },
+  {
+    "code": "FC/265/NG",
+    "name": "Kontagora/Wushishi/Mariga/ Mashegu",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "The entire Geographical Area of Kontagora/Wushishi/Mariga/Mashegu LGAs",
+    "collationCentre": "GOVT. TECH. COLLEGE KONTAGORA"
+  },
+  {
+    "code": "FC/266/NG",
+    "name": "Shiroro/Rafi/Munya",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "The entire Geographical Area of Shiroro/Rafi/Munya LGAs",
+    "collationCentre": "FED. TECH. COLLEGE KUTA"
+  },
+  {
+    "code": "FC/267/OG",
+    "name": "Abeokuta North/ Obafemi- Owode/Odeda",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "The entire Geographical Area of Abeokuta North/Obafemi-Owode/Odeda LGAs",
+    "collationCentre": "UNITY HIGH SCH. AGO IKA"
+  },
+  {
+    "code": "FC/268/OG",
+    "name": "Abeokuta South",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "The entire Geographical Area of Abeokuta South LGA",
+    "collationCentre": "CENTRAL HALL AKE"
+  },
+  {
+    "code": "FC/269/OG",
+    "name": "Ado-Odo/Ota",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "The entire Geographical Area of Ado-Odo/Ota LGAs",
+    "collationCentre": "LG. SEC. HALL"
+  },
+  {
+    "code": "FC/270/OG",
+    "name": "Egbado North/Imeko-Afon",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "The entire Geographical Area of Egbado North/Imeko-Afon LGAs",
+    "collationCentre": "MULTI-PURPOSE TOWN HALL, OKE OYINBO, AYETORO"
+  },
+  {
+    "code": "FC/271/OG",
+    "name": "Egbado South/Ipokia",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "The entire Geographical Area of Egbado South/Ipokia LGAs",
+    "collationCentre": "ORONA TOWN HALL ILARO"
+  },
+  {
+    "code": "FC/272/OG",
+    "name": "Ifo/Ewekoro",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "The entire Geographical Area of Ifo/Ewekoro LGAs",
+    "collationCentre": "R.C.M. SCH. I, IFO"
+  },
+  {
+    "code": "FC/273/OG",
+    "name": "Ijebu North/Ijebu East/Ogun Waterside",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "The entire Geographical Area of Ijebu North/Ijebu East/Ogun Waterside LGAs",
+    "collationCentre": "ST. MARY PRY. SCH. IJEBU-IMUSHIN"
+  },
+  {
+    "code": "FC/274/OG",
+    "name": "Ijebu Ode /Odogbolu /Ijebu North East",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "The entire Geographical Area of Ijebu-Ode/Odogbolu/Ijebu North East LGAs",
+    "collationCentre": "IJEBU-ODE GRAMMAR SCH. IJEBU-ODE"
+  },
+  {
+    "code": "FC/275/OG",
+    "name": "Ikenne/Shagamu/Remo North",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "The entire Geographical Area of Ikenne/Shagamu/Remo North LGAs",
+    "collationCentre": "TOWN HALL, IKENNE"
+  },
+  {
+    "code": "FC/276/OD",
+    "name": "Akoko North East/Akoko North West",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "The entire Geographical Area of Akoko North East/Akoko North West LGAs",
+    "collationCentre": "VICTORY COLLEGE IKARE"
+  },
+  {
+    "code": "FC/277/OD",
+    "name": "Akoko South East/Akoko South West",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "The entire Geographical Area of Akoko South East/ Akoko South West LGAs",
+    "collationCentre": "ST. MARY’S PRY SCH. OKA"
+  },
+  {
+    "code": "FC/278/OD",
+    "name": "Akure North/Akure South",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "The entire Geographical Area of Akure North/Akure South LGAs",
+    "collationCentre": "ST. PETER’S UNITY SCH. AKURE"
+  },
+  {
+    "code": "FC/279/OD",
+    "name": "Idanre/Ifedore",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "The entire Geographical Area of Idanre/Ifedore LGAs",
+    "collationCentre": "LOCAL GOVT. OWENA"
+  },
+  {
+    "code": "FC/280/OD",
+    "name": "Ileoluji/Okeigbo/Odigbo",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "The entire Geographical Area of Ile- Oluji/Okeigbo/Odigbo LGAs",
+    "collationCentre": "ISERO GRAMMAR SCH., ODIGBO"
+  },
+  {
+    "code": "FC/281/OD",
+    "name": "Okitipupa/Irele",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "The entire Geographical Area of Okitipupa/Irele LGAs",
+    "collationCentre": "STELLA MARIS COLLEGE OKITIPUPA"
+  },
+  {
+    "code": "FC/282/OD",
+    "name": "Eseodo/Ilaje",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "The entire Geographical Area of Eseodo/Ilaje LGAs",
+    "collationCentre": "CIVIC CENTRE IGBOKODA"
+  },
+  {
+    "code": "FC/283/OD",
+    "name": "Ondo East/Ondo West",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "The entire Geographical Area of Ondo East/Ondo West LGAs",
+    "collationCentre": "TOWN HALL, ENUOWA ONDO"
+  },
+  {
+    "code": "FC/284/OD",
+    "name": "Owo/Ose",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "The entire Geographical Area of Owo/Ose LGAs",
+    "collationCentre": "MAPO HALL, OWO"
+  },
+  {
+    "code": "FC/285/OS",
+    "name": "Irepodun/Olorunda/Osogbo/Orolu",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "The entire Geographical Area of Irepodun/Olorunda/Osogbo/Orolu LGAs",
+    "collationCentre": "OSOGBO CITY HALL, OSOGBO"
+  },
+  {
+    "code": "FC/286/OS",
+    "name": "Odo-Otin/Ifelodun/Boripe",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "The entire Geographical Area of Odo-Otin/Ifelodun/Boripe LGAs",
+    "collationCentre": "IKIRUN TOWN HALL IKIRUN"
+  },
+  {
+    "code": "FC/287/OS",
+    "name": "Boluwaduro/Ifedayo/Ila",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "The entire Geographical Area of Boluwaduro/Ifedayo/Ila LGAs",
+    "collationCentre": "ILA LGA SEC. ILA OREGUN"
+  },
+  {
+    "code": "FC/288/OS",
+    "name": "Atakunmosa East/ Atakunmosa West/Ilesha East/Ilesha West",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "The entire Geographical Area of Atakumosa East/Atakumosa West/Ilesha East/Ilesha West LGAs",
+    "collationCentre": "OGBOKUN BOSI TOWN HALL ILESHA"
+  },
+  {
+    "code": "FC/289/OS",
+    "name": "Obokun/Oriade",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "The entire Geographical Area of Obokun/Oriade LGAs",
+    "collationCentre": "IJEBU IJESHA GRAMM. SCH. IJEBU IJESHA"
+  },
+  {
+    "code": "FC/290/OS",
+    "name": "Ife Central/Ife North/Ife South/Ife East",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "The entire Geographical Area of Ife Central/Ife North/Ife South/Ife East LGAs",
+    "collationCentre": "IFE CITY HALL ILE IFE"
+  },
+  {
+    "code": "FC/291/OS",
+    "name": "Ayedire/Iwo/Ola-Oluwa",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "The entire Geographical Area of Ayedire/Iwo/Ola-Oluwa LGAs",
+    "collationCentre": "BAPT. HIGH SCH. ADEKE IWO"
+  },
+  {
+    "code": "FC/292/OS",
+    "name": "Ayedaade/Irewole/Isokan",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "The entire Geographical Area of Ayedaade/Irewole/Isokan LGAs",
+    "collationCentre": "IREWOLE LGA SEC."
+  },
+  {
+    "code": "FC/293/OS",
+    "name": "Ede North/Ede South/ Egbedore/Ejigbo",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "The entire Geographical Area of Ede North/Ede South/Egbedore/Ejigbo LGAs",
+    "collationCentre": "EDE TOWN HALL EDE"
+  },
+  {
+    "code": "FC/294/OY",
+    "name": "Afijio/Oyo East/Oyo West/ Atiba",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Afijio/Oyo East/Oyo West/Atiba LGAs",
+    "collationCentre": "INEC OFFICE KOSOBO"
+  },
+  {
+    "code": "FC/295/OY",
+    "name": "Akinyele/Lagelu",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Akinyele/Lagelu LGAs",
+    "collationCentre": "LG. SECRETARIAT MONIYA AKINYELE"
+  },
+  {
+    "code": "FC/296/OY",
+    "name": "Egbeda/Ona-Ara",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Egbado/Ona-Ara LGAs",
+    "collationCentre": "SDP BUILDING EGEDA"
+  },
+  {
+    "code": "FC/297/OY",
+    "name": "Ibarapa Central/Ibarapa North",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Ibarapa Central/Ibarapa North LGAs",
+    "collationCentre": "LG SEC. IGBO ORA, IBARAPA CENTRAL"
+  },
+  {
+    "code": "FC/298/OY",
+    "name": "Ibarapa East/Ido",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Ibarapa East/Ido LGAs",
+    "collationCentre": "INEC OFFICE IDO"
+  },
+  {
+    "code": "FC/299/OY",
+    "name": "Saki East/Saki West/Atisbo",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Saki East/Saki West/Atisbo LGAs",
+    "collationCentre": "LG. SEC. SAKI WEST"
+  },
+  {
+    "code": "FC/300/OY",
+    "name": "Irepo/Orelope/Olorunsogo",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Irepo/Orelope/Olorunsogo LGAs",
+    "collationCentre": "LG. SEC. IGBOWO, OORELOPE LG"
+  },
+  {
+    "code": "FC/301/OY",
+    "name": "Iseyin/Itesiwaju/Kajola/ Iwajowa",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Iseyin/Itesiwaju/Kajola/Iwajowa LGAs",
+    "collationCentre": "LG SEC. ISEYIN"
+  },
+  {
+    "code": "FC/302/OY",
+    "name": "Ogbomoso North/ Ogbomoso South/Orire",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Ogbomoso North/Ogbomoso South/Oriire LGAs",
+    "collationCentre": "TOWN HALL OJA IGBO OGBOMOSHO NORTH"
+  },
+  {
+    "code": "FC/303/OY",
+    "name": "Ogo-Oluwa/Surulere",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Ogo-Oluwa/Surulere LGAs",
+    "collationCentre": "LG SEC. AJAAWA"
+  },
+  {
+    "code": "FC/304/OY",
+    "name": "Oluyole",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Oluyole LGA",
+    "collationCentre": "LG. IDI AYUNRE OLUYOLE LG."
+  },
+  {
+    "code": "FC/305/OY",
+    "name": "Ibadan North East/Ibadan South East",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Ibadan North East/ Ibadan South East LGAs",
+    "collationCentre": "LG. SEC. MAPO HALL, IBADAN SOUTH EAST"
+  },
+  {
+    "code": "FC/306/OY",
+    "name": "Ibadan South West/Ibadan North West",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Ibadan South West/Ibadan North West LGAs",
+    "collationCentre": "LG. SEC. RING ROAD, OLUYOLE ESTATE, IBADAN SOUTH WEST."
+  },
+  {
+    "code": "FC/307/OY",
+    "name": "Ibadan North",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "The entire Geographical Area of Ibadan North LGA",
+    "collationCentre": "LG. SEC. AGODI,IBADAN NORTH"
+  },
+  {
+    "code": "FC/308/PL",
+    "name": "Jos North/Bassa",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "The entire Geographical Area of Jos North/Bassa LGAs",
+    "collationCentre": "JOS NORTH LG SECRETARIAT"
+  },
+  {
+    "code": "FC/309/PL",
+    "name": "Jos South/Jos East",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "The entire Geographical Area of Jos South/Jos East LGAs",
+    "collationCentre": "JOS SOUTH LG SECRETARIAT"
+  },
+  {
+    "code": "FC/310/PL",
+    "name": "Barkin Ladi/Riyom",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "The entire Geographical Area of Barkin Ladi/Riyom LGAs",
+    "collationCentre": "BARKIN LAD LG SECRETARIAT"
+  },
+  {
+    "code": "FC/311/PL",
+    "name": "Bokkos/Mangu",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "The entire Geographical Area of Bokkos/Mangu LGAs",
+    "collationCentre": "MANGU LG SEC."
+  },
+  {
+    "code": "FC/312/PL",
+    "name": "Kanke/Pankshin/Kanam",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "The entire Geographical Area of Kanke/Pankshin/Kanam L.G.As",
+    "collationCentre": "PANKSHIN LG SECRETARIAT"
+  },
+  {
+    "code": "FC/313/PL",
+    "name": "Wase",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "The entire Geographical Area of Wase LGA",
+    "collationCentre": "WASE LGA SEC."
+  },
+  {
+    "code": "FC/314/PL",
+    "name": "Langtang North/Langtang South",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "The entire Geographical Area of Langtang North/Langtang South LGAs",
+    "collationCentre": "LANGTANG NORTH LG SEC."
+  },
+  {
+    "code": "FC/315/PL",
+    "name": "Mikang/Qua’an/Pan/Shedam",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "The entire Geographical Area of Mikang/Qua'an/Pan/Shedam LGAs",
+    "collationCentre": "SHENDAM LG SECRETARIAT"
+  },
+  {
+    "code": "FC/316/RV",
+    "name": "Abua-Odual/Ahaoda East",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Abua-Odual/Ahaoda East LGAs",
+    "collationCentre": "COUNCIL HALL AHOADA"
+  },
+  {
+    "code": "FC/317/RV",
+    "name": "Ahoada West/Ogba Egbema",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Ahoada West/Ogba Egbema LGAs",
+    "collationCentre": "CIVIC CENTRE OMOKU"
+  },
+  {
+    "code": "FC/318/RV",
+    "name": "Degema/Bonny",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Degema/Bonny LGAs",
+    "collationCentre": "COUNCIL HALL DEGEMA"
+  },
+  {
+    "code": "FC/319/RV",
+    "name": "Akuku-Toru/Asari-Toru",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Akuku-Toru/Asari-Toru LGAs",
+    "collationCentre": "MULTI-PURPOSE HALL ABONNEMA"
+  },
+  {
+    "code": "FC/320/RV",
+    "name": "Okrika/Ogu-Bolo",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Okrika/Ogu-Bolo LGAs",
+    "collationCentre": "COUNCIL HALL OKRIKA"
+  },
+  {
+    "code": "FC/321/RV",
+    "name": "Opobo/Nkoro/Andoni",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Opobo/Nkoro/Andoni LGAs",
+    "collationCentre": "COUNCIL HALL NGO"
+  },
+  {
+    "code": "FC/322/RV",
+    "name": "Eleme/Tai/Oyigbo",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Eleme/Tai/Oyigbo LGAs",
+    "collationCentre": "OLD COUNCIL HALL"
+  },
+  {
+    "code": "FC/323/RV",
+    "name": "Khana/Gokana",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Khana/Gokana LGAs",
+    "collationCentre": "SWANU-FINIMA NWIKA CONF HALL BORI"
+  },
+  {
+    "code": "FC/324/RV",
+    "name": "Ikwerre/Umohua",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Ikwerre/Umohua LGAs",
+    "collationCentre": "ISIOKPO COUNCIL HALL"
+  },
+  {
+    "code": "FC/325/RV",
+    "name": "Etche/Omuma",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Etvhe/Omuma LGAs",
+    "collationCentre": "COUNCIL OKEHI"
+  },
+  {
+    "code": "FC/326/RV",
+    "name": "Obio Akpor",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "The entire Geographical Area of Obio Akpor LGA",
+    "collationCentre": "LG COUNCIL HALL RUMUODUMANYA"
+  },
+  {
+    "code": "FC/327/RV",
+    "name": "Port Harcourt I",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "Part of Port Harcourt LGA",
+    "collationCentre": "CITY COUNCIL PH"
+  },
+  {
+    "code": "FC/328/RV",
+    "name": "Port Harcourt II",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "Part of Port Harcourt LGA",
+    "collationCentre": "CITY COUNCIL PH"
+  },
+  {
+    "code": "FC/329/SO",
+    "name": "Isa/Sabon Birni",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Isa/Sabon Birni L.G.As",
+    "collationCentre": "ISA LGA CONF. ROOM"
+  },
+  {
+    "code": "FC/330/SO",
+    "name": "Goronyo/Gada",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Goronyo/Gada L.G.As",
+    "collationCentre": "GADA LGA CONF. ROOM"
+  },
+  {
+    "code": "FC/331/SO",
+    "name": "Wurno/Rabah",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Wurno/Rabah L.G.As",
+    "collationCentre": "WURNO LGA CONF. ROOM"
+  },
+  {
+    "code": "FC/332/SO",
+    "name": "Illela/Gwadabawa",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Illela/Gwadabawa L.G.As",
+    "collationCentre": "GWADABAWA LGA CONF. ROOM"
+  },
+  {
+    "code": "FC/333/SO",
+    "name": "Tangaza/Gudu",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Tangaza/Gudu L.Gas",
+    "collationCentre": "TANGAZA ROOM"
+  },
+  {
+    "code": "FC/334/SO",
+    "name": "Binji/Silame",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Binji/Silame L.G.As",
+    "collationCentre": "BINJI LGA CONF. ROOM"
+  },
+  {
+    "code": "FC/335/SO",
+    "name": "Kware/Wamakko",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Kware/Wamakko L.G.As",
+    "collationCentre": "KWARE LGA CONF. ROOM"
+  },
+  {
+    "code": "FC/336/SO",
+    "name": "Sokoto North/Sokoto South",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Sokoto North/Sokoto South L.G.As",
+    "collationCentre": "SOKOTO NORTH LGA CONF. ROOM"
+  },
+  {
+    "code": "FC/337/SO",
+    "name": "Dange-Shuni/Bodinga/Tureta",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Dange-Shuni/Bodinga/Tureta L.G.As",
+    "collationCentre": "BODINGA LGA CONF. ROOM"
+  },
+  {
+    "code": "FC/338/SO",
+    "name": "Yabo/Shagari",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Yabo/Shagari L.G.As",
+    "collationCentre": "YABO LGA CONF. ROOM"
+  },
+  {
+    "code": "FC/339/SO",
+    "name": "Kebbe/Tambuwal",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "The entire Geographical Area of Kebbe/ambuwal L.G.As",
+    "collationCentre": "TAMBUWAL LGA CONF. ROOM"
+  },
+  {
+    "code": "FC/340/TR",
+    "name": "Bali/Gassol",
+    "stateId": "taraba",
+    "stateName": "TARABA",
+    "composition": "The entire Geographical Area of Bali/Gassol L.G.As",
+    "collationCentre": "BALI LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/341/TR",
+    "name": "Takum/Donga/Ussa",
+    "stateId": "taraba",
+    "stateName": "TARABA",
+    "composition": "The entire Geographical Area of Takum/Donga/Ussa L.G.As",
+    "collationCentre": "TAKUM LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/342/TR",
+    "name": "Sardauna/Kurmi/Gashaka",
+    "stateId": "taraba",
+    "stateName": "TARABA",
+    "composition": "The entire Geographical Area of Sardauna/Kurmi/Gashaka L.G.As",
+    "collationCentre": "SARDAUNA LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/343/TR",
+    "name": "Ibi/Wukari",
+    "stateId": "taraba",
+    "stateName": "TARABA",
+    "composition": "The entire Geographical Area of Ibi/Wukari L.G.As",
+    "collationCentre": "WUKARI RECREATION CENTRE"
+  },
+  {
+    "code": "FC/344/TR",
+    "name": "Jalingo/Yorro/Zing",
+    "stateId": "taraba",
+    "stateName": "TARABA",
+    "composition": "The entire Geographical Area of Jalingo/Yorro/Zing L.G.As",
+    "collationCentre": "JALINGO LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/345/TR",
+    "name": "Karim Lamido/Lau/Ardo-Kola",
+    "stateId": "taraba",
+    "stateName": "TARABA",
+    "composition": "The entire Geographical Area of Karim Lamido/Lau/Ardo-Kola L.G.As",
+    "collationCentre": "LAU LGA SECRETARIAT"
+  },
+  {
+    "code": "FC/346/YB",
+    "name": "Bade/Jakusko",
+    "stateId": "yobe",
+    "stateName": "YOBE",
+    "composition": "The entire Geographical Area of Bade/Jakusko L.G.As",
+    "collationCentre": "GOVT. SEC. SCH.,GASHUA"
+  },
+  {
+    "code": "FC/347/YB",
+    "name": "Bursari/Geidam/Yunusari",
+    "stateId": "yobe",
+    "stateName": "YOBE",
+    "composition": "The entire Geographical Area of Busari/Geidam/Yunusari L.G.As",
+    "collationCentre": "FEDERAL SECRETARIAT"
+  },
+  {
+    "code": "FC/348/YB",
+    "name": "Damaturu/Gujba/Gulani/ Tarmuwa",
+    "stateId": "yobe",
+    "stateName": "YOBE",
+    "composition": "The entire Geographical Area of Damaturu/Gujba/Gulani/Tarmuwa L.G.As",
+    "collationCentre": "GSS GEIDAM"
+  },
+  {
+    "code": "FC/349/YB",
+    "name": "Fika/Fune",
+    "stateId": "yobe",
+    "stateName": "YOBE",
+    "composition": "The entire Geographical Area of Fika/Fune L.G.As",
+    "collationCentre": "GOVT SEC. SCH NGURU"
+  },
+  {
+    "code": "FC/350/YB",
+    "name": "Machina/Nguru/Yusufari/ Karasuwa",
+    "stateId": "yobe",
+    "stateName": "YOBE",
+    "composition": "The entire Geographical Area of Machina/Nguru/Yusufari/Karasuwa L.G.As",
+    "collationCentre": "GOVT. SEC. SCH.,DAMAGUM"
+  },
+  {
+    "code": "FC/351/YB",
+    "name": "Nangere/Potiskm",
+    "stateId": "yobe",
+    "stateName": "YOBE",
+    "composition": "The entire Geographical Area of Nangere/Potiskum L.G.As",
+    "collationCentre": "CABS"
+  },
+  {
+    "code": "FC/352/ZF",
+    "name": "Kaura-Namoda/Birnin Magaji",
+    "stateId": "zamfara",
+    "stateName": "ZAMFARA",
+    "composition": "The entire Geographical Area of Kaura-Namoda/Birnin Magaji L.G.As",
+    "collationCentre": "INEC OFFICE KAURA NAMODA"
+  },
+  {
+    "code": "FC/353/ZF",
+    "name": "Shinkafi/Zurmi",
+    "stateId": "zamfara",
+    "stateName": "ZAMFARA",
+    "composition": "The entire Geographical Area of Shinkafi/Zurmi L.G.As",
+    "collationCentre": "INEC OFFICE ZURUMI"
+  },
+  {
+    "code": "FC/354/ZF",
+    "name": "Gusau/Tsafe",
+    "stateId": "zamfara",
+    "stateName": "ZAMFARA",
+    "composition": "The entire Geographical Area of Gusau/Tsafe L.G.As",
+    "collationCentre": "INEC OFFICE GUSAU"
+  },
+  {
+    "code": "FC/355/ZF",
+    "name": "Bungudu/Maru",
+    "stateId": "zamfara",
+    "stateName": "ZAMFARA",
+    "composition": "The entire Geographical Area of Bungudu/Maru L.G.A",
+    "collationCentre": "INEC OFFICE BUNGUDU"
+  },
+  {
+    "code": "FC/356/ZF",
+    "name": "Anka/Talata Mafara",
+    "stateId": "zamfara",
+    "stateName": "ZAMFARA",
+    "composition": "The entire Geographical Area of Anka/Talata Marafa L.G.As",
+    "collationCentre": "INEC OFFICE TALATA MAFARA"
+  },
+  {
+    "code": "FC/357/ZF",
+    "name": "Bakura/Maradun",
+    "stateId": "zamfara",
+    "stateName": "ZAMFARA",
+    "composition": "The entire Geographical Area of Bakura/Maradun L.G.As",
+    "collationCentre": "INEC OFFICE MARADUN"
+  },
+  {
+    "code": "FC/358/ZF",
+    "name": "Gummi/Bukkuyum",
+    "stateId": "zamfara",
+    "stateName": "ZAMFARA",
+    "composition": "The entire Geographical Area of Gummi/Bukkuyum L.G.As",
+    "collationCentre": "INEC OFFICE GUMMI"
+  },
+  {
+    "code": "FC/359/FCT",
+    "name": "Abaji/Gwagwalada/Kwali/Kuje",
+    "stateId": "federal-capital-territory",
+    "stateName": "FEDERAL CAPITAL TERRITORY",
+    "composition": "The entire Geographical Area of Abaji/Gwagwalada/Kwali/Kuje L.G.As",
+    "collationCentre": "Govt Central Primary School, Gwagwalwda."
+  },
+  {
+    "code": "FC/360/FCT",
+    "name": "Municipal/Bwari",
+    "stateId": "federal-capital-territory",
+    "stateName": "FEDERAL CAPITAL TERRITORY",
+    "composition": "The entire Geographical Area of Municipal/Bwari L.G.As",
+    "collationCentre": "Garki Primary School, Garki Area 10, Garki, Abuja."
+  }
+]

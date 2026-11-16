@@ -1,0 +1,874 @@
+[
+  {
+    "code": "SD/001/AB",
+    "name": "ABIA NORTH",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "UMUNNEOCHI, ISUKWUATO, OHAFIA, AROCHUKWU, BENDE",
+    "collationCentre": "COUNCIL HALL OHAFIA LGA HQS"
+  },
+  {
+    "code": "SD/002/AB",
+    "name": "ABIA CENTRAL",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "UMUAHIA NORTH, UMUAHIA SOUTH, IKWUANO, ISIALA NGWA NORTH, ISIALA NGWA SOUTH,",
+    "collationCentre": "COUNCIL HALL UMUAHIA NORTH LGA HQS"
+  },
+  {
+    "code": "SD/003/AB",
+    "name": "ABIA SOUTH",
+    "stateId": "abia",
+    "stateName": "ABIA",
+    "composition": "ABA NORTH, ABA SOUTH, UGWUNAGBO, OBINGWA,  UKWA EAST, UKWA WEST & OSISIOMA",
+    "collationCentre": "ABA TOWN HALL ABA SOUTH LGA"
+  },
+  {
+    "code": "SD/007/AK",
+    "name": "AKWA IBOM NORTH EAST",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "ETINAN, IBESIKPO ASUTAN, IBIONO IBOM, ITU, NSIT ATAI, NSIT IBOM, NSIT UBIUM, URUAN, UYO",
+    "collationCentre": "INEC OFFICE UYO LGA"
+  },
+  {
+    "code": "SD/008/AK",
+    "name": "AKWA IBOM NORTH WEST",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "ABAK, ESSIEN UDIM, ETIM EKPO, IKA, IKONO, IKOT EKPENE, INI, OBOT AKARA, ORUK ANAM, UKANAFUN",
+    "collationCentre": "INEC OFFICE IKOT EKPENELGA"
+  },
+  {
+    "code": "SD/009/AK",
+    "name": "AKWA IBOM SOUTH",
+    "stateId": "akwa-ibom",
+    "stateName": "AKWA IBOM",
+    "composition": "EASTERN OBOLO, EKET, ESIT EKET, IBENO, IKOT ABASI, MBO, MKPAT ENIN, OKOBO, ONNA, ORON, UDUNG UKO,URUE OFFONG/ORUKO",
+    "collationCentre": "EKET LGA INEC OFFICE"
+  },
+  {
+    "code": "SD/004/AD",
+    "name": "ADAMAWA NORTH",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "MADAGALI, MAIHA, MICHIKA, MUBI NORTH, MUBI SOUTH",
+    "collationCentre": "GSS MUBI"
+  },
+  {
+    "code": "SD/005/AD",
+    "name": "ADAMAWA SOUTH",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "DEMSA, GANYE, GUYUK, JADA, MAYO-BELWA, NUMAN, SHELLENG, TOUNGO, LAMURDE",
+    "collationCentre": "GSS NUMAN"
+  },
+  {
+    "code": "SD/006/AD",
+    "name": "ADAMAWA CENTRAL",
+    "stateId": "adamawa",
+    "stateName": "ADAMAWA",
+    "composition": "HONG, FUFORE, SONG, YOLA NORTH, YOLA SOUTH, GERFI",
+    "collationCentre": "GMMC YOLA"
+  },
+  {
+    "code": "SD/010/AN",
+    "name": "ANAMBRA NORTH",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "ONITSHA NORTH, ONITSHA SOUTH, OYI, OGBARU, ANAMBRA EAST, ANAMBRA WEST, AYAMELUM",
+    "collationCentre": "ONITHA NORTH INEC OFFICE"
+  },
+  {
+    "code": "SD/011/AN",
+    "name": "ANAMBRA CENTRAL",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "AWKA NORTH, AWKA SOUTH, NJIKOKA, ANAOCHA, IDEMILI NORTH, IDEMILI SOUTH, DUNUKOFIA",
+    "collationCentre": "AWKA SOUTH"
+  },
+  {
+    "code": "SD/012/AN",
+    "name": "ANAMBRA SOUTH",
+    "stateId": "anambra",
+    "stateName": "ANAMBRA",
+    "composition": "IHIALA, NNEWI NORTH, NNEWI SOUTH, ORUMBA SOUTH, ORUMBA NORTH, AGUATA, EKWUSIGO",
+    "collationCentre": "NNEWI NORTH INEC OFFICE"
+  },
+  {
+    "code": "SD/013/BA",
+    "name": "BAUCHI SOUTH",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "ALKALERI, KIRFI, BAUCHI, TAFAWA BALEWA, BOGORO, DASS, TORO",
+    "collationCentre": "INEC STATE OFFICE"
+  },
+  {
+    "code": "SD/014/BA",
+    "name": "BAUCHI CENTRAL",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "NINGI, WARJI, DARAZO, GANJUWA, MISAU, DAMBAN",
+    "collationCentre": "DARAZO"
+  },
+  {
+    "code": "SD/015/BA",
+    "name": "BAUCHI NORTH",
+    "stateId": "bauchi",
+    "stateName": "BAUCHI",
+    "composition": "ZAKI, GAMAWA, JAMA’ARE, ITAS-GADAU, SHIRA, GIADE, KATAGUM",
+    "collationCentre": "AZARE"
+  },
+  {
+    "code": "SD/016/BY",
+    "name": "BAYELSA EAST",
+    "stateId": "bayelsa",
+    "stateName": "BAYELSA",
+    "composition": "BRASS, NEMBE, OGBIA",
+    "collationCentre": "INEC BRASS"
+  },
+  {
+    "code": "SD/017/BY",
+    "name": "BAYELSA CENTRAL",
+    "stateId": "bayelsa",
+    "stateName": "BAYELSA",
+    "composition": "KOLOKUMA/OPOKUMA, SOUTHERN IJAW, YENAGOA",
+    "collationCentre": "COUNCIL HALL YENAGOA"
+  },
+  {
+    "code": "SD/018/BY",
+    "name": "BAYELSA WEST",
+    "stateId": "bayelsa",
+    "stateName": "BAYELSA",
+    "composition": "EKEREMOR, SAGBAMA",
+    "collationCentre": "INEC OFFICE SAGBAMA"
+  },
+  {
+    "code": "SD/019/BN",
+    "name": "BENUE NORTH EAST",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "KATSINA-ALA, KONSHISHA, KWANDE, LOGO, UKUM, USHONGO, VANDEIKYA",
+    "collationCentre": "KATSINA-ALA"
+  },
+  {
+    "code": "SD/020/BN",
+    "name": "BENUE NORTH WEST",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "BURUKU, GBOKO, GUMA, GWER-EAST, GWER-WEST, MARKURDI, TARKA",
+    "collationCentre": "MARKURDI"
+  },
+  {
+    "code": "SD/021/BN",
+    "name": "BENUE SOUTH",
+    "stateId": "benue",
+    "stateName": "BENUE",
+    "composition": "ADO, AGATU, APA, OBI, OGBADIBO, OHIMINI, OJU,OKPOKWU, OTUKPO",
+    "collationCentre": "OTUKPO"
+  },
+  {
+    "code": "SD/022/BO",
+    "name": "BORNO NORTH",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "ABADAM, GUBIO, GUZAMALA,  KUKAWA, MAGUMERI, MARTE, MOBBAR, NGANZA, MOGUNO",
+    "collationCentre": "INEC OFFICE MONGUNO"
+  },
+  {
+    "code": "SD/023/BO",
+    "name": "BORNO CENTRAL",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "DIKWA, JERE, KALA BALGE, MAFA, METROPOLITAN, NGALA, KONDUGA, BAMA, KAGA",
+    "collationCentre": "WAZIRI HALL MADUGURI METRO COUNCIL"
+  },
+  {
+    "code": "SD/024/BO",
+    "name": "BORNO SOUTH",
+    "stateId": "borno",
+    "stateName": "BORNO",
+    "composition": "ASKIRA/UBA, BAYO, BIU, CHIBOK, DAMABOA, GWOZA, HAWUL, KWAYA, SHANI",
+    "collationCentre": "BIU LG COUNCIL CHAMBER"
+  },
+  {
+    "code": "SD/025/CR",
+    "name": "CROSS RIVER NORTH",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "BEKWARRA, OBANLIKU, OBUDU, OGOJA, YALA, BIASE",
+    "collationCentre": "INEC OFFICE OGOJA"
+  },
+  {
+    "code": "SD/026/CR",
+    "name": "CROSS RIVER CENTRAL",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "ABI, BOKI, ETUNG, IKOM, OBUBRA, YAKURR",
+    "collationCentre": "INEC OFFICE IKOM"
+  },
+  {
+    "code": "SD/027/CR",
+    "name": "CROSS RIVER SOUTH",
+    "stateId": "cross-river",
+    "stateName": "CROSS RIVER",
+    "composition": "CALABAR MUNICIPAL, CALABAR SOUTH, AKAMKPA, AKPABUYO, BAKASSI, ODUKPANI",
+    "collationCentre": "CALABAR INEC OFFICE"
+  },
+  {
+    "code": "SD/028/DT",
+    "name": "DELTA CENTRAL",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "ETHIOPE EAST, ETHIOPE WEST, OKPE, SAPELE,UDU, UGHELLI NORTH, UGHELI SOUTH, UVWIE",
+    "collationCentre": "TOWN HALL, UGHELLI NORTH LGA"
+  },
+  {
+    "code": "SD/029/DT",
+    "name": "DELTA NORTH",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "ANIOCHA NORTH, ANIOCHA SOUTH, IKA NORTH-EAST, IKA SOUTH, NDOKWA EAST, NDOKWA WEST, OSHIMILI NORTH, OSHIMILI SOUTH, UKWUANI",
+    "collationCentre": "INEC STATE H/QS ASABA"
+  },
+  {
+    "code": "SD/030/DT",
+    "name": "DELTA SOUTH",
+    "stateId": "delta",
+    "stateName": "DELTA",
+    "composition": "BOMADI, BURUTU, ISOKO NORTH, ISOKO SOUTH, PATANI, WARRI NORTH, WARRI SOUTH, WARRI SOUTH WEST",
+    "collationCentre": "ISOKO SOUTH COUNCIL HALL OLEH"
+  },
+  {
+    "code": "SD/031/EB",
+    "name": "EBONYI NORTH",
+    "stateId": "ebonyi",
+    "stateName": "EBONYI",
+    "composition": "ABAKALIKI, EBONYI, IZZI, OHAUKWU",
+    "collationCentre": "ABAKALIKI LGA COUNCIL HALL NKALIKI"
+  },
+  {
+    "code": "SD/032/EB",
+    "name": "EBONYI CENTRAL",
+    "stateId": "ebonyi",
+    "stateName": "EBONYI",
+    "composition": "EZZA NORTH, EZZA SOUTH, IKWO, ISHIELU",
+    "collationCentre": "LG COUNCIL HALL ONUEKE EZZA SOUTH"
+  },
+  {
+    "code": "SD/033/EB",
+    "name": "EBONYI SOUTH",
+    "stateId": "ebonyi",
+    "stateName": "EBONYI",
+    "composition": "AFIKPO NORTH, AFIKPO SOUTH, IVO, OHAOZARA, ONICHA",
+    "collationCentre": "AFIKPO NORTH LGA COUNCIL HALL AFIKPO"
+  },
+  {
+    "code": "SD/034/ED",
+    "name": "EDO CENTRAL",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "ESAN CENTRAL, ESAN NORTH EAST, ESAN SOUTH EAST, ESAN WEST, IGUEBEN",
+    "collationCentre": "SACRED HEART GIRLS’S UBIAJA"
+  },
+  {
+    "code": "SD/035/ED",
+    "name": "EDO NORTH",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "AKOKO EDO, ETSAKO EAST, ETSAKO CENTRAL, ETSAKO WEST, OWAN EAST, OWAN WEST",
+    "collationCentre": "COUNCIL HALL, AUCHI"
+  },
+  {
+    "code": "SD/036/ED",
+    "name": "EDO SOUTH",
+    "stateId": "edo",
+    "stateName": "EDO",
+    "composition": "OREDO, ORHIONMWON, OVIA NORTH EAST, OVIA SOUTH WEST, EGOR, UHUNMWODE, IKPOBA OKHA",
+    "collationCentre": "INEC H/Q, BENIN CITY"
+  },
+  {
+    "code": "SD/037/EK",
+    "name": "EKITI NORTH",
+    "stateId": "ekiti",
+    "stateName": "EKITI",
+    "composition": "IKOLE, OYE, IDO/OSI, MOBA, ILEJEMEJE",
+    "collationCentre": "ST. DAVID’S ANG. PRY. SCH. IDO-EKITI"
+  },
+  {
+    "code": "SD/038/EK",
+    "name": "EKITI CENTRAL",
+    "stateId": "ekiti",
+    "stateName": "EKITI",
+    "composition": "ADO EKITI, IREPODUN/IFELODUN, IJERO, EFON, EKITI WEST",
+    "collationCentre": "MARY IMMACULATE GIRL’S GRAM. SCH. ADO"
+  },
+  {
+    "code": "SD/039/EK",
+    "name": "EKITI SOUTH",
+    "stateId": "ekiti",
+    "stateName": "EKITI",
+    "composition": "EKITI SOUTH WEST, IKERE, EMURE, ISE/ORUN, GBONYIN, EKITI EAST",
+    "collationCentre": "HOLY TRINITY PRY. SCH. ODO OJA IKERE EKITI"
+  },
+  {
+    "code": "SD/040/EN",
+    "name": "ENUGU EAST",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "ENUGU EAST, ENUGU NORTH, ENUGU SOUTH, ISI-UZO, NKANU EAST, NKANU WEST",
+    "collationCentre": "ENUGU NORTH LG COUNCIL HALL"
+  },
+  {
+    "code": "SD/041/EN",
+    "name": "ENUGU WEST",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "ANINIRI, AWGU, EZEAGU, OJI RIVER, UDI",
+    "collationCentre": "AWGU LG COUNCIL HALL"
+  },
+  {
+    "code": "SD/042/EN",
+    "name": "ENUGU NORTH",
+    "stateId": "enugu",
+    "stateName": "ENUGU",
+    "composition": "IGBO-ETITI, IGBO-EZE NORTH, IGO-EZE SOUTH, UZO UWANI, UDENU, NSUKKA",
+    "collationCentre": "NSUKKA LG HALL"
+  },
+  {
+    "code": "SD/043/GM",
+    "name": "GOMBE CENTRAL",
+    "stateId": "gombe",
+    "stateName": "GOMBE",
+    "composition": "AKKO, YAMALTU/DEBA",
+    "collationCentre": "GOVT. TECH. SCH. KUMO"
+  },
+  {
+    "code": "SD/044/GM",
+    "name": "GOMBE SOUTH",
+    "stateId": "gombe",
+    "stateName": "GOMBE",
+    "composition": "BALANGA, BILLIRI, KALTUNGO, SHONGOM",
+    "collationCentre": "GGASS KALTUNGO"
+  },
+  {
+    "code": "SD/045/GM",
+    "name": "GOMBE NORTH",
+    "stateId": "gombe",
+    "stateName": "GOMBE",
+    "composition": "FUNAKAYE, NAFADA, GOMBE, KWAMI,DUKKU",
+    "collationCentre": "GSS MALAM SIDI"
+  },
+  {
+    "code": "SD/046/IM",
+    "name": "IMO EAST",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "ABOH MBAISE, AHIAZU MBAISE, EZINIHITTE, IKEDURU, MBAITOLI, NGOR OKPALA, OWERRI MUNICIPAL, OWERRI NORTH, OWERRI WEST",
+    "collationCentre": "OWERRI MUNICIPAL COUNCIL HALL"
+  },
+  {
+    "code": "SD/047/IM",
+    "name": "IMO WEST",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "IDEATO NORTH, IDEATO SOUTH, ISU, NJABA, NKWERE, NWANGELE, OGUTA, OHAJI/EGBEMA, ORLU, ORSU, ORU WEST, ORU EAST",
+    "collationCentre": "ORLU LGA COUNCIL HALL"
+  },
+  {
+    "code": "SD/048/IM",
+    "name": "IMO NORTH",
+    "stateId": "imo",
+    "stateName": "IMO",
+    "composition": "EHIME MBANO, IHITE/UBOMA, ISIALA MBANO, OBOWO, OKIGWE, ONUIMO",
+    "collationCentre": "OKIGWE LGA COUNCIL HALL"
+  },
+  {
+    "code": "SD/049/JG",
+    "name": "JIGAWA SOUTH – WEST",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "BIRNIN KUDU, BUJI, DUTSE, GWARAM, KIYAWA, JAUN, MIGA",
+    "collationCentre": "DUTSE MUNICIPAL COUNCIL"
+  },
+  {
+    "code": "SD/050/JG",
+    "name": "JIGAWA NORTH – EAST",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "AUYO, BIRNIWA, GURI, HADEJIA, KAUGAMA, K/HAUSA, K/KASAMMA, M/MADORI",
+    "collationCentre": "HADEJIA LG SECRETERIAT"
+  },
+  {
+    "code": "SD/051/JG",
+    "name": "JIGAWA NORTH - WEST",
+    "stateId": "jigawa",
+    "stateName": "JIGAWA",
+    "composition": "BABURA, GAGARA, GARKI, GWIWA, KAZAURE, MAIGATAR, RONI, RINGIN, S/TANKAR, TAURA, YANKWASHI, GUME",
+    "collationCentre": "GUMEL LOCAL SECRETERIAT"
+  },
+  {
+    "code": "SD/052/KD",
+    "name": "KADUNA NORTH",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "KUBAU, IKARA, MAKARFI, SOBA, SABON GARI, ZARIA, LERE, KUDAN",
+    "collationCentre": "INEC OFFICE ZARIA LGA"
+  },
+  {
+    "code": "SD/053/KD",
+    "name": "KADUNA CENTRAL",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "BIRNIN GWARI, GIWA, IGABI, KADUNA NORTH, KADUNA SOUTH, CHIKUN, KAJURU",
+    "collationCentre": "KADUNA NORTH COUNCIL CHAMBER"
+  },
+  {
+    "code": "SD/054/KD",
+    "name": "KADUNA SOUTH",
+    "stateId": "kaduna",
+    "stateName": "KADUNA",
+    "composition": "JEMA’A, JABA, KAURA, ZANGON, KAURA, KACHIA, KAGARKO, SANGA",
+    "collationCentre": "INEC OFFICE JEMA'A LGA"
+  },
+  {
+    "code": "SD/055/KN",
+    "name": "KANO CENTRAL",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "DALA, GWALE, DAWAKIN, GEZAWA, TARAUNI, FAGGE, GARUM MALLAM, KANO MUNICIPAL, KUMBOTSO, KURA, MADOBI, MINJIBIR, NASSARAWA, UNGOGO, WARAWA",
+    "collationCentre": "KANO MUNICIPAL SECRETARIAT"
+  },
+  {
+    "code": "SD/056/KN",
+    "name": "KANO NORTH",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "BICHI, SHANONO, BAGWAI, DANBATTA, MAKODA, DAWAKIN, GABASAWA, GWARZO, KABO, RIMI GADO, TOFA, TSANYAWA, KUNCHI, KARAYE",
+    "collationCentre": "BICHI LGA SECT."
+  },
+  {
+    "code": "SD/057/KN",
+    "name": "KANO SOUTH",
+    "stateId": "kano",
+    "stateName": "KANO",
+    "composition": "ALBASU, BEBEJI, BUNKURE, DOGUWA, GAYA, KIRU, RANO, TAKAI, AJINGI, ROGO, KIBIYA, TUDUN WADA, GARKO, WUDIL, SUMAILA",
+    "collationCentre": "KANO LGA SECRETARIAT"
+  },
+  {
+    "code": "SD/058/KT",
+    "name": "KATSINA NORTH",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "DAURA, ZANGO, MAIADUA, MASHI, MANI, INGAWA, BINDAWA, SANDAMU, DUTSI, KANKIA, KUSADA, BAURE",
+    "collationCentre": "INEC OFFICE DAURA"
+  },
+  {
+    "code": "SD/059/KT",
+    "name": "KATSINA SOUTH",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "FUNTUA, FASKARI, DANJA, DANDUME, BAKORI, KANKARA, MALUMEFASHI, KAFUR, MUSAWA, MATAZU, SABUWA",
+    "collationCentre": "INEC OFFICE FUNTUA"
+  },
+  {
+    "code": "SD/060/KT",
+    "name": "KATSINA CENTRAL",
+    "stateId": "katsina",
+    "stateName": "KATSINA",
+    "composition": "KATSINA, KAITA, JIBIA, BATSARI, SAFANA, DUTSIN-MA, KURFI, BATAGARAWA, RIMI, CHARANCHI, DANMUSA",
+    "collationCentre": "INEC OFFICE KATSINA STATE HQ"
+  },
+  {
+    "code": "SD/061/KB",
+    "name": "KEBBI NORTH",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "AREWA, ARGUNGU, AUGIE, BAGUDO, DANDI, SURU, JEGA",
+    "collationCentre": "KAMBA LGA SECRETARIAT"
+  },
+  {
+    "code": "SD/062/KB",
+    "name": "KEBBI CENTRAL",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "ALEIRO, BIRNIN KEBBI, BUNZA, GWANDU, KALGO, KOKO BESSE, MAIYAMA",
+    "collationCentre": "BIRNI KEBBI LGA INEC OFFICE"
+  },
+  {
+    "code": "SD/063/KB",
+    "name": "KEBBI SOUTH",
+    "stateId": "kebbi",
+    "stateName": "KEBBI",
+    "composition": "FAKAI, NGASKI, SAKABA, SHANGA, WASAGU/DANKO, YAURI, ZURU",
+    "collationCentre": "ZURU LGA INEC OFFICE"
+  },
+  {
+    "code": "SD/064/KG",
+    "name": "KOGI CENTRAL",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "ADAVI, AJAOKUTA, OGORI/MAGONGO, OKEHI, OKENE",
+    "collationCentre": "LGA SECRETARIAT OKENE"
+  },
+  {
+    "code": "SD/065/KG",
+    "name": "KOGI EAST",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "ANKPA, BASSA, DEKINA, IBAJI, IDAH, IGALAMELA-ODOLU, OFU, OLAMABORO, OMALA",
+    "collationCentre": "INEC IDAH"
+  },
+  {
+    "code": "SD/066/KG",
+    "name": "KOGI WEST",
+    "stateId": "kogi",
+    "stateName": "KOGI",
+    "composition": "IJUMU, KABBA, KOGI, LOKOJA, MOPAMURO, YAGBA EAST, YAGBA WEST",
+    "collationCentre": "INEC OFFICE LOKOJA"
+  },
+  {
+    "code": "SD/067/KW",
+    "name": "KWARA NORTH",
+    "stateId": "kwara",
+    "stateName": "KWARA",
+    "composition": "BARUTEN, EDU, PATIGI, KAIAMA, MORO",
+    "collationCentre": "MORO-LGA COUNCIL CHAMBER"
+  },
+  {
+    "code": "SD/068/KW",
+    "name": "KWARA CENTRAL",
+    "stateId": "kwara",
+    "stateName": "KWARA",
+    "composition": "ASA, ILORIN EAST, ILORIN SOUTH, ILORIN WEST, OFFA",
+    "collationCentre": "INEC OFFICE ILORIN"
+  },
+  {
+    "code": "SD/069/KW",
+    "name": "KWARA SOUTH",
+    "stateId": "kwara",
+    "stateName": "KWARA",
+    "composition": "EKITI, OKE-ERO, IFELODUN, IREPODUN, ISIN,  OYUN",
+    "collationCentre": "IRPODUN LG COUNCIL CHAMBER"
+  },
+  {
+    "code": "SD/070/LA",
+    "name": "LAGOS CENTRAL",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "LAGOS ISLAND, LAGOS MAINLAND, SURULERE, APAPA, ETI-OSA",
+    "collationCentre": "CITY HALL LAGOS ISLAND"
+  },
+  {
+    "code": "SD/071/LA",
+    "name": "LAGOS EAST",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "SHOMOLU, KOSOFE, EPE, IBEJU-LEKKI, IKORODU",
+    "collationCentre": "COUNCIL HALL SOMOLU LG SECRETARIAT"
+  },
+  {
+    "code": "SD/072/LA",
+    "name": "LAGOS WEST",
+    "stateId": "lagos",
+    "stateName": "LAGOS",
+    "composition": "AGEGE,IFAKO-IJAYE, ALIMOSHO, BADAGRY, OJO, AJEROMI/IFELODUN, AMUWO-ODOFIN, OSHODI/ISOLO, IKEJA, MUSHIN",
+    "collationCentre": "COUNCIL CHAMBER IKEJA LG SECRETARIAT"
+  },
+  {
+    "code": "SD/073/NW",
+    "name": "NASSARAWA NORTH",
+    "stateId": "nasarawa",
+    "stateName": "NASARAWA",
+    "composition": "AKAWANGA, NASSARAWA EGGON, WAMBA",
+    "collationCentre": "VIP COUCIL CHAMBERS AKWANGA"
+  },
+  {
+    "code": "SD/074/NW",
+    "name": "NASSARAWA WEST",
+    "stateId": "nasarawa",
+    "stateName": "NASARAWA",
+    "composition": "NASSARAWA, KEFFI, KOKONA, KARU, TOTO",
+    "collationCentre": "MAIN AUDITORIUM NAS. STATE UNIVERSITY KEFFI"
+  },
+  {
+    "code": "SD/075/NW",
+    "name": "NASSARAWA SOUTH",
+    "stateId": "nasarawa",
+    "stateName": "NASARAWA",
+    "composition": "LAFIA, AWE, DOMA, KEANA, OBI",
+    "collationCentre": "IBRAHIM ABACHA YOUTH CENTRE LAFIA"
+  },
+  {
+    "code": "SD/076/NG",
+    "name": "NIGER EAST",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "BOSSO, CHACHANGA, GURARA, PAIKORO, RAFI, SHIRORO, MUNYA, SULEJA, TAFA",
+    "collationCentre": "COLLEG OF EDU. MUNYA"
+  },
+  {
+    "code": "SD/077/NG",
+    "name": "NIGER NORTH",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "AGWARA, BORGU, KONTOGORA, MARIGA, RIJAU, WUSHISHI, MASHEGU MAGAMA",
+    "collationCentre": "GOVT. TECH. COLLEGE KONTAGORA"
+  },
+  {
+    "code": "SD/078/NG",
+    "name": "NIGER SOUTH",
+    "stateId": "niger",
+    "stateName": "NIGER",
+    "composition": "AGAIE, BIDA, KATCHA, BATAGI, LAPAI, LAVUN, EDATI-IDATI, MOKWA",
+    "collationCentre": "GOVT. COLLEGE BIDA"
+  },
+  {
+    "code": "SD/079/OG",
+    "name": "OGUN CENTRAL",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "IFO, EWEKORO, OBAFEMI/OWODE, ABEOKUTA NORTH, ABEOKUTA SOUTH, ODEDA",
+    "collationCentre": "CENTENARY HALL AKE, ABEOKUTA"
+  },
+  {
+    "code": "SD/080/OG",
+    "name": "OGUN EAST",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "SAGAMU, IKENNE, REMO NORTH, IJEBU-ODE, ODOGBOLU, IJEBU NORTH EAST, IJEBU NORTH, IJEBU EAST, OGUN WATERSIDE",
+    "collationCentre": "TOWN HALL IJEBU ODE"
+  },
+  {
+    "code": "SD/081/OG",
+    "name": "OGUN WEST",
+    "stateId": "ogun",
+    "stateName": "OGUN",
+    "composition": "IMEKO AFON, EGBADO NORTH, EGBADO SOUTH, IPOKIA, ADO-ODO/OTA",
+    "collationCentre": "ARONNA TOWN HALL ILARO"
+  },
+  {
+    "code": "SD/082/OD",
+    "name": "ONDO NORTH",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "AKOKO NORTH EAST, AKOKO NORTH WEST, AKOKO SOUTH WEST,AKOKO SOUTH EAST, OSE, OWO",
+    "collationCentre": "MAPO HALL, OWO"
+  },
+  {
+    "code": "SD/083/OD",
+    "name": "ONDO CENTRAL",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "AKURE NORTH, AKURE SOUTH, IFEDORE, IDANRE, ONDO EAST, ONDO WEST",
+    "collationCentre": "ST. PETER’S UNITY SCHOOL, AKURE"
+  },
+  {
+    "code": "SD/084/OD",
+    "name": "ONDO SOUTH",
+    "stateId": "ondo",
+    "stateName": "ONDO",
+    "composition": "ILEOLUJI/OKEIGBO, ODIGBO, IRELE, OKITIPUPA, ESE-ODO, ILAJE",
+    "collationCentre": "STELLA MARIS COLLEGE OKITIPUPA"
+  },
+  {
+    "code": "SD/085/OS",
+    "name": "OSUN CENTRAL",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "BORIPE, BOLOWADURO, IFELODUN, ILA, IFEDAYO, IREPODUN, OROLU, ODO-OTIN, OLORUNDA, OSOGBO",
+    "collationCentre": "OSOGBO CITY HALL, OSOGBO"
+  },
+  {
+    "code": "SD/086/OS",
+    "name": "OSUN EAST",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "ATAKUNMOSA EAST, ATAKUNMOSA WEST, IFE CENTRAL, IFE EAST, IFE NORTH, IFE SOUTH, ILESA EAST, ILESA WEST, OBOKUN, ORIADE",
+    "collationCentre": "ILESA GRAMMER SCHOOL, ILESA"
+  },
+  {
+    "code": "SD/087/OS",
+    "name": "OSUN WEST",
+    "stateId": "osun",
+    "stateName": "OSUN",
+    "composition": "AYADAADE, AYEDIRE, EDE NORTH, EDE SOUTH, EGBEDORE, EJIGBO, IREWOLE, ISOKAN, IWO, OLA-OLUWA",
+    "collationCentre": "BAPTIST HIGH SCHOOL ADEKE IWO"
+  },
+  {
+    "code": "SD/088/OY",
+    "name": "OYO CENTRAL",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "AFIJIO, AKINYELE, EGBEDA, OGO OLUWA, SURULERE, LAGELU, OLUYOLE, ONA-ARA, OYO EAST, OYO WEST, ATIBA",
+    "collationCentre": "INEC OFFICE AKINYELE LG SEC. MONIYA"
+  },
+  {
+    "code": "SD/089/OY",
+    "name": "OYO NORTH",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "SAKI WEST, SAKI EAST, ATIGBO, IREPO, OLORUNSOGO, KAJOLA, IWAJOWA, OGBOMOSHO NORTH, OGBOMOSHO SOUTH, ISEYIN, OORELOPE, ORIRE, ITESIWAJU",
+    "collationCentre": "LG SEC. ISEYIN ISEYIN"
+  },
+  {
+    "code": "SD/090/OY",
+    "name": "OYO SOUTH",
+    "stateId": "oyo",
+    "stateName": "OYO",
+    "composition": "IBADAN NORTH, IBADAN NORTH EAST, IBADAN NORTH WEST, IBADAN SOUTH EAST, IBADAN SOUTH WEST, IBARAPA CENTRAL, IBARAPA NORTH, IBARAPA EAST, IDO",
+    "collationCentre": "INEC OFFICE IBADAN NORTH LG SEC. IBADAN"
+  },
+  {
+    "code": "SD/091/PL",
+    "name": "PLATEAU SOUTH",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "LANTANG NORTH, LANTANG SOUTH, MIKANG, QUA’AN PAN, SHENDAM, WASE",
+    "collationCentre": "SHENDAM LG COUNCIL SEC."
+  },
+  {
+    "code": "SD/092/PL",
+    "name": "PLATEAU CENTRAL",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "BOKKOS, KANKE, MANGU, PANKSHIN, KANAM",
+    "collationCentre": "PANKSHIN LG COUNCIL SEC."
+  },
+  {
+    "code": "SD/093/PL",
+    "name": "PLATEAU NORTH",
+    "stateId": "plateau",
+    "stateName": "PLATEAU",
+    "composition": "BARKIN LADI, BASSA, JOS EAST, JOS NORTH, JOS SOUTH, RIYOM",
+    "collationCentre": "JOS NORTH LG COUNCIL SEC."
+  },
+  {
+    "code": "SD/094/RV",
+    "name": "RIVERS EAST",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "ETCHE, OMUMA, IKWERRE, OBIO AKPOR, PORT HARCOURT, OKIRIKA, OGU BOLO, EMOHUA",
+    "collationCentre": "PORT HARCORUT CITY COUNCIL HALL, PORT HARCOURT"
+  },
+  {
+    "code": "SD/095/RV",
+    "name": "RIVERS SOUTH EAST",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "OPOBO/NKORO, ANDONI, OYIGBO, TAI, ELEME, GOKANA, KHANA",
+    "collationCentre": "SWANU-FINIMA NWIKA CONF. HALL BORI"
+  },
+  {
+    "code": "SD/096/RV",
+    "name": "RIVERS WEST",
+    "stateId": "rivers",
+    "stateName": "RIVERS",
+    "composition": "ASARI-TORU, AKUKU-TORU, DEGEMA, OGBA/EGBEMA/NDONI, ABUA-ODUAL, AHOADA EAST, AHOADA WEST, BONNY",
+    "collationCentre": "AHOADA EAST LOCAL GOVT. COUNCIL HALL, AHOADA"
+  },
+  {
+    "code": "SD/097/SO",
+    "name": "SOKOTO EAST",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "ISA, SABON BIRNI, WURNO, GORONYO, RABAH, GADA, ILLELA, GWADABAWA",
+    "collationCentre": "GWADABAWA LGA CONFERENCE ROOM"
+  },
+  {
+    "code": "SD/098/SO",
+    "name": "SOKOTO NORTH",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "TANGAZA, BINJI, SILAME, GUDU, KWARE, WAMAKKO,SOKOTO NORTH, SOKOTO SOUTH",
+    "collationCentre": "SOKOTO NORTH LOCAL GOVT. COUNCIL CONFERENENCE ROOM"
+  },
+  {
+    "code": "SD/099/SO",
+    "name": "SOKOTO SOUTH",
+    "stateId": "sokoto",
+    "stateName": "SOKOTO",
+    "composition": "DANGE SHUNI, TURETA, BODINGA, SHAGARI, YABO, TAMBUWA, KEBBE",
+    "collationCentre": "BODINGA LGA  CONFERENCE ROOM"
+  },
+  {
+    "code": "SD/100/TR",
+    "name": "TARABA SOUTH",
+    "stateId": "taraba",
+    "stateName": "TARABA",
+    "composition": "WUKARI, IBI, DONGA, USSA, TAKUM",
+    "collationCentre": "WUKARI RECREATION CENTRE"
+  },
+  {
+    "code": "SD/101/TR",
+    "name": "TARABA CENTRAL",
+    "stateId": "taraba",
+    "stateName": "TARABA",
+    "composition": "SARDAUNA, KURMI, BALI, GASHAKA, GASSOL",
+    "collationCentre": "BALI LGA SECRETARIAT"
+  },
+  {
+    "code": "SD/102/TR",
+    "name": "TARABA NORTH",
+    "stateId": "taraba",
+    "stateName": "TARABA",
+    "composition": "JALINGO, YORRO, ZING, LAU, ARDO-KOLA, KARIM-LAMIDO",
+    "collationCentre": "JALINGO LGA SECRETARIAT"
+  },
+  {
+    "code": "SD/103/YB",
+    "name": "YOBE EAST",
+    "stateId": "yobe",
+    "stateName": "YOBE",
+    "composition": "BURSARI, GEIDAM,GUJBA, GULANI, TARMUWA, YUNUSARI",
+    "collationCentre": "FEDERAL POLYTECHNIC DAMATURU"
+  },
+  {
+    "code": "SD/104/YB",
+    "name": "YOBE NORTH",
+    "stateId": "yobe",
+    "stateName": "YOBE",
+    "composition": "BADE, JAKUSKO, MACHINA, KARASUWA, NGURU, YUSUFARI",
+    "collationCentre": "COLLEGE OF EDUCATION GASHUA"
+  },
+  {
+    "code": "SD/105/YB",
+    "name": "YOBE SOUTH",
+    "stateId": "yobe",
+    "stateName": "YOBE",
+    "composition": "FIKA, FUNE, NANGERE, POTISKUM, DAMATURU",
+    "collationCentre": "FEDERAL COLLEGE OF EDUCATION"
+  },
+  {
+    "code": "SD/106/ZF",
+    "name": "ZAMFARA NORTH",
+    "stateId": "zamfara",
+    "stateName": "ZAMFARA",
+    "composition": "K/NAMODA, SHINKAFI, ZURMI, BIRNIN MAGAJI, T/MAFARA",
+    "collationCentre": "INEC OFFICE KAURA NAMODA"
+  },
+  {
+    "code": "SD/107/ZF",
+    "name": "ZAMFARA CENTRAL",
+    "stateId": "zamfara",
+    "stateName": "ZAMFARA",
+    "composition": "GUSAU, TSAFE, BUNGUDU, MARU",
+    "collationCentre": "INEC OFFICE GUSAU"
+  },
+  {
+    "code": "SD/108/ZF",
+    "name": "ZAMFARA WEST",
+    "stateId": "zamfara",
+    "stateName": "ZAMFARA",
+    "composition": "MARADUN, BAKURA, ANKA, BUKKUYUM, GUMMI",
+    "collationCentre": "INEC OFFICE TALATA MAFARA"
+  },
+  {
+    "code": "SD/109/FCT",
+    "name": "FEDERAL CAPITAL TERRITORY",
+    "stateId": "federal-capital-territory",
+    "stateName": "FEDERAL CAPITAL TERRITORY",
+    "composition": "ABAJI AREA COUNCIL, GWAGWA AREA COUNCIL, KUJE AREA COUNCIL, MUNICIPAL AREA COUNCIL, KWALI AREA COUNCIL, BWARI AREA COUNCIL",
+    "collationCentre": "INEC OFFICE FCT"
+  }
+]

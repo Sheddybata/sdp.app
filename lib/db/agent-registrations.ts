@@ -15,6 +15,8 @@ export interface AgentRegistrationInsert {
   assigned_ward_name: string | null;
   assigned_polling_unit_name: string | null;
   assigned_code: string | null;
+  assigned_constituency_code: string | null;
+  assigned_constituency_name: string | null;
   first_name: string;
   middle_name: string | null;
   surname: string;
@@ -49,6 +51,8 @@ export interface AgentRegistrationRecord {
   assignedWardName: string | null;
   assignedPollingUnitName: string | null;
   assignedCode: string | null;
+  assignedConstituencyCode: string | null;
+  assignedConstituencyName: string | null;
   firstName: string;
   middleName: string | null;
   surname: string;
@@ -71,7 +75,7 @@ export interface AgentRegistrationRecord {
 
 /** List view — excludes the three base64 document columns. */
 const LIST_COLUMNS =
-  "id,user_id,member_id,agent_level,assigned_state_id,assigned_lga_id,assigned_ward_id,assigned_state_name,assigned_lga_name,assigned_ward_name,assigned_polling_unit_name,assigned_code,first_name,middle_name,surname,phone,email,nin,voter_identification_number,sdp_membership_id,agent_polling_unit,agent_voting_unit,polling_unit,acknowledged_at,created_at,portal_users(status,reviewed_at,review_note)";
+  "id,user_id,member_id,agent_level,assigned_state_id,assigned_lga_id,assigned_ward_id,assigned_state_name,assigned_lga_name,assigned_ward_name,assigned_polling_unit_name,assigned_code,assigned_constituency_code,assigned_constituency_name,first_name,middle_name,surname,phone,email,nin,voter_identification_number,sdp_membership_id,agent_polling_unit,agent_voting_unit,polling_unit,acknowledged_at,created_at,portal_users(status,reviewed_at,review_note)";
 
 const DETAIL_COLUMNS = `${LIST_COLUMNS},photo_data_url,membership_id_card_data_url,pvc_data_url`;
 
@@ -98,6 +102,8 @@ function rowToRecord(r: Row): AgentRegistrationRecord {
     assignedWardName: str("assigned_ward_name"),
     assignedPollingUnitName: str("assigned_polling_unit_name"),
     assignedCode: str("assigned_code"),
+    assignedConstituencyCode: str("assigned_constituency_code"),
+    assignedConstituencyName: str("assigned_constituency_name"),
     firstName: r.first_name as string,
     middleName: str("middle_name"),
     surname: r.surname as string,
@@ -248,6 +254,89 @@ export async function agentExistsForMember(memberId: string): Promise<boolean> {
     return false;
   }
   return (data ?? []).length > 0;
+}
+
+/**
+ * True when another agent already holds this post.
+ * Post key is agent_level + assigned_code (INEC or constituency / NATIONAL).
+ */
+export async function agentPostTaken(args: {
+  agentLevel: AgentLevel;
+  assignedCode: string;
+  /** When approving, ignore this user so they don't block themselves. */
+  excludeUserId?: string;
+  /** If true, only conflict with already-approved holders (default for apply/approve). */
+  approvedOnly?: boolean;
+}): Promise<boolean> {
+  const code = args.assignedCode.trim();
+  if (!code) return false;
+  const supabase = createAdminClient();
+  if (!supabase) return false;
+  const { data, error } = await supabase
+    .from("agent_registrations")
+    .select("id,user_id,portal_users!inner(status)")
+    .eq("agent_level", args.agentLevel)
+    .eq("assigned_code", code)
+    .in("portal_users.status", args.approvedOnly ? ["approved"] : ["pending", "approved"])
+    .limit(5);
+  if (error) {
+    console.error("[agent registration] post check failed:", error);
+    return false;
+  }
+  const rows = (data ?? []) as { id: string; user_id: string }[];
+  if (args.excludeUserId) {
+    return rows.some((r) => r.user_id !== args.excludeUserId);
+  }
+  return rows.length > 0;
+}
+
+const AUTO_REJECT_NOTE =
+  "This post was filled by another approved applicant. Your application was automatically closed.";
+
+/**
+ * After one applicant is approved for a post, reject every other pending applicant for the same seat.
+ */
+export async function rejectPendingApplicantsForPost(args: {
+  agentLevel: AgentLevel;
+  assignedCode: string;
+  approvedUserId: string;
+}): Promise<number> {
+  const code = args.assignedCode.trim();
+  if (!code) return 0;
+  const supabase = createAdminClient();
+  if (!supabase) return 0;
+
+  const { data, error } = await supabase
+    .from("agent_registrations")
+    .select("user_id,portal_users!inner(status)")
+    .eq("agent_level", args.agentLevel)
+    .eq("assigned_code", code)
+    .eq("portal_users.status", "pending");
+  if (error) {
+    console.error("[agent registration] list pending for post failed:", error);
+    return 0;
+  }
+
+  const userIds = ((data ?? []) as { user_id: string }[])
+    .map((r) => r.user_id)
+    .filter((id) => id && id !== args.approvedUserId);
+  if (userIds.length === 0) return 0;
+
+  const { error: updError } = await supabase
+    .from("portal_users")
+    .update({
+      status: "rejected",
+      reviewed_at: new Date().toISOString(),
+      review_note: AUTO_REJECT_NOTE,
+    })
+    .in("id", userIds)
+    .eq("role", "agent")
+    .eq("status", "pending");
+  if (updError) {
+    console.error("[agent registration] auto-reject pending failed:", updError);
+    return 0;
+  }
+  return userIds.length;
 }
 
 /** Passport photos only, for ID card generation. */

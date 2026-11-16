@@ -242,6 +242,52 @@ export function AgentCoverageClient({ report, generatedAt }: { report: AgentCove
         })}
       </div>
 
+      {report.constituencies ? (
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-end justify-between gap-2">
+            <div>
+              <h2 className="text-base font-semibold text-neutral-900">National &amp; constituency posts</h2>
+              <p className="text-sm text-neutral-600">
+                National (1), senatorial (109), House of Reps (360), and state assembly seats.
+              </p>
+            </div>
+            <Button asChild variant="outline" className="min-h-[40px]">
+              <Link href="/admin/constituency-mapping">
+                Fix unmapped seats ({fmt(report.constituencies.unmappedSeats)})
+              </Link>
+            </Button>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {(
+              [
+                ["national", "National agent", report.constituencies.national],
+                ["senatorial", "Senatorial agents", report.constituencies.senatorial],
+                ["houseOfReps", "House of Reps agents", report.constituencies.houseOfReps],
+                ["stateAssembly", "State assembly agents", report.constituencies.stateAssembly],
+              ] as const
+            ).map(([key, label, c]) => {
+              const p = pct(c);
+              return (
+                <div key={key} className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+                  <p className="text-sm font-medium text-neutral-600">{label}</p>
+                  <p className="mt-1 text-2xl font-bold text-neutral-900">
+                    {fmt(c.filled)}
+                    <span className="text-base font-medium text-neutral-500"> / {fmt(c.required)}</span>
+                  </p>
+                  <Bar c={c} className="mt-3 h-2.5" />
+                  <p className="mt-2 flex flex-wrap justify-between gap-x-2 text-xs">
+                    <span className={cn("font-semibold", pctTone(p))}>{p}% filled</span>
+                    {c.pending > 0 ? (
+                      <span className="text-amber-700">+{fmt(c.pending)} awaiting review</span>
+                    ) : null}
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex flex-wrap gap-x-6 gap-y-2 rounded-xl border border-neutral-200 bg-white px-4 py-3 text-sm shadow-sm">
         <span>
           <strong className="text-neutral-900">{fmt(n.approvedAgents)}</strong>{" "}

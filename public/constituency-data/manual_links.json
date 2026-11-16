@@ -1,0 +1,4 @@
+{
+  "_comment": "Map constituency code → array of ward location codes (e.g. 37/01/01) or {stateId,lgaId,wardId}. Merged on extract.",
+  "links": {}
+}

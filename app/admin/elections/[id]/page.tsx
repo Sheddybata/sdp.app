@@ -9,8 +9,12 @@ import {
   listCheckins,
   listIncidents,
 } from "@/lib/db/elections";
-import { countPollingUnitsUnder, getLocationTotals, type StateLocationTotals } from "@/lib/location-codes";
+import { getLocationTotals, type StateLocationTotals } from "@/lib/location-codes";
 import { buildComparison, buildStateProgress } from "@/lib/elections/dashboard";
+import {
+  countPollingUnitsForLocationCode,
+  enrichConstituencyComparison,
+} from "@/lib/elections/constituency-comparison";
 import { RACE_TOP_LEVEL, type Race } from "@/lib/elections/shared";
 import { ElectionDashboardClient } from "./ElectionDashboardClient";
 
@@ -55,9 +59,10 @@ export default async function ElectionDashboardPage({
     checkinCounts,
     RACE_TOP_LEVEL[race]
   );
-  const comparison = buildComparison(comparisonRows, (code) => {
+  const enrichedRows = await enrichConstituencyComparison(election.id, race, comparisonRows);
+  const comparison = buildComparison(enrichedRows, (code) => {
     try {
-      return countPollingUnitsUnder(code);
+      return countPollingUnitsForLocationCode(code);
     } catch {
       return 0;
     }

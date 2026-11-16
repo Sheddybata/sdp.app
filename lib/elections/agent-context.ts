@@ -1,6 +1,11 @@
 import { getAgentRegistrationByUserId, type AgentRegistrationRecord } from "@/lib/db/agent-registrations";
 import { listPollingUnitsInWard } from "@/lib/location-codes";
-import type { Election, ReportTarget } from "@/lib/elections/shared";
+import {
+  resultLevelForAgentLevel,
+  type Election,
+  type ReportTarget,
+  type ResultLevel,
+} from "@/lib/elections/shared";
 
 export interface AgentElectionContext {
   registration: AgentRegistrationRecord;
@@ -12,8 +17,11 @@ export interface AgentElectionContext {
 
 function ownTargetFor(r: AgentRegistrationRecord): ReportTarget | null {
   if (!r.assignedCode) return null;
+  const level = resultLevelForAgentLevel(r.agentLevel) as ResultLevel | null;
+  if (!level) return null;
+
   const base = {
-    level: r.agentLevel,
+    level,
     locationCode: r.assignedCode,
     stateId: r.assignedStateId,
     stateName: r.assignedStateName,
@@ -24,6 +32,7 @@ function ownTargetFor(r: AgentRegistrationRecord): ReportTarget | null {
     pollingUnitName: r.assignedPollingUnitName,
     isBackup: false,
   };
+
   switch (r.agentLevel) {
     case "polling_unit":
       return { ...base, label: r.assignedPollingUnitName ?? r.assignedCode };
@@ -40,6 +49,32 @@ function ownTargetFor(r: AgentRegistrationRecord): ReportTarget | null {
         wardName: null,
         pollingUnitName: null,
         label: `${r.assignedStateName} State`,
+      };
+    case "national":
+      return {
+        ...base,
+        stateId: "national",
+        stateName: "Nationwide",
+        lgaId: null,
+        lgaName: null,
+        wardId: null,
+        wardName: null,
+        pollingUnitName: null,
+        label: "National collation",
+      };
+    case "senatorial":
+    case "house_of_reps":
+    case "state_assembly":
+      return {
+        ...base,
+        lgaId: null,
+        lgaName: null,
+        wardId: null,
+        wardName: null,
+        pollingUnitName: null,
+        label: r.assignedConstituencyName
+          ? `${r.assignedConstituencyName} (${r.assignedCode})`
+          : r.assignedCode,
       };
   }
 }
@@ -73,7 +108,7 @@ export async function getAgentElectionContext(
       registration.assignedLgaId,
       registration.assignedWardId
     ).map((pu) => ({
-      level: "polling_unit",
+      level: "polling_unit" as const,
       locationCode: pu.code,
       label: pu.name,
       stateId: registration.assignedStateId,
@@ -103,6 +138,7 @@ export function findAgentTarget(
 }
 
 export function electionCoversState(election: Election, stateId: string): boolean {
+  if (stateId === "national") return true;
   if (!election.stateIds || election.stateIds.length === 0) return true;
   const id = stateId.toLowerCase();
   return election.stateIds.some((s) => s.toLowerCase() === id);

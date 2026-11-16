@@ -2,26 +2,80 @@ import { z } from "zod";
 import { isValidEnrollmentNigerianPhone } from "@/lib/phone-nigeria";
 import { validateVoterId } from "@/lib/enrollment-schema";
 
-export const AGENT_LEVELS = ["polling_unit", "ward", "lga", "state"] as const;
+export const AGENT_LEVELS = [
+  "national",
+  "state",
+  "senatorial",
+  "house_of_reps",
+  "state_assembly",
+  "lga",
+  "ward",
+  "polling_unit",
+] as const;
 export type AgentLevel = (typeof AGENT_LEVELS)[number];
 
 export const AGENT_LEVEL_LABELS: Record<AgentLevel, string> = {
-  polling_unit: "Polling Agent",
-  ward: "Ward Agent",
-  lga: "Local Government Agent",
+  national: "National Agent",
   state: "State Agent",
+  senatorial: "Senatorial District Agent",
+  house_of_reps: "House of Reps Agent",
+  state_assembly: "State Assembly Constituency Agent",
+  lga: "LG Agent",
+  ward: "Ward Agent",
+  polling_unit: "Polling Agent",
 };
+
+/** Registration UI groups (party collation layers). */
+export const AGENT_LEVEL_GROUPS: { id: string; title: string; levels: AgentLevel[] }[] = [
+  {
+    id: "national_collation",
+    title: "National Collation Agents",
+    levels: ["national", "state", "senatorial", "house_of_reps"],
+  },
+  {
+    id: "state_collation",
+    title: "State Collation Agents",
+    levels: ["state_assembly", "lga"],
+  },
+  {
+    id: "baseline_collation",
+    title: "Baseline Collation Agents",
+    levels: ["ward"],
+  },
+  {
+    id: "polling_unit_agents",
+    title: "Polling Unit Agents",
+    levels: ["polling_unit"],
+  },
+];
 
 /** Photos per admin fetch; keeps responses under Vercel's 4.5 MB limit (photos are up to ~900 KB). */
 export const AGENT_PHOTO_BATCH_SIZE = 4;
 
 /** Label for the "name" field shown once a level is ticked (matches the party's form). */
 export const AGENT_LEVEL_NAME_LABELS: Record<AgentLevel, string> = {
-  polling_unit: "Polling unit name",
-  ward: "Ward name",
-  lga: "LGA name",
+  national: "Nationwide post",
   state: "State name",
+  senatorial: "Senatorial district",
+  house_of_reps: "Federal constituency",
+  state_assembly: "State assembly constituency",
+  lga: "LGA name",
+  ward: "Ward name",
+  polling_unit: "Polling unit name",
 };
+
+/** Levels that pick an INEC constituency (SD / FC / SC) instead of LGA→ward→PU. */
+export const CONSTITUENCY_AGENT_LEVELS = ["senatorial", "house_of_reps", "state_assembly"] as const;
+export type ConstituencyAgentLevel = (typeof CONSTITUENCY_AGENT_LEVELS)[number];
+
+export function isConstituencyAgentLevel(level: AgentLevel): level is ConstituencyAgentLevel {
+  return (CONSTITUENCY_AGENT_LEVELS as readonly string[]).includes(level);
+}
+
+/** Levels that use the classic State→LGA→Ward→PU location picker. */
+export function usesAdminLocationPicker(level: AgentLevel): boolean {
+  return level === "state" || level === "lga" || level === "ward" || level === "polling_unit";
+}
 
 /** Same normalisation the member lookup uses (spaces removed, upper case). */
 export function normalizeMembershipId(raw: string): string {
@@ -65,15 +119,22 @@ export const EMPTY_LOCATION: LocationPick = {
 
 /** Name of the deepest location required for `level` (empty if not chosen yet). */
 export function locationNameForLevel(loc: LocationPick, level: AgentLevel): string {
+  if (level === "national") return loc.stateName || "Nationwide";
   if (level === "state") return loc.stateName;
+  if (isConstituencyAgentLevel(level)) return loc.pollingUnitName || loc.code || "";
   if (level === "lga") return loc.lgaName;
   if (level === "ward") return loc.wardName;
   return loc.pollingUnitName;
 }
 
 export function isLocationComplete(loc: LocationPick, level: AgentLevel): boolean {
+  if (level === "national") return loc.code.trim().toUpperCase() === "NATIONAL";
   if (!loc.stateId) return false;
   if (level === "state") return true;
+  if (isConstituencyAgentLevel(level)) {
+    // Constituency name stored in pollingUnitName; code is the SD/FC/SC code.
+    return !!loc.code.trim() && !!(loc.pollingUnitName || loc.code).trim();
+  }
   if (!loc.lgaId) return false;
   if (level === "lga") return true;
   if (!loc.wardId) return false;
@@ -83,6 +144,14 @@ export function isLocationComplete(loc: LocationPick, level: AgentLevel): boolea
 
 /** Readable one-line summary, e.g. "Polling unit name — Ward, LGA, State (37/01/01/001)". */
 export function formatLocationPick(loc: LocationPick, level: AgentLevel = "polling_unit"): string {
+  if (level === "national") return loc.code ? `Nationwide (${loc.code})` : "Nationwide";
+  if (isConstituencyAgentLevel(level)) {
+    const name = loc.pollingUnitName || loc.code;
+    const parts = [name, loc.stateName].filter(Boolean);
+    const text = parts.join(", ");
+    if (!text) return "—";
+    return loc.code && name !== loc.code ? `${text} (${loc.code})` : text;
+  }
   const parts: string[] = [];
   if (level === "polling_unit" && loc.pollingUnitName) parts.push(loc.pollingUnitName);
   if ((level === "polling_unit" || level === "ward") && loc.wardName) parts.push(loc.wardName);

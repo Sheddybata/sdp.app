@@ -75,6 +75,10 @@ const COLLATION_SOURCE_LABEL: Record<ResultLevel, string> = {
   ward: "Ward collations",
   lga: "LGA collations",
   state: "State collations",
+  state_constituency: "State assembly collations",
+  federal_constituency: "Federal constituency collations",
+  senatorial: "Senatorial collations",
+  national: "National collations",
 };
 
 function PartyStandings({

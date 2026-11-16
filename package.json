@@ -12,6 +12,7 @@
     "generate-default-wards": "node scripts/generate-default-wards.cjs",
     "embed-full-wards": "node scripts/embed-full-nigeria-wards.cjs",
     "extract-inec": "node scripts/extract-inec-polling-units.cjs",
+    "extract-constituencies": "node scripts/extract-agent-constituencies.cjs",
     "generate-icons": "node scripts/generate-icons.js",
     "setup-supabase": "node scripts/setup-supabase.js",
     "generate-password-hash": "node scripts/generate-password-hash.js",

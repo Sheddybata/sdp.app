@@ -15,7 +15,12 @@ const fmt = (n: number) => n.toLocaleString("en-NG");
 function label(r: ComparisonView) {
   if (r.level === "ward") return `${r.wardName} ward`;
   if (r.level === "lga") return `${r.lgaName} LGA`;
-  return `${r.stateName} State`;
+  if (r.level === "state") return `${r.stateName} State`;
+  if (r.level === "national") return "National";
+  if (r.level === "senatorial" || r.level === "federal_constituency" || r.level === "state_constituency") {
+    return r.locationCode;
+  }
+  return `${r.stateName}`;
 }
 
 function StatusBadge({ s }: { s: ComparisonStatus }) {

@@ -46,6 +46,15 @@ function fullName(r: AgentRegistrationRecord): string {
 }
 
 function assignmentText(r: AgentRegistrationRecord): string {
+  if (r.agentLevel === "national") {
+    return r.assignedCode ? `Nationwide (${r.assignedCode})` : "Nationwide";
+  }
+  if (r.assignedConstituencyName || r.assignedConstituencyCode) {
+    const name = r.assignedConstituencyName || r.assignedConstituencyCode;
+    const parts = [name, r.assignedStateName].filter(Boolean);
+    const text = parts.join(", ");
+    return r.assignedCode ? `${text} (${r.assignedCode})` : text;
+  }
   const parts = [
     r.assignedPollingUnitName,
     r.assignedWardName,
@@ -164,7 +173,34 @@ export function AdminAgentRegistrationsClient({
       return;
     }
     const patch = { status, reviewNote: note.trim() || null, reviewedAt: new Date().toISOString() };
-    setRegistrations((list) => list.map((r) => (r.id === selected.id ? { ...r, ...patch } : r)));
+    const autoRejectNote =
+      "This post was filled by another approved applicant. Your application was automatically closed.";
+    const approvedCode = selected.assignedCode;
+    const approvedLevel = selected.agentLevel;
+    const approvedId = selected.id;
+    setRegistrations((list) =>
+      list.map((r) => {
+        if (r.id === approvedId) return { ...r, ...patch };
+        if (
+          status === "approved" &&
+          result.autoRejected &&
+          result.autoRejected > 0 &&
+          r.status === "pending" &&
+          r.agentLevel === approvedLevel &&
+          r.assignedCode &&
+          approvedCode &&
+          r.assignedCode === approvedCode
+        ) {
+          return {
+            ...r,
+            status: "rejected",
+            reviewNote: autoRejectNote,
+            reviewedAt: patch.reviewedAt,
+          };
+        }
+        return r;
+      })
+    );
     setSelected((s) => (s ? { ...s, ...patch } : s));
   };
 

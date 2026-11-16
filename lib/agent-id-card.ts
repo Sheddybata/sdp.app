@@ -17,6 +17,7 @@ export type AgentCardData = {
   assignedWardName: string | null;
   assignedPollingUnitName: string | null;
   assignedCode: string | null;
+  assignedConstituencyName?: string | null;
 };
 
 export type AgentCardAssets = {
@@ -36,10 +37,14 @@ const MUTED = "#6b7280";
 const RED = "#c81e1e";
 
 const LEVEL_THEME: Record<AgentLevel, { color: string; prefix: string; badge: string }> = {
-  polling_unit: { color: "#01a85a", prefix: "PU", badge: "POLLING UNIT AGENT" },
-  ward: { color: "#2563eb", prefix: "WD", badge: "WARD AGENT" },
-  lga: { color: "#7c3aed", prefix: "LG", badge: "LOCAL GOVERNMENT AGENT" },
+  national: { color: "#b45309", prefix: "NA", badge: "NATIONAL AGENT" },
   state: { color: "#dc2626", prefix: "ST", badge: "STATE AGENT" },
+  senatorial: { color: "#0369a1", prefix: "SD", badge: "SENATORIAL DISTRICT AGENT" },
+  house_of_reps: { color: "#0f766e", prefix: "FC", badge: "HOUSE OF REPS AGENT" },
+  state_assembly: { color: "#a16207", prefix: "SC", badge: "STATE ASSEMBLY AGENT" },
+  lga: { color: "#7c3aed", prefix: "LG", badge: "LOCAL GOVERNMENT AGENT" },
+  ward: { color: "#2563eb", prefix: "WD", badge: "WARD AGENT" },
+  polling_unit: { color: "#01a85a", prefix: "PU", badge: "POLLING UNIT AGENT" },
 };
 
 export function agentCardNumber(r: Pick<AgentCardData, "id" | "agentLevel">): string {
@@ -67,6 +72,15 @@ function assignmentLines(r: AgentCardData): { primary: string; secondary: string
       return { primary: up(r.assignedWardName) || "—", secondary: join(r.assignedLgaName, r.assignedStateName) };
     case "lga":
       return { primary: up(r.assignedLgaName) || "—", secondary: join(r.assignedStateName) };
+    case "national":
+      return { primary: "NATIONWIDE", secondary: "NATIONAL COLLATION" };
+    case "senatorial":
+    case "house_of_reps":
+    case "state_assembly":
+      return {
+        primary: up(r.assignedConstituencyName) || up(r.assignedCode) || "—",
+        secondary: join(r.assignedStateName),
+      };
     default:
       return { primary: up(r.assignedStateName) || "—", secondary: "STATE-WIDE" };
   }

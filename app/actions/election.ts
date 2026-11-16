@@ -197,7 +197,10 @@ export async function loadAgentElectionHome(): Promise<ElectionActionResult<{ ho
       agent: {
         name: ctx.displayName,
         level: ctx.ownTarget.level,
-        levelLabel: AGENT_LEVEL_LABELS[ctx.ownTarget.level],
+        levelLabel:
+          AGENT_LEVEL_LABELS[ctx.registration.agentLevel] ??
+          RESULT_LEVEL_LABELS[ctx.ownTarget.level] ??
+          ctx.ownTarget.level,
         postLabel: ctx.ownTarget.label,
         code: ctx.ownTarget.locationCode,
         stateName: ctx.ownTarget.stateName,
