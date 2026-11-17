@@ -15,7 +15,11 @@ import {
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { formatVoterIdDisplay } from "@/lib/enrollment-schema";
-import { AGENT_LEVEL_LABELS, formatLocationPick } from "@/lib/agent-registration-schema";
+import {
+  AGENT_LEVEL_LABELS,
+  formatLocationPick,
+  type LocationPick,
+} from "@/lib/agent-registration-schema";
 import type { AgentRegistrationRecord, PortalUserStatus } from "@/lib/db/agent-registrations";
 import {
   adminSetAgentRegistrationStatus,
@@ -65,25 +69,26 @@ function assignmentText(r: AgentRegistrationRecord): string {
   return r.assignedCode ? `${text} (${r.assignedCode})` : text;
 }
 
-function isMemberApplicant(r: AgentRegistrationRecord): boolean {
-  return !!(r.memberId || r.sdpMembershipId);
-}
-
 function matchesSearch(r: AgentRegistrationRecord, q: string): boolean {
   if (!q) return true;
   return [
     fullName(r),
-    r.email ?? "",
     r.phone,
+    r.gender ?? "",
     r.nin ?? "",
     r.sdpMembershipId ?? "",
-    r.voterIdentificationNumber,
+    r.voterIdentificationNumber ?? "",
     assignmentText(r),
-    isMemberApplicant(r) ? "member" : "non-member",
   ]
     .join(" ")
     .toLowerCase()
     .includes(q);
+}
+
+function optionalLoc(loc: LocationPick | null | undefined): string | null {
+  if (!loc) return null;
+  const text = formatLocationPick(loc);
+  return text && text !== "—" ? text : null;
 }
 
 function StatusBadge({ status }: { status: PortalUserStatus }) {
@@ -223,26 +228,37 @@ export function AdminAgentRegistrationsClient({
         ...(selected.membershipIdCardDataUrl
           ? ([["Membership ID card", selected.membershipIdCardDataUrl]] as [string, string | null][])
           : []),
-        ["PVC", selected.pvcDataUrl],
+        ...(selected.pvcDataUrl ? ([["PVC", selected.pvcDataUrl]] as [string, string | null][]) : []),
       ]
     : [];
 
   const detailRows: [string, string][] = selected
-    ? [
+    ? ([
         ["Agent type", AGENT_LEVEL_LABELS[selected.agentLevel]],
         ["Assigned to", assignmentText(selected)],
-        ["Applicant", isMemberApplicant(selected) ? "SDP member" : "Non-member"],
         ["Phone", selected.phone],
-        ...(selected.gender ? ([["Gender", selected.gender]] as [string, string][]) : []),
-        ["NIN", selected.nin ?? "—"],
-        ["Voter registration number", formatVoterIdDisplay(selected.voterIdentificationNumber)],
-        ["SDP membership ID", selected.sdpMembershipId ?? "—"],
-        ["Agent's polling unit", formatLocationPick(selected.agentPollingUnit)],
-        ["Agent voting unit", formatLocationPick(selected.agentVotingUnit)],
-        ["Polling unit (name/code)", formatLocationPick(selected.pollingUnit)],
+        ["Gender", selected.gender ?? "—"],
+        ...(selected.nin ? ([["NIN", selected.nin]] as [string, string][]) : []),
+        ...(selected.voterIdentificationNumber
+          ? ([
+              ["Voter registration number", formatVoterIdDisplay(selected.voterIdentificationNumber)],
+            ] as [string, string][])
+          : []),
+        ...(selected.sdpMembershipId
+          ? ([["SDP membership ID", selected.sdpMembershipId]] as [string, string][])
+          : []),
+        ...(optionalLoc(selected.agentPollingUnit)
+          ? ([["Agent's polling unit", optionalLoc(selected.agentPollingUnit)!]] as [string, string][])
+          : []),
+        ...(optionalLoc(selected.agentVotingUnit)
+          ? ([["Agent voting unit", optionalLoc(selected.agentVotingUnit)!]] as [string, string][])
+          : []),
+        ...(optionalLoc(selected.pollingUnit)
+          ? ([["Polling unit (name/code)", optionalLoc(selected.pollingUnit)!]] as [string, string][])
+          : []),
         ["Declaration accepted", selected.acknowledgedAt.slice(0, 16).replace("T", " ")],
         ["Registered", selected.createdAt.slice(0, 16).replace("T", " ")],
-      ]
+      ] as [string, string][])
     : [];
 
   return (
@@ -297,7 +313,7 @@ export function AdminAgentRegistrationsClient({
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
             <Input
               id="agent-search"
-              placeholder="Name, phone, NIN, membership ID, location"
+              placeholder="Name, phone, gender, location"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="min-h-[44px] pl-9"
@@ -348,9 +364,9 @@ export function AdminAgentRegistrationsClient({
                   >
                     <td className="px-4 py-3 font-medium text-neutral-900">
                       <div>{fullName(r)}</div>
-                      <div className="mt-0.5 text-xs font-normal text-neutral-500">
-                        {isMemberApplicant(r) ? "SDP member" : "Non-member"}
-                      </div>
+                      {r.gender ? (
+                        <div className="mt-0.5 text-xs font-normal text-neutral-500">{r.gender}</div>
+                      ) : null}
                     </td>
                     <td className="px-4 py-3 text-neutral-600">{AGENT_LEVEL_LABELS[r.agentLevel]}</td>
                     <td className="px-4 py-3 text-neutral-600">{assignmentText(r)}</td>

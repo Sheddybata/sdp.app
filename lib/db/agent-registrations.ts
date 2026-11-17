@@ -24,15 +24,15 @@ export interface AgentRegistrationInsert {
   gender?: string | null;
   phone: string;
   email: string | null;
-  nin: string;
-  voter_identification_number: string;
+  nin: string | null;
+  voter_identification_number: string | null;
   sdp_membership_id: string | null;
-  agent_polling_unit: LocationPick;
-  agent_voting_unit: LocationPick;
-  polling_unit: LocationPick;
+  agent_polling_unit: LocationPick | null;
+  agent_voting_unit: LocationPick | null;
+  polling_unit: LocationPick | null;
   photo_data_url: string;
   membership_id_card_data_url: string | null;
-  pvc_data_url: string;
+  pvc_data_url: string | null;
   acknowledged_at: string;
 }
 
@@ -61,14 +61,14 @@ export interface AgentRegistrationRecord {
   phone: string;
   email: string | null;
   gender: string | null;
-  /** Null for registrations made before NIN was collected. */
+  /** Null when not collected (slim apply) or for older rows without NIN. */
   nin: string | null;
-  voterIdentificationNumber: string;
-  /** Null for non-member applicants. */
+  voterIdentificationNumber: string | null;
+  /** Null when not collected (slim apply). */
   sdpMembershipId: string | null;
-  agentPollingUnit: LocationPick;
-  agentVotingUnit: LocationPick;
-  pollingUnit: LocationPick;
+  agentPollingUnit: LocationPick | null;
+  agentVotingUnit: LocationPick | null;
+  pollingUnit: LocationPick | null;
   /** Null in list results; loaded when a single registration is opened. */
   photoDataUrl: string | null;
   membershipIdCardDataUrl: string | null;
@@ -115,11 +115,11 @@ function rowToRecord(r: Row): AgentRegistrationRecord {
     email: str("email"),
     gender: str("gender"),
     nin: str("nin"),
-    voterIdentificationNumber: r.voter_identification_number as string,
+    voterIdentificationNumber: str("voter_identification_number"),
     sdpMembershipId: str("sdp_membership_id"),
-    agentPollingUnit: r.agent_polling_unit as LocationPick,
-    agentVotingUnit: r.agent_voting_unit as LocationPick,
-    pollingUnit: r.polling_unit as LocationPick,
+    agentPollingUnit: (r.agent_polling_unit as LocationPick | null) ?? null,
+    agentVotingUnit: (r.agent_voting_unit as LocationPick | null) ?? null,
+    pollingUnit: (r.polling_unit as LocationPick | null) ?? null,
     photoDataUrl: str("photo_data_url"),
     membershipIdCardDataUrl: str("membership_id_card_data_url"),
     pvcDataUrl: str("pvc_data_url"),
@@ -138,10 +138,7 @@ export async function createAgentRegistration(args: {
   phone: string;
   passwordHash: string;
   registration: AgentRegistrationInsert;
-}): Promise<
-  | { ok: true; id: string }
-  | { ok: false; error: "phone_taken" | "nin_taken" | "member_taken" | "unavailable" }
-> {
+}): Promise<{ ok: true; id: string } | { ok: false; error: "phone_taken" | "unavailable" }> {
   const supabase = createAdminClient();
   if (!supabase) return { ok: false, error: "unavailable" };
 
@@ -179,13 +176,6 @@ export async function createAgentRegistration(args: {
 
   if (regError || !regRow) {
     await supabase.from("portal_users").delete().eq("id", userId);
-    const detail = `${regError?.message ?? ""} ${regError?.details ?? ""}`.toLowerCase();
-    if (regError?.code === "23505" && detail.includes("member_id")) {
-      return { ok: false, error: "member_taken" };
-    }
-    if (regError?.code === "23505" && detail.includes("nin")) {
-      return { ok: false, error: "nin_taken" };
-    }
     console.error("[agent registration] insert details failed:", regError);
     return { ok: false, error: "unavailable" };
   }

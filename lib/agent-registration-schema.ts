@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { isValidEnrollmentNigerianPhone } from "@/lib/phone-nigeria";
-import { validateVoterId } from "@/lib/enrollment-schema";
 
 export const AGENT_LEVELS = [
   "national",
@@ -82,17 +81,12 @@ export function normalizeMembershipId(raw: string): string {
   return raw.replace(/\s/g, "").toUpperCase().trim();
 }
 
-export const MEMBERSHIP_NOT_VERIFIED_MESSAGE = "Tap “Check membership” to confirm your SDP membership ID.";
-
 export const LOCATION_CODE_MISSING_MESSAGE =
   "The code for this location has not loaded. Wait a moment and try again — if it still does not appear, contact the SDP secretariat.";
 
 /** Placeholder until the party supplies the official declaration text. */
 export const AGENT_DECLARATION_TEXT =
   "I confirm that the information I have provided is true and complete, and that I will carry out my duties as an agent in line with the party constitution and the Electoral Act.";
-
-export const AGENT_MEMBERSHIP_PATHS = ["member", "non_member"] as const;
-export type AgentMembershipPath = (typeof AGENT_MEMBERSHIP_PATHS)[number];
 
 export const AGENT_GENDERS = ["Male", "Female"] as const;
 export type AgentGender = (typeof AGENT_GENDERS)[number];
@@ -168,15 +162,6 @@ export function formatLocationPick(loc: LocationPick, level: AgentLevel = "polli
   return loc.code ? `${text} (${loc.code})` : text;
 }
 
-/** Codes always come from the official list (never typed), so a location without one is not accepted. */
-function requireLocation(level: AgentLevel, message: string) {
-  return locationPickSchema
-    .refine((loc) => isLocationComplete(loc, level), { message })
-    .refine((loc) => !isLocationComplete(loc, level) || !!loc.code.trim(), {
-      message: LOCATION_CODE_MISSING_MESSAGE,
-    });
-}
-
 const imageDataUrl = (message: string) =>
   z
     .string({ required_error: message })
@@ -205,58 +190,17 @@ export const agentStep1Schema = z
   });
 
 const agentStep2Object = z.object({
-  membershipPath: z.enum(AGENT_MEMBERSHIP_PATHS, {
-    required_error: "Choose whether you are an SDP member or not.",
-    invalid_type_error: "Choose whether you are an SDP member or not.",
-  }),
   firstName: z.string().trim().min(2, "First name is required").max(80),
   middleName: z.string().trim().max(80).optional().default(""),
   surname: z.string().trim().min(2, "Surname is required").max(80),
-  gender: z
-    .string()
-    .optional()
-    .transform((s): AgentGender | null => (s === "Male" || s === "Female" ? s : null)),
+  gender: z.enum(AGENT_GENDERS, {
+    required_error: "Select your gender.",
+    invalid_type_error: "Select your gender.",
+  }),
   phone: z.string().trim().refine(isValidEnrollmentNigerianPhone, {
     message: "Use a Nigerian mobile number, e.g. 08012345678 or +2348012345678.",
   }),
-  nin: z
-    .string()
-    .transform((s) => s.replace(/\s/g, ""))
-    .refine((s) => /^[0-9]{11}$/.test(s), { message: "NIN must be exactly 11 digits." }),
-  voterIdentificationNumber: z
-    .string()
-    .transform((s) => s.replace(/\s/g, "").toUpperCase())
-    .refine(validateVoterId, { message: "Voter ID must be 19 or 20 letters and numbers." }),
-  agentPollingUnit: requireLocation("polling_unit", "Select the agent's polling unit."),
-  agentVotingUnit: requireLocation("polling_unit", "Select the agent voting unit."),
-  sdpMembershipId: z.string().trim().max(60).optional().default(""),
-  pollingUnit: requireLocation("polling_unit", "Select the polling unit."),
-});
-
-export const agentStep2Schema = agentStep2Object.superRefine((val, ctx) => {
-  if (val.membershipPath === "member") {
-    const id = normalizeMembershipId(val.sdpMembershipId ?? "");
-    if (id.length < 3) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["sdpMembershipId"],
-        message: "Enter your SDP membership ID",
-      });
-    }
-  } else if (!val.gender) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["gender"],
-      message: "Select your gender.",
-    });
-  }
-});
-
-const agentStep3Object = z.object({
-  membershipPath: z.enum(AGENT_MEMBERSHIP_PATHS),
   photoDataUrl: imageDataUrl("Upload your photo."),
-  membershipIdCardDataUrl: z.string().optional().default(""),
-  pvcDataUrl: imageDataUrl("Upload your PVC."),
   acknowledged: z.literal(true, {
     errorMap: () => ({ message: "Tick the declaration to continue." }),
   }),
@@ -267,64 +211,31 @@ const agentStep3Object = z.object({
   confirmPassword: z.string(),
 });
 
-export const agentStep3Schema = agentStep3Object.superRefine((val, ctx) => {
-    if (val.password !== val.confirmPassword) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["confirmPassword"],
-        message: "Passwords do not match.",
-      });
-    }
-    if (val.membershipPath === "member") {
-      if (!val.membershipIdCardDataUrl || !val.membershipIdCardDataUrl.startsWith("data:image/")) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["membershipIdCardDataUrl"],
-          message: "Upload your membership ID card.",
-        });
-      } else if (val.membershipIdCardDataUrl.length > 900_000) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["membershipIdCardDataUrl"],
-          message: "This image is too large. Please use a smaller photo.",
-        });
-      }
-    }
-  });
+export const agentStep2Schema = agentStep2Object.superRefine((val, ctx) => {
+  if (val.password !== val.confirmPassword) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["confirmPassword"],
+      message: "Passwords do not match.",
+    });
+  }
+});
 
 /** Field names owned by step 2 (for sending users back after server errors). */
 export const AGENT_STEP2_FIELD_KEYS = Object.keys(agentStep2Object.shape);
 
 export const agentRegistrationSchema = z
   .object({
-    membershipPath: z.enum(AGENT_MEMBERSHIP_PATHS),
     firstName: z.string().trim().min(2).max(80),
     middleName: z.string().trim().max(80).optional().default(""),
     surname: z.string().trim().min(2).max(80),
-    gender: z
-      .string()
-      .optional()
-      .transform((s): AgentGender | null => (s === "Male" || s === "Female" ? s : null)),
+    gender: z.enum(AGENT_GENDERS),
     phone: z.string().trim().refine(isValidEnrollmentNigerianPhone, {
       message: "Use a Nigerian mobile number, e.g. 08012345678 or +2348012345678.",
     }),
-    nin: z
-      .string()
-      .transform((s) => s.replace(/\s/g, ""))
-      .refine((s) => /^[0-9]{11}$/.test(s), { message: "NIN must be exactly 11 digits." }),
-    voterIdentificationNumber: z
-      .string()
-      .transform((s) => s.replace(/\s/g, "").toUpperCase())
-      .refine(validateVoterId, { message: "Voter ID must be 19 or 20 letters and numbers." }),
-    agentPollingUnit: requireLocation("polling_unit", "Select the agent's polling unit."),
-    agentVotingUnit: requireLocation("polling_unit", "Select the agent voting unit."),
-    sdpMembershipId: z.string().trim().max(60).optional().default(""),
-    pollingUnit: requireLocation("polling_unit", "Select the polling unit."),
     agentLevel: z.enum(AGENT_LEVELS),
     assignment: locationPickSchema,
     photoDataUrl: imageDataUrl("Upload your photo."),
-    membershipIdCardDataUrl: z.string().optional().default(""),
-    pvcDataUrl: imageDataUrl("Upload your PVC."),
     acknowledged: z.literal(true),
     password: z.string().min(8).max(128),
     confirmPassword: z.string(),
@@ -346,29 +257,6 @@ export const agentRegistrationSchema = z
         message: "Passwords do not match.",
       });
     }
-    if (val.membershipPath === "member") {
-      const id = normalizeMembershipId(val.sdpMembershipId ?? "");
-      if (id.length < 3) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["sdpMembershipId"],
-          message: "Enter your SDP membership ID",
-        });
-      }
-      if (!val.membershipIdCardDataUrl || !val.membershipIdCardDataUrl.startsWith("data:image/")) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["membershipIdCardDataUrl"],
-          message: "Upload your membership ID card.",
-        });
-      }
-    } else if (!val.gender) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["gender"],
-        message: "Select your gender.",
-      });
-    }
   });
 
 export type AgentRegistrationPayload = z.input<typeof agentRegistrationSchema>;
@@ -377,23 +265,12 @@ export type AgentRegistrationPayload = z.input<typeof agentRegistrationSchema>;
 export type AgentRegistrationDraft = {
   agentLevel: AgentLevel | null;
   assignment: LocationPick;
-  membershipPath: AgentMembershipPath;
   firstName: string;
   middleName: string;
   surname: string;
   gender: AgentGender | "";
   phone: string;
-  nin: string;
-  voterIdentificationNumber: string;
-  agentPollingUnit: LocationPick;
-  agentVotingUnit: LocationPick;
-  sdpMembershipId: string;
-  /** Membership ID (normalised) that passed the member check; names are filled from that record. */
-  memberVerifiedId: string;
-  pollingUnit: LocationPick;
   photoDataUrl: string;
-  membershipIdCardDataUrl: string;
-  pvcDataUrl: string;
   acknowledged: boolean;
   password: string;
   confirmPassword: string;
@@ -402,22 +279,12 @@ export type AgentRegistrationDraft = {
 export const EMPTY_AGENT_DRAFT: AgentRegistrationDraft = {
   agentLevel: null,
   assignment: EMPTY_LOCATION,
-  membershipPath: "member",
   firstName: "",
   middleName: "",
   surname: "",
   gender: "",
   phone: "",
-  nin: "",
-  voterIdentificationNumber: "",
-  agentPollingUnit: EMPTY_LOCATION,
-  agentVotingUnit: EMPTY_LOCATION,
-  sdpMembershipId: "",
-  memberVerifiedId: "",
-  pollingUnit: EMPTY_LOCATION,
   photoDataUrl: "",
-  membershipIdCardDataUrl: "",
-  pvcDataUrl: "",
   acknowledged: false,
   password: "",
   confirmPassword: "",

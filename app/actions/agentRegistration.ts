@@ -5,70 +5,25 @@ import {
   agentRegistrationSchema,
   isConstituencyAgentLevel,
   LOCATION_CODE_MISSING_MESSAGE,
-  normalizeMembershipId,
   usesAdminLocationPicker,
   zodFieldErrors,
   type AgentLevel,
   type LocationPick,
 } from "@/lib/agent-registration-schema";
-import {
-  agentExistsForMember,
-  agentPostTaken,
-  createAgentRegistration,
-} from "@/lib/db/agent-registrations";
-import { getMemberByMembershipId } from "@/lib/db/members";
+import { agentPostTaken, createAgentRegistration } from "@/lib/db/agent-registrations";
 import { lookupLocationCode } from "@/app/actions/locationCodes";
 import { verifyConstituencyAssignment } from "@/app/actions/constituencies";
 import { nationalAgentPost } from "@/lib/constituency-data";
 import { normalizePhone } from "@/lib/otp/termii";
-import type { MemberRecord } from "@/lib/mock-members";
 
 export type AgentRegistrationResult =
   | { ok: true }
   | { ok: false; error: string; fieldErrors?: Record<string, string> };
 
-export type AgentMembershipCheck =
-  | { ok: true; membershipId: string; firstName: string; middleName: string; surname: string }
-  | { ok: false; error: string };
-
-const MEMBER_NOT_FOUND =
-  "We couldn't find this SDP membership ID. Check the number on your membership card, or register as a member first.";
-const MEMBER_ALREADY_AGENT =
-  "This member is already registered as an agent. Sign in instead, or contact the SDP secretariat.";
 const POST_TAKEN =
   "This post already has an approved agent. Choose a different assignment, or contact the SDP secretariat.";
 const PHONE_TAKEN =
   "An agent account with this phone number already exists. Sign in instead, or use a different number.";
-
-async function resolveMember(
-  raw: string
-): Promise<{ ok: true; member: MemberRecord } | { ok: false; error: string }> {
-  const normalized = normalizeMembershipId(raw ?? "");
-  if (normalized.length < 6 || normalized.length > 96) return { ok: false, error: MEMBER_NOT_FOUND };
-  const member = await getMemberByMembershipId(normalized);
-  if (!member) return { ok: false, error: MEMBER_NOT_FOUND };
-  if (await agentExistsForMember(member.id)) return { ok: false, error: MEMBER_ALREADY_AGENT };
-  return { ok: true, member };
-}
-
-function memberDisplayId(member: MemberRecord, fallback: string): string {
-  return member.locationMembershipId || member.membershipId || normalizeMembershipId(fallback);
-}
-
-/** Look up an SDP membership ID for the member apply path. */
-export async function checkAgentMembership(membershipId: string): Promise<AgentMembershipCheck> {
-  if (typeof membershipId !== "string") return { ok: false, error: MEMBER_NOT_FOUND };
-  const found = await resolveMember(membershipId);
-  if (!found.ok) return found;
-  const m = found.member;
-  return {
-    ok: true,
-    membershipId: memberDisplayId(m, membershipId),
-    firstName: m.firstName,
-    middleName: m.otherNames ?? "",
-    surname: m.surname,
-  };
-}
 
 function puIndex(loc: LocationPick): number | undefined {
   const m = /-(\d+)$/.exec(loc.pollingUnitId);
@@ -99,28 +54,11 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
     };
   }
   const v = parsed.data;
-  const isMember = v.membershipPath === "member";
 
-  let memberId: string | null = null;
-  let firstName = v.firstName.trim();
-  let middleName = (v.middleName ?? "").trim();
-  let surname = v.surname.trim();
-  let sdpMembershipId: string | null = null;
-  let gender: string | null = v.gender ?? null;
-
-  if (isMember) {
-    const found = await resolveMember(v.sdpMembershipId ?? "");
-    if (!found.ok) {
-      return { ok: false, error: found.error, fieldErrors: { sdpMembershipId: found.error } };
-    }
-    const member = found.member;
-    memberId = member.id;
-    firstName = member.firstName.trim();
-    middleName = (member.otherNames ?? "").trim();
-    surname = member.surname.trim();
-    sdpMembershipId = memberDisplayId(member, v.sdpMembershipId ?? "");
-    gender = member.gender ?? null;
-  }
+  const firstName = v.firstName.trim();
+  const middleName = (v.middleName ?? "").trim();
+  const surname = v.surname.trim();
+  const gender = v.gender;
 
   const level = v.agentLevel;
   let assignment = v.assignment;
@@ -170,25 +108,11 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
     assignment = await withServerCode(v.assignment, level);
   }
 
-  const [agentPollingUnit, agentVotingUnit, pollingUnit] = await Promise.all([
-    withServerCode(v.agentPollingUnit, "polling_unit"),
-    withServerCode(v.agentVotingUnit, "polling_unit"),
-    withServerCode(v.pollingUnit, "polling_unit"),
-  ]);
-
-  const missingCode = (
-    [
-      ["assignment", assignment],
-      ["agentPollingUnit", agentPollingUnit],
-      ["agentVotingUnit", agentVotingUnit],
-      ["pollingUnit", pollingUnit],
-    ] as const
-  ).find(([, loc]) => !loc.code);
-  if (missingCode) {
+  if (!assignment.code.trim()) {
     return {
       ok: false,
       error: LOCATION_CODE_MISSING_MESSAGE,
-      fieldErrors: { [missingCode[0]]: LOCATION_CODE_MISSING_MESSAGE },
+      fieldErrors: { assignment: LOCATION_CODE_MISSING_MESSAGE },
     };
   }
 
@@ -207,7 +131,7 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
     phone,
     passwordHash,
     registration: {
-      member_id: memberId,
+      member_id: null,
       agent_level: level,
       assigned_state_id: assignment.stateId,
       assigned_state_name: assignment.stateName,
@@ -226,16 +150,15 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
       gender,
       phone,
       email: null,
-      nin: v.nin,
-      voter_identification_number: v.voterIdentificationNumber,
-      sdp_membership_id: sdpMembershipId,
-      agent_polling_unit: agentPollingUnit,
-      agent_voting_unit: agentVotingUnit,
-      polling_unit: pollingUnit,
+      nin: null,
+      voter_identification_number: null,
+      sdp_membership_id: null,
+      agent_polling_unit: null,
+      agent_voting_unit: null,
+      polling_unit: null,
       photo_data_url: v.photoDataUrl,
-      membership_id_card_data_url:
-        isMember && v.membershipIdCardDataUrl ? v.membershipIdCardDataUrl : null,
-      pvc_data_url: v.pvcDataUrl,
+      membership_id_card_data_url: null,
+      pvc_data_url: null,
       acknowledged_at: new Date().toISOString(),
     },
   });
@@ -246,16 +169,6 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
         ok: false,
         error: PHONE_TAKEN,
         fieldErrors: { phone: "This phone number is already registered." },
-      };
-    }
-    if (result.error === "member_taken") {
-      return { ok: false, error: MEMBER_ALREADY_AGENT, fieldErrors: { sdpMembershipId: MEMBER_ALREADY_AGENT } };
-    }
-    if (result.error === "nin_taken") {
-      return {
-        ok: false,
-        error: "An agent with this NIN has already registered. Contact the SDP secretariat if this is a mistake.",
-        fieldErrors: { nin: "This NIN is already registered." },
       };
     }
     return { ok: false, error: "Registration is temporarily unavailable. Please try again later." };

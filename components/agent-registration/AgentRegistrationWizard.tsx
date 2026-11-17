@@ -10,25 +10,20 @@ import {
   AGENT_STEP2_FIELD_KEYS,
   agentStep1Schema,
   agentStep2Schema,
-  agentStep3Schema,
-  MEMBERSHIP_NOT_VERIFIED_MESSAGE,
-  normalizeMembershipId,
   zodFieldErrors,
   type AgentRegistrationDraft,
 } from "@/lib/agent-registration-schema";
 import { submitAgentRegistration } from "@/app/actions/agentRegistration";
 import { AgentStep1Assignment } from "./AgentStep1Assignment";
 import { AgentStep2Personal } from "./AgentStep2Personal";
-import { AgentStep3Documents } from "./AgentStep3Documents";
 import { AgentReviewDialog } from "./AgentReviewDialog";
 
 const STEPS = [
   { id: 1, label: "Assignment" },
-  { id: 2, label: "Personal details" },
-  { id: 3, label: "Documents" },
+  { id: 2, label: "Details" },
 ] as const;
 
-const STEP_SCHEMAS = [agentStep1Schema, agentStep2Schema, agentStep3Schema] as const;
+const STEP_SCHEMAS = [agentStep1Schema, agentStep2Schema] as const;
 
 /** Which step owns each field, so server-side errors send the user back to the right screen. */
 const FIELD_STEP: Record<string, number> = {
@@ -63,16 +58,6 @@ export function AgentRegistrationWizard() {
   const validateStep = (n: number): boolean => {
     const result = STEP_SCHEMAS[n - 1].safeParse(draft);
     const next = result.success ? {} : zodFieldErrors(result.error);
-    if (
-      n === 2 &&
-      draft.membershipPath === "member" &&
-      (!draft.memberVerifiedId || draft.memberVerifiedId !== normalizeMembershipId(draft.sdpMembershipId))
-    ) {
-      delete next.firstName;
-      delete next.middleName;
-      delete next.surname;
-      next.sdpMembershipId = MEMBERSHIP_NOT_VERIFIED_MESSAGE;
-    }
     setErrors(next);
     if (Object.keys(next).length === 0) return true;
     window.scrollTo(0, 0);
@@ -81,7 +66,7 @@ export function AgentRegistrationWizard() {
 
   const handleNext = () => {
     if (!validateStep(step)) return;
-    if (step < 3) goTo(step + 1);
+    if (step < 2) goTo(step + 1);
     else {
       setSubmitError(null);
       setReviewOpen(true);
@@ -106,9 +91,9 @@ export function AgentRegistrationWizard() {
     setSubmitError(result.error);
     if (result.fieldErrors) {
       const firstKey = Object.keys(result.fieldErrors)[0];
-      const target = FIELD_STEP[firstKey] ?? 3;
+      const target = FIELD_STEP[firstKey] ?? 2;
       setErrors(result.fieldErrors);
-      if (target !== 3) {
+      if (target !== 2) {
         setReviewOpen(false);
         goTo(target);
       }
@@ -147,7 +132,7 @@ export function AgentRegistrationWizard() {
           </Link>
           <h1 className="mt-2 text-xl font-semibold text-neutral-900">Register as an agent</h1>
           <p className="mt-1 text-sm text-neutral-600">
-            Complete all three steps. Your account will be activated after the national secretariat
+            Complete both steps. Your account will be activated after the national secretariat
             approves it.
           </p>
 
@@ -210,7 +195,6 @@ export function AgentRegistrationWizard() {
 
         {step === 1 && <AgentStep1Assignment draft={draft} update={update} errors={errors} />}
         {step === 2 && <AgentStep2Personal draft={draft} update={update} errors={errors} />}
-        {step === 3 && <AgentStep3Documents draft={draft} update={update} errors={errors} />}
 
         <div className="flex gap-3 pt-6">
           {step > 1 ? (
@@ -224,7 +208,7 @@ export function AgentRegistrationWizard() {
             </Button>
           ) : null}
           <Button type="button" className="min-h-[44px] flex-1" onClick={handleNext}>
-            {step < 3 ? "Continue" : "Review & submit"}
+            {step < 2 ? "Continue" : "Review & submit"}
           </Button>
         </div>
       </div>

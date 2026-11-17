@@ -11,7 +11,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { formatVoterIdDisplay } from "@/lib/enrollment-schema";
 import {
   AGENT_LEVEL_LABELS,
   formatLocationPick,
@@ -51,14 +50,6 @@ export function AgentReviewDialog({
   error: string | null;
 }) {
   const level = draft.agentLevel;
-  const isMember = draft.membershipPath === "member";
-  const docs: [string, string][] = [
-    ["Photo", draft.photoDataUrl],
-    ...(isMember && draft.membershipIdCardDataUrl
-      ? ([["Membership ID", draft.membershipIdCardDataUrl]] as [string, string][])
-      : []),
-    ["PVC", draft.pvcDataUrl],
-  ];
 
   return (
     <Dialog open={open} onOpenChange={(o) => !isSubmitting && onOpenChange(o)}>
@@ -81,30 +72,22 @@ export function AgentReviewDialog({
               label="Name"
               value={[draft.firstName, draft.middleName, draft.surname].filter(Boolean).join(" ")}
             />
-            <Row label="Applicant type" value={isMember ? "SDP member" : "Non-member"} />
+            <Row label="Gender" value={draft.gender || "—"} />
             <Row label="Phone" value={draft.phone} />
-            {!isMember ? <Row label="Gender" value={draft.gender || "—"} /> : null}
-            <Row label="NIN" value={draft.nin} />
-            <Row label="Voter registration number" value={formatVoterIdDisplay(draft.voterIdentificationNumber)} />
-            <Row label="SDP membership ID" value={isMember ? draft.sdpMembershipId : "— (non-member)"} />
-            <Row label="Agent's polling unit" value={formatLocationPick(draft.agentPollingUnit)} />
-            <Row label="Agent voting unit" value={formatLocationPick(draft.agentVotingUnit)} />
-            <Row label="Polling unit (name/code)" value={formatLocationPick(draft.pollingUnit)} />
 
-            <Section title="Documents" />
-            <div className="grid grid-cols-2 gap-3 py-2 sm:grid-cols-4">
-              {docs.map(([label, src]) => (
-                <figure key={label} className="space-y-1">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={src}
-                    alt={label}
-                    className="h-20 w-full rounded-md border border-neutral-200 bg-white object-contain"
-                  />
-                  <figcaption className="text-center text-xs text-neutral-600">{label}</figcaption>
-                </figure>
-              ))}
-            </div>
+            <Section title="Photo" />
+            {draft.photoDataUrl ? (
+              <figure className="space-y-1 py-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={draft.photoDataUrl}
+                  alt="Passport photo"
+                  className="h-28 w-28 rounded-md border border-neutral-200 bg-white object-cover"
+                />
+              </figure>
+            ) : (
+              <Row label="Photo" value="—" />
+            )}
             <Row label="Declaration" value={draft.acknowledged ? "Accepted" : "Not accepted"} />
           </dl>
         </div>
