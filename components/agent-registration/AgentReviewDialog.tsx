@@ -64,14 +64,12 @@ export function AgentReviewDialog({
         <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3 sm:px-6">
           <dl>
             <Section title="Assignment" />
+            <Row label="Recruitment" value={draft.unlockedAroLabel || "—"} />
             <Row label="Agent type" value={level ? AGENT_LEVEL_LABELS[level] : "—"} />
             <Row label="Location and code" value={level ? formatLocationPick(draft.assignment, level) : "—"} />
 
             <Section title="Personal details" />
-            <Row
-              label="Name"
-              value={[draft.firstName, draft.middleName, draft.surname].filter(Boolean).join(" ")}
-            />
+            <Row label="Name" value={[draft.firstName, draft.surname].filter(Boolean).join(" ")} />
             <Row label="Gender" value={draft.gender || "—"} />
             <Row label="Phone" value={draft.phone} />
 

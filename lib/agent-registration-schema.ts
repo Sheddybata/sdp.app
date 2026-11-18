@@ -132,7 +132,6 @@ export function isLocationComplete(loc: LocationPick, level: AgentLevel): boolea
   if (!loc.stateId) return false;
   if (level === "state") return true;
   if (isConstituencyAgentLevel(level)) {
-    // Constituency name stored in pollingUnitName; code is the SD/FC/SC code.
     return !!loc.code.trim() && !!(loc.pollingUnitName || loc.code).trim();
   }
   if (!loc.lgaId) return false;
@@ -169,13 +168,31 @@ const imageDataUrl = (message: string) =>
     .max(900_000, "This image is too large. Please use a smaller photo.")
     .refine((s) => s.startsWith("data:image/"), { message: "Please upload an image file." });
 
-export const agentStep1Schema = z
+/** Single-page agent registration (no portal password; secretariat reviews applications). */
+export const agentRegistrationSchema = z
   .object({
+    recruitmentCode: z
+      .string()
+      .trim()
+      .min(6, "Enter the recruitment code from your Agent Registration Officer."),
     agentLevel: z.enum(AGENT_LEVELS, {
       required_error: "Tick the type of agent you are registering as.",
       invalid_type_error: "Tick the type of agent you are registering as.",
     }),
     assignment: locationPickSchema,
+    firstName: z.string().trim().min(2, "First name is required").max(80),
+    surname: z.string().trim().min(2, "Surname is required").max(80),
+    gender: z.enum(AGENT_GENDERS, {
+      required_error: "Select your gender.",
+      invalid_type_error: "Select your gender.",
+    }),
+    phone: z.string().trim().refine(isValidEnrollmentNigerianPhone, {
+      message: "Use a Nigerian mobile number, e.g. 08012345678 or +2348012345678.",
+    }),
+    photoDataUrl: imageDataUrl("Upload your photo."),
+    acknowledged: z.literal(true, {
+      errorMap: () => ({ message: "Tick the declaration to continue." }),
+    }),
   })
   .superRefine((val, ctx) => {
     if (!isLocationComplete(val.assignment, val.agentLevel)) {
@@ -189,105 +206,36 @@ export const agentStep1Schema = z
     }
   });
 
-const agentStep2Object = z.object({
-  firstName: z.string().trim().min(2, "First name is required").max(80),
-  middleName: z.string().trim().max(80).optional().default(""),
-  surname: z.string().trim().min(2, "Surname is required").max(80),
-  gender: z.enum(AGENT_GENDERS, {
-    required_error: "Select your gender.",
-    invalid_type_error: "Select your gender.",
-  }),
-  phone: z.string().trim().refine(isValidEnrollmentNigerianPhone, {
-    message: "Use a Nigerian mobile number, e.g. 08012345678 or +2348012345678.",
-  }),
-  photoDataUrl: imageDataUrl("Upload your photo."),
-  acknowledged: z.literal(true, {
-    errorMap: () => ({ message: "Tick the declaration to continue." }),
-  }),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters.")
-    .max(128, "Password is too long."),
-  confirmPassword: z.string(),
-});
-
-export const agentStep2Schema = agentStep2Object.superRefine((val, ctx) => {
-  if (val.password !== val.confirmPassword) {
-    ctx.addIssue({
-      code: z.ZodIssueCode.custom,
-      path: ["confirmPassword"],
-      message: "Passwords do not match.",
-    });
-  }
-});
-
-/** Field names owned by step 2 (for sending users back after server errors). */
-export const AGENT_STEP2_FIELD_KEYS = Object.keys(agentStep2Object.shape);
-
-export const agentRegistrationSchema = z
-  .object({
-    firstName: z.string().trim().min(2).max(80),
-    middleName: z.string().trim().max(80).optional().default(""),
-    surname: z.string().trim().min(2).max(80),
-    gender: z.enum(AGENT_GENDERS),
-    phone: z.string().trim().refine(isValidEnrollmentNigerianPhone, {
-      message: "Use a Nigerian mobile number, e.g. 08012345678 or +2348012345678.",
-    }),
-    agentLevel: z.enum(AGENT_LEVELS),
-    assignment: locationPickSchema,
-    photoDataUrl: imageDataUrl("Upload your photo."),
-    acknowledged: z.literal(true),
-    password: z.string().min(8).max(128),
-    confirmPassword: z.string(),
-  })
-  .superRefine((val, ctx) => {
-    if (!isLocationComplete(val.assignment, val.agentLevel)) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["assignment"],
-        message: "Select where you will serve as an agent.",
-      });
-    } else if (!val.assignment.code.trim()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["assignment"], message: LOCATION_CODE_MISSING_MESSAGE });
-    }
-    if (val.password !== val.confirmPassword) {
-      ctx.addIssue({
-        code: z.ZodIssueCode.custom,
-        path: ["confirmPassword"],
-        message: "Passwords do not match.",
-      });
-    }
-  });
-
 export type AgentRegistrationPayload = z.input<typeof agentRegistrationSchema>;
 
-/** Form state held by the wizard across steps. */
+/** Form state for the one-page apply form. */
 export type AgentRegistrationDraft = {
+  /** Unlocks the form; stamped to the registration on submit. */
+  recruitmentCode: string;
+  codeUnlocked: boolean;
+  unlockedAroLabel: string;
   agentLevel: AgentLevel | null;
   assignment: LocationPick;
   firstName: string;
-  middleName: string;
   surname: string;
   gender: AgentGender | "";
   phone: string;
   photoDataUrl: string;
   acknowledged: boolean;
-  password: string;
-  confirmPassword: string;
 };
 
 export const EMPTY_AGENT_DRAFT: AgentRegistrationDraft = {
+  recruitmentCode: "",
+  codeUnlocked: false,
+  unlockedAroLabel: "",
   agentLevel: null,
   assignment: EMPTY_LOCATION,
   firstName: "",
-  middleName: "",
   surname: "",
   gender: "",
   phone: "",
   photoDataUrl: "",
   acknowledged: false,
-  password: "",
-  confirmPassword: "",
 };
 
 /** Flatten zod issues to `{ fieldName: firstMessage }` (top-level path segment). */

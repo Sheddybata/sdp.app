@@ -1,6 +1,7 @@
 "use server";
 
 import bcrypt from "bcryptjs";
+import { randomBytes } from "crypto";
 import {
   agentRegistrationSchema,
   isConstituencyAgentLevel,
@@ -11,6 +12,7 @@ import {
   type LocationPick,
 } from "@/lib/agent-registration-schema";
 import { agentPostTaken, createAgentRegistration } from "@/lib/db/agent-registrations";
+import { findActiveAroByCode } from "@/lib/db/agent-recruitment";
 import { lookupLocationCode } from "@/app/actions/locationCodes";
 import { verifyConstituencyAssignment } from "@/app/actions/constituencies";
 import { nationalAgentPost } from "@/lib/constituency-data";
@@ -23,7 +25,9 @@ export type AgentRegistrationResult =
 const POST_TAKEN =
   "This post already has an approved agent. Choose a different assignment, or contact the SDP secretariat.";
 const PHONE_TAKEN =
-  "An agent account with this phone number already exists. Sign in instead, or use a different number.";
+  "An agent with this phone number has already registered. Contact the SDP secretariat if this is a mistake.";
+const CODE_INVALID =
+  "That recruitment code is invalid or has been revoked. Ask your Agent Registration Officer for a current code.";
 
 function puIndex(loc: LocationPick): number | undefined {
   const m = /-(\d+)$/.exec(loc.pollingUnitId);
@@ -55,8 +59,12 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
   }
   const v = parsed.data;
 
+  const aro = await findActiveAroByCode(v.recruitmentCode);
+  if (!aro) {
+    return { ok: false, error: CODE_INVALID, fieldErrors: { recruitmentCode: CODE_INVALID } };
+  }
+
   const firstName = v.firstName.trim();
-  const middleName = (v.middleName ?? "").trim();
   const surname = v.surname.trim();
   const gender = v.gender;
 
@@ -121,8 +129,9 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
     return { ok: false, error: POST_TAKEN, fieldErrors: { assignment: POST_TAKEN } };
   }
 
-  const passwordHash = await bcrypt.hash(v.password, await bcrypt.genSalt(10));
-  const fullName = [firstName, middleName, surname].filter(Boolean).join(" ");
+  // Agents do not get portal login; store an unusable random hash to satisfy portal_users.
+  const passwordHash = await bcrypt.hash(randomBytes(32).toString("hex"), await bcrypt.genSalt(10));
+  const fullName = [firstName, surname].filter(Boolean).join(" ");
   const phone = normalizePhone(v.phone) || v.phone.trim();
 
   const isAdminLadder = usesAdminLocationPicker(level);
@@ -132,6 +141,8 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
     passwordHash,
     registration: {
       member_id: null,
+      aro_id: aro.id,
+      aro_officer_number: aro.officerNumber,
       agent_level: level,
       assigned_state_id: assignment.stateId,
       assigned_state_name: assignment.stateName,
@@ -145,7 +156,7 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
       assigned_constituency_code: constituencyCode,
       assigned_constituency_name: constituencyName,
       first_name: firstName,
-      middle_name: middleName || null,
+      middle_name: null,
       surname,
       gender,
       phone,

@@ -7,6 +7,8 @@ export type PortalUserStatus = "pending" | "approved" | "rejected";
 
 export interface AgentRegistrationInsert {
   member_id: string | null;
+  aro_id: string | null;
+  aro_officer_number: number | null;
   agent_level: AgentLevel;
   assigned_state_id: string;
   assigned_state_name: string;
@@ -41,6 +43,8 @@ export interface AgentRegistrationRecord {
   userId: string;
   /** Linked SDP member record; null for registrations made before the member check. */
   memberId: string | null;
+  aroId: string | null;
+  aroOfficerNumber: number | null;
   status: PortalUserStatus;
   reviewedAt: string | null;
   reviewNote: string | null;
@@ -79,7 +83,7 @@ export interface AgentRegistrationRecord {
 
 /** List view — excludes the three base64 document columns. */
 const LIST_COLUMNS =
-  "id,user_id,member_id,agent_level,assigned_state_id,assigned_lga_id,assigned_ward_id,assigned_state_name,assigned_lga_name,assigned_ward_name,assigned_polling_unit_name,assigned_code,assigned_constituency_code,assigned_constituency_name,first_name,middle_name,surname,gender,phone,email,nin,voter_identification_number,sdp_membership_id,agent_polling_unit,agent_voting_unit,polling_unit,acknowledged_at,created_at,portal_users(status,reviewed_at,review_note)";
+  "id,user_id,member_id,aro_id,aro_officer_number,agent_level,assigned_state_id,assigned_lga_id,assigned_ward_id,assigned_state_name,assigned_lga_name,assigned_ward_name,assigned_polling_unit_name,assigned_code,assigned_constituency_code,assigned_constituency_name,first_name,middle_name,surname,gender,phone,email,nin,voter_identification_number,sdp_membership_id,agent_polling_unit,agent_voting_unit,polling_unit,acknowledged_at,created_at,portal_users(status,reviewed_at,review_note)";
 
 const DETAIL_COLUMNS = `${LIST_COLUMNS},photo_data_url,membership_id_card_data_url,pvc_data_url`;
 
@@ -94,6 +98,13 @@ function rowToRecord(r: Row): AgentRegistrationRecord {
     id: r.id as string,
     userId: r.user_id as string,
     memberId: str("member_id"),
+    aroId: str("aro_id"),
+    aroOfficerNumber:
+      typeof r.aro_officer_number === "number"
+        ? r.aro_officer_number
+        : r.aro_officer_number != null
+          ? Number(r.aro_officer_number)
+          : null,
     status: ((pu?.status as PortalUserStatus) ?? "pending"),
     reviewedAt: pu?.reviewed_at ?? null,
     reviewNote: pu?.review_note ?? null,

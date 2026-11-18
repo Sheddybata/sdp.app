@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Sheet,
   SheetClose,
   SheetContent,
@@ -79,6 +86,8 @@ function matchesSearch(r: AgentRegistrationRecord, q: string): boolean {
     r.sdpMembershipId ?? "",
     r.voterIdentificationNumber ?? "",
     assignmentText(r),
+    r.assignedStateName,
+    r.aroOfficerNumber != null ? `aro ${r.aroOfficerNumber}` : "",
   ]
     .join(" ")
     .toLowerCase()
@@ -111,6 +120,8 @@ export function AdminAgentRegistrationsClient({
 }) {
   const [registrations, setRegistrations] = useState(initialRegistrations);
   const [filter, setFilter] = useState<Filter>("pending");
+  const [stateFilter, setStateFilter] = useState<string>("all");
+  const [aroFilter, setAroFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [selected, setSelected] = useState<AgentRegistrationRecord | null>(null);
@@ -127,10 +138,28 @@ export function AdminAgentRegistrationsClient({
     return c;
   }, [registrations]);
 
+  const stateOptions = useMemo(() => {
+    const map = new Map<string, string>();
+    for (const r of registrations) {
+      if (r.assignedStateId) map.set(r.assignedStateId, r.assignedStateName || r.assignedStateId);
+    }
+    return Array.from(map.entries())
+      .map(([id, name]) => ({ id, name }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [registrations]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
-    return registrations.filter((r) => (filter === "all" || r.status === filter) && matchesSearch(r, q));
-  }, [registrations, filter, search]);
+    return registrations.filter((r) => {
+      if (filter !== "all" && r.status !== filter) return false;
+      if (stateFilter !== "all" && r.assignedStateId !== stateFilter) return false;
+      if (aroFilter !== "all") {
+        const n = Number(aroFilter);
+        if (r.aroOfficerNumber !== n) return false;
+      }
+      return matchesSearch(r, q);
+    });
+  }, [registrations, filter, search, stateFilter, aroFilter]);
 
   /** ID cards are only issued to approved agents; the search box narrows them further. */
   const cardAgents = useMemo(() => {
@@ -158,7 +187,7 @@ export function AdminAgentRegistrationsClient({
   const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const pageRows = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-  useEffect(() => setPage(1), [filter, search]);
+  useEffect(() => setPage(1), [filter, search, stateFilter, aroFilter]);
 
   const selectedId = selected?.id;
   useEffect(() => {
@@ -236,6 +265,12 @@ export function AdminAgentRegistrationsClient({
     ? ([
         ["Agent type", AGENT_LEVEL_LABELS[selected.agentLevel]],
         ["Assigned to", assignmentText(selected)],
+        [
+          "ARO",
+          selected.aroOfficerNumber != null
+            ? `Agent Registration Officer ${selected.aroOfficerNumber}`
+            : "—",
+        ],
         ["Phone", selected.phone],
         ["Gender", selected.gender ?? "—"],
         ...(selected.nin ? ([["NIN", selected.nin]] as [string, string][]) : []),
@@ -267,10 +302,13 @@ export function AdminAgentRegistrationsClient({
         <div>
           <h1 className="text-2xl font-bold text-neutral-900">Agent registrations</h1>
           <p className="mt-1 text-sm text-neutral-600">
-            Agents who registered themselves. Approve them to let them sign in to the agent portal.
+            Agents who registered themselves. Approve to confirm the post; reject to close the application.
           </p>
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
+          <Button asChild variant="outline" className="min-h-[44px]">
+            <Link href="/admin/agent-recruitment">ARO codes & monitoring</Link>
+          </Button>
           <Button asChild variant="outline" className="min-h-[44px]">
             <Link href="/admin/agent-coverage">
               <MapIcon className="h-4 w-4" />
@@ -307,17 +345,51 @@ export function AdminAgentRegistrationsClient({
       </div>
 
       <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-        <div className="max-w-md space-y-2">
-          <Label htmlFor="agent-search">Search</Label>
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-            <Input
-              id="agent-search"
-              placeholder="Name, phone, gender, location"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="min-h-[44px] pl-9"
-            />
+        <div className="grid gap-4 sm:grid-cols-3">
+          <div className="space-y-2 sm:col-span-1">
+            <Label htmlFor="agent-search">Search</Label>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+              <Input
+                id="agent-search"
+                placeholder="Name, phone, gender, location"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="min-h-[44px] pl-9"
+              />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label>State</Label>
+            <Select value={stateFilter} onValueChange={setStateFilter}>
+              <SelectTrigger className="min-h-[44px]">
+                <SelectValue placeholder="All states" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All states</SelectItem>
+                {stateOptions.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label>ARO</Label>
+            <Select value={aroFilter} onValueChange={setAroFilter}>
+              <SelectTrigger className="min-h-[44px]">
+                <SelectValue placeholder="All officers" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All officers</SelectItem>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <SelectItem key={n} value={String(n)}>
+                    ARO {n}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </div>
       </div>
@@ -328,6 +400,7 @@ export function AdminAgentRegistrationsClient({
             <thead className="border-b border-neutral-200 bg-neutral-50">
               <tr>
                 <th className="px-4 py-3 font-semibold text-neutral-700">Name</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">ARO</th>
                 <th className="px-4 py-3 font-semibold text-neutral-700">Agent type</th>
                 <th className="px-4 py-3 font-semibold text-neutral-700">Assigned to</th>
                 <th className="px-4 py-3 font-semibold text-neutral-700">Phone</th>
@@ -338,7 +411,7 @@ export function AdminAgentRegistrationsClient({
             <tbody className="divide-y divide-neutral-100">
               {pageRows.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center">
+                  <td colSpan={7} className="px-4 py-12 text-center">
                     <p className="font-medium text-neutral-900">No agent registrations here</p>
                     <p className="mt-1 text-sm text-neutral-600">
                       Registrations from <span className="font-mono">/agent/apply</span> appear here
@@ -367,6 +440,9 @@ export function AdminAgentRegistrationsClient({
                       {r.gender ? (
                         <div className="mt-0.5 text-xs font-normal text-neutral-500">{r.gender}</div>
                       ) : null}
+                    </td>
+                    <td className="px-4 py-3 text-neutral-600">
+                      {r.aroOfficerNumber != null ? `ARO ${r.aroOfficerNumber}` : "—"}
                     </td>
                     <td className="px-4 py-3 text-neutral-600">{AGENT_LEVEL_LABELS[r.agentLevel]}</td>
                     <td className="px-4 py-3 text-neutral-600">{assignmentText(r)}</td>
@@ -549,8 +625,8 @@ export function AdminAgentRegistrationsClient({
                     </Button>
                   </div>
                   <p className="text-xs text-neutral-500">
-                    Approved agents can sign in at <span className="font-mono">/agent/login</span> with the
-                    phone number and password they registered with. Rejecting blocks sign-in.
+                    Approval confirms the agent for this post and ID-card workflows. Agents do not sign in
+                    to a portal. Rejecting closes the application.
                   </p>
                 </div>
               </div>

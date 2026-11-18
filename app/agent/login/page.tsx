@@ -5,7 +5,7 @@ export default function AgentLoginPage() {
     <PortalLoginPage
       variant="agent"
       title="Agent portal"
-      subtitle="Sign in with your phone number and password to access the agent portal."
+      subtitle="Field officers with an invitation code can sign in here. Most agents only need to register — no login required."
       dashboardPath="/agent"
       signupPath="/agent/signup"
       registerPath="/agent/apply"

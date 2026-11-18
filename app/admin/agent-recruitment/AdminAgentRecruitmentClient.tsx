@@ -1,0 +1,310 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { Copy, KeyRound, Loader2, RefreshCw, Ban } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  adminGenerateMissingAroCodes,
+  adminRevokeAroCode,
+  adminRotateAroCode,
+} from "@/app/actions/agentRecruitment";
+import type { AgentRecruitmentOfficer } from "@/lib/db/agent-recruitment";
+
+type Stats = Awaited<ReturnType<typeof import("@/lib/db/agent-recruitment").getAroRegistrationStats>>;
+
+export function AdminAgentRecruitmentClient({
+  initialOfficers,
+  initialStats,
+}: {
+  initialOfficers: AgentRecruitmentOfficer[];
+  initialStats: Stats;
+}) {
+  const [officers, setOfficers] = useState(initialOfficers);
+  const [stats] = useState(initialStats);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [revealed, setRevealed] = useState<Record<number, string>>({});
+  const [batchCodes, setBatchCodes] = useState<{ officerNumber: number; plainCode: string }[] | null>(
+    null
+  );
+
+  const missingCodes = useMemo(
+    () => officers.filter((o) => !o.hasCode || o.status !== "active").length,
+    [officers]
+  );
+
+  const refreshOfficers = (patch: Partial<AgentRecruitmentOfficer> & { officerNumber: number }) => {
+    setOfficers((prev) =>
+      prev.map((o) => (o.officerNumber === patch.officerNumber ? { ...o, ...patch } : o))
+    );
+  };
+
+  const generateMissing = async () => {
+    setBusy("batch");
+    setError(null);
+    setBatchCodes(null);
+    const result = await adminGenerateMissingAroCodes();
+    setBusy(null);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setBatchCodes(result.codes);
+    const map: Record<number, string> = {};
+    for (const c of result.codes) {
+      map[c.officerNumber] = c.plainCode;
+      refreshOfficers({
+        officerNumber: c.officerNumber,
+        hasCode: true,
+        status: "active",
+        codeGeneratedAt: new Date().toISOString(),
+      });
+    }
+    setRevealed((r) => ({ ...r, ...map }));
+  };
+
+  const rotate = async (officerNumber: number) => {
+    setBusy(`rotate-${officerNumber}`);
+    setError(null);
+    const result = await adminRotateAroCode(officerNumber);
+    setBusy(null);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setRevealed((r) => ({ ...r, [officerNumber]: result.plainCode }));
+    refreshOfficers({
+      officerNumber,
+      hasCode: true,
+      status: "active",
+      codeGeneratedAt: new Date().toISOString(),
+    });
+  };
+
+  const revoke = async (officerNumber: number) => {
+    setBusy(`revoke-${officerNumber}`);
+    setError(null);
+    const result = await adminRevokeAroCode(officerNumber);
+    setBusy(null);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setRevealed((r) => {
+      const next = { ...r };
+      delete next[officerNumber];
+      return next;
+    });
+    refreshOfficers({ officerNumber, status: "revoked" });
+  };
+
+  return (
+    <div className="space-y-8">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-neutral-900">Agent recruitment (ARO)</h1>
+          <p className="mt-1 max-w-2xl text-sm text-neutral-600">
+            Five Agent Registration Officers. Each has a short multi-use code that unlocks agent
+            registration. Codes are not stored in plain text — copy them when generated or rotated.
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" className="min-h-[44px]">
+            <Link href="/admin/agent-registrations">Agent registrations</Link>
+          </Button>
+          {missingCodes > 0 ? (
+            <Button
+              type="button"
+              className="min-h-[44px] bg-sdp-primary text-white hover:bg-sdp-primary/90"
+              disabled={!!busy}
+              onClick={generateMissing}
+            >
+              {busy === "batch" ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
+              Generate missing codes ({missingCodes})
+            </Button>
+          ) : null}
+        </div>
+      </div>
+
+      {error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
+      ) : null}
+
+      {batchCodes && batchCodes.length > 0 ? (
+        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
+          <p className="font-semibold text-emerald-950">New codes (copy now — shown once):</p>
+          <ul className="mt-3 space-y-2">
+            {batchCodes.map((c) => (
+              <li key={c.officerNumber} className="flex items-center gap-2">
+                <span className="w-16 font-medium text-emerald-900">ARO {c.officerNumber}</span>
+                <code className="flex-1 rounded border border-emerald-200 bg-white px-3 py-2 font-mono tracking-wide">
+                  {c.plainCode}
+                </code>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  aria-label={`Copy ARO ${c.officerNumber} code`}
+                  onClick={() => navigator.clipboard.writeText(c.plainCode)}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+        <table className="w-full min-w-[720px] text-left text-sm">
+          <thead className="border-b border-neutral-200 bg-neutral-50">
+            <tr>
+              <th className="px-4 py-3 font-semibold text-neutral-700">Officer</th>
+              <th className="px-4 py-3 font-semibold text-neutral-700">Status</th>
+              <th className="px-4 py-3 font-semibold text-neutral-700">Registrations</th>
+              <th className="px-4 py-3 font-semibold text-neutral-700">Current code</th>
+              <th className="px-4 py-3 font-semibold text-neutral-700">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-neutral-100">
+            {officers.map((o) => (
+              <tr key={o.id}>
+                <td className="px-4 py-3">
+                  <div className="font-medium text-neutral-900">ARO {o.officerNumber}</div>
+                  <div className="text-xs text-neutral-500">{o.label}</div>
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={
+                      o.status === "active"
+                        ? "rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800"
+                        : "rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600"
+                    }
+                  >
+                    {o.status === "active" ? "Active" : "Revoked"}
+                  </span>
+                </td>
+                <td className="px-4 py-3 font-mono text-neutral-800">{o.registrationCount}</td>
+                <td className="px-4 py-3">
+                  {revealed[o.officerNumber] ? (
+                    <div className="flex items-center gap-2">
+                      <code className="rounded bg-neutral-100 px-2 py-1 font-mono tracking-wide">
+                        {revealed[o.officerNumber]}
+                      </code>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={() => navigator.clipboard.writeText(revealed[o.officerNumber]!)}
+                      >
+                        <Copy className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-neutral-500">
+                      {o.hasCode ? "Hidden (rotate to reveal a new code)" : "Not generated yet"}
+                    </span>
+                  )}
+                </td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="min-h-[40px]"
+                      disabled={!!busy}
+                      onClick={() => rotate(o.officerNumber)}
+                    >
+                      {busy === `rotate-${o.officerNumber}` ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RefreshCw className="h-4 w-4" />
+                      )}
+                      {o.hasCode ? "Rotate" : "Generate"}
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="min-h-[40px] border-red-200 text-red-700 hover:bg-red-50"
+                      disabled={!!busy || o.status === "revoked"}
+                      onClick={() => revoke(o.officerNumber)}
+                    >
+                      {busy === `revoke-${o.officerNumber}` ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Ban className="h-4 w-4" />
+                      )}
+                      Revoke
+                    </Button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-neutral-900">By Agent Registration Officer</h2>
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {stats.byAro.map((a) => (
+            <div key={a.officerNumber} className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                ARO {a.officerNumber}
+              </p>
+              <p className="mt-1 text-2xl font-bold text-neutral-900">{a.total}</p>
+              <p className="mt-1 text-xs text-neutral-600">
+                {a.pending} pending · {a.approved} approved · {a.rejected} rejected
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <h2 className="text-lg font-semibold text-neutral-900">By state</h2>
+        <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+          <table className="w-full min-w-[640px] text-left text-sm">
+            <thead className="border-b border-neutral-200 bg-neutral-50">
+              <tr>
+                <th className="px-4 py-3 font-semibold text-neutral-700">State</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Total</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Pending</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Approved</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Rejected</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">By ARO</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {stats.byState.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-10 text-center text-neutral-600">
+                    No agent registrations yet.
+                  </td>
+                </tr>
+              ) : (
+                stats.byState.map((s) => (
+                  <tr key={s.stateId}>
+                    <td className="px-4 py-3 font-medium text-neutral-900">{s.stateName}</td>
+                    <td className="px-4 py-3 font-mono">{s.total}</td>
+                    <td className="px-4 py-3 font-mono text-amber-700">{s.pending}</td>
+                    <td className="px-4 py-3 font-mono text-emerald-700">{s.approved}</td>
+                    <td className="px-4 py-3 font-mono text-red-700">{s.rejected}</td>
+                    <td className="px-4 py-3 text-xs text-neutral-600">
+                      {[1, 2, 3, 4, 5]
+                        .map((n) => (s.byAro[n] ? `ARO${n}:${s.byAro[n]}` : null))
+                        .filter(Boolean)
+                        .join(" · ") || "—"}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  );
+}

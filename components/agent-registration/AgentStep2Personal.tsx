@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Lock } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -53,10 +52,10 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
         <div>
           <h3 className="text-sm font-semibold text-neutral-900">Personal details</h3>
           <p className="mt-0.5 text-xs text-neutral-500">
-            Enter your name, gender and phone. You will sign in with this phone number.
+            First name, surname, gender and phone number.
           </p>
         </div>
-        <div className="grid gap-4 sm:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2">
           <Field id="agent-firstName" label="First name" error={errors.firstName}>
             <Input
               id="agent-firstName"
@@ -65,15 +64,6 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
               className="min-h-[44px]"
               autoComplete="given-name"
               aria-invalid={!!errors.firstName}
-            />
-          </Field>
-          <Field id="agent-middleName" label="Other names" error={errors.middleName} hint="Optional">
-            <Input
-              id="agent-middleName"
-              value={draft.middleName}
-              onChange={(e) => update({ middleName: e.target.value })}
-              className="min-h-[44px]"
-              autoComplete="additional-name"
             />
           </Field>
           <Field id="agent-surname" label="Surname" error={errors.surname}>
@@ -107,12 +97,7 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
               </SelectContent>
             </Select>
           </Field>
-          <Field
-            id="agent-phone"
-            label="Phone number"
-            error={errors.phone}
-            hint="Nigerian mobile — used to sign in after approval."
-          >
+          <Field id="agent-phone" label="Phone number" error={errors.phone} hint="Nigerian mobile">
             <Input
               id="agent-phone"
               value={draft.phone}
@@ -158,60 +143,6 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
             {errors.acknowledged}
           </p>
         ) : null}
-      </div>
-
-      <div className="space-y-4 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
-        <div>
-          <h2 className="text-sm font-semibold text-neutral-900">Create your sign-in password</h2>
-          <p className="mt-0.5 text-xs text-neutral-500">
-            You will sign in with{" "}
-            <span className="font-medium">{draft.phone || "your phone number"}</span> once the secretariat
-            approves your registration.
-          </p>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="agent-password">Password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-              <Input
-                id="agent-password"
-                type="password"
-                value={draft.password}
-                onChange={(e) => update({ password: e.target.value })}
-                className="min-h-[44px] pl-10"
-                autoComplete="new-password"
-                aria-invalid={!!errors.password}
-              />
-            </div>
-            <p className="text-xs text-neutral-500">At least 8 characters.</p>
-            {errors.password ? (
-              <p className="text-sm text-red-600" role="alert">
-                {errors.password}
-              </p>
-            ) : null}
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="agent-confirm-password">Confirm password</Label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
-              <Input
-                id="agent-confirm-password"
-                type="password"
-                value={draft.confirmPassword}
-                onChange={(e) => update({ confirmPassword: e.target.value })}
-                className="min-h-[44px] pl-10"
-                autoComplete="new-password"
-                aria-invalid={!!errors.confirmPassword}
-              />
-            </div>
-            {errors.confirmPassword ? (
-              <p className="text-sm text-red-600" role="alert">
-                {errors.confirmPassword}
-              </p>
-            ) : null}
-          </div>
-        </div>
       </div>
     </div>
   );
