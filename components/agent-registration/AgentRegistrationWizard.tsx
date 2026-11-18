@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { ArrowLeft, CheckCircle2, KeyRound, Loader2 } from "lucide-react";
+import { CheckCircle2, KeyRound, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -161,14 +160,7 @@ export function AgentRegistrationWizard() {
     <main className="min-h-screen bg-neutral-50">
       <header className="border-b border-neutral-200 bg-white px-4 py-4 shadow-sm">
         <div className="mx-auto max-w-xl">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm font-medium text-neutral-600 hover:text-neutral-900"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to homepage
-          </Link>
-          <h1 className="mt-2 text-xl font-semibold text-neutral-900">Register as an agent</h1>
+          <h1 className="text-xl font-semibold text-neutral-900">Register as an agent</h1>
           <p className="mt-1 text-sm text-neutral-600">
             You need a recruitment code from an Agent Registration Officer before you can apply.
           </p>
