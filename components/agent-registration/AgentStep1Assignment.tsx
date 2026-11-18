@@ -99,8 +99,9 @@ function ConstituencyAssignmentPicker({
         <div className="space-y-1.5">
           <Label>State</Label>
           <Select
-            value={value.stateId || undefined}
+            value={value.stateId || "_none"}
             onValueChange={(stateId) => {
+              if (stateId === "_none") return;
               const st = states.find((s) => s.id === stateId);
               onChange({
                 ...EMPTY_LOCATION,
@@ -114,6 +115,9 @@ function ConstituencyAssignmentPicker({
               <SelectValue placeholder={loading ? "Loading…" : "Select state"} />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="_none" disabled className="hidden">
+                Select state
+              </SelectItem>
               {states.map((s) => (
                 <SelectItem key={s.id} value={s.id}>
                   {s.name}
@@ -125,8 +129,9 @@ function ConstituencyAssignmentPicker({
         <div className="space-y-1.5">
           <Label>{AGENT_LEVEL_NAME_LABELS[level]}</Label>
           <Select
-            value={value.code || undefined}
+            value={value.code || "_none"}
             onValueChange={(code) => {
+              if (code === "_none") return;
               const seat = seats.find((s) => s.code === code);
               onChange({
                 ...value,
@@ -153,6 +158,9 @@ function ConstituencyAssignmentPicker({
               />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="_none" disabled className="hidden">
+                Select constituency
+              </SelectItem>
               {seats.map((s) => (
                 <SelectItem key={s.code} value={s.code}>
                   {s.name} ({s.code})
@@ -160,6 +168,9 @@ function ConstituencyAssignmentPicker({
               ))}
             </SelectContent>
           </Select>
+          {!pending && value.stateId && seats.length === 0 ? (
+            <p className="text-xs text-amber-700">No constituencies found for this state.</p>
+          ) : null}
         </div>
       </div>
       {value.code ? (
