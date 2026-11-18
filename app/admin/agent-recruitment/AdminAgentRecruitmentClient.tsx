@@ -186,20 +186,180 @@ export function AdminAgentRecruitmentClient({
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Agent recruitment</h1>
+          <h1 className="text-2xl font-bold text-neutral-900">Agent recruitment codes</h1>
           <p className="mt-1 max-w-2xl text-sm text-neutral-600">
-            ARO 1–5 codes (nationwide) and independent state codes (lock the applicant to that
-            state). Codes are not stored in plain text — copy them when generated or rotated.
+            Generate independent codes for all 37 states (locks each state on apply), plus ARO 1–5
+            nationwide codes. Copy codes when generated — they are shown once.
           </p>
         </div>
-        <Button asChild variant="outline" className="min-h-[44px]">
-          <Link href="/admin/agent-registrations">Agent registrations</Link>
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button asChild variant="outline" className="min-h-[44px]">
+            <Link href="/admin/agent-registrations">Agent registrations</Link>
+          </Button>
+          <Button
+            type="button"
+            className="min-h-[44px] bg-sdp-primary text-white hover:bg-sdp-primary/90"
+            disabled={!!busy || missingStateCodes === 0}
+            onClick={generateMissingStates}
+          >
+            {busy === "state-batch" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <KeyRound className="h-4 w-4" />
+            )}
+            {missingStateCodes > 0
+              ? `Generate all state codes (${missingStateCodes})`
+              : "All state codes generated"}
+          </Button>
+        </div>
       </div>
 
       {error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
       ) : null}
+
+      <section id="state-codes" className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-neutral-900">State codes (37)</h2>
+            <p className="text-sm text-neutral-600">
+              Independent of ARO. Unlocking a state code locks that state and blocks National Agent.
+              Use <strong>Generate</strong> on a row, or generate all missing states above.
+            </p>
+          </div>
+          {missingStateCodes > 0 ? (
+            <Button
+              type="button"
+              className="min-h-[44px] bg-sdp-primary text-white hover:bg-sdp-primary/90"
+              disabled={!!busy}
+              onClick={generateMissingStates}
+            >
+              {busy === "state-batch" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <KeyRound className="h-4 w-4" />
+              )}
+              Generate missing state codes ({missingStateCodes})
+            </Button>
+          ) : null}
+        </div>
+
+        {stateBatchCodes && stateBatchCodes.length > 0 ? (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
+            <p className="font-semibold text-emerald-950">New state codes (copy now — shown once):</p>
+            <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto">
+              {stateBatchCodes.map((c) => (
+                <li key={c.stateId} className="flex items-center gap-2">
+                  <span className="w-40 shrink-0 font-medium text-emerald-900">
+                    {titleCaseStateName(c.stateName)}
+                  </span>
+                  <code className="flex-1 rounded border border-emerald-200 bg-white px-3 py-2 font-mono tracking-wide">
+                    {c.plainCode}
+                  </code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label={`Copy ${c.stateName} code`}
+                    onClick={() => navigator.clipboard.writeText(c.plainCode)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+          <table className="w-full min-w-[720px] text-left text-sm">
+            <thead className="border-b border-neutral-200 bg-neutral-50">
+              <tr>
+                <th className="px-4 py-3 font-semibold text-neutral-700">State</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Status</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Registrations</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Current code</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {stateCodes.map((c) => (
+                <tr key={c.stateId}>
+                  <td className="px-4 py-3 font-medium text-neutral-900">
+                    {titleCaseStateName(c.stateName)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={
+                        c.status === "active"
+                          ? "rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800"
+                          : "rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600"
+                      }
+                    >
+                      {c.status === "active" ? "Active" : "Revoked"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-neutral-800">{c.registrationCount}</td>
+                  <td className="px-4 py-3">
+                    {revealedStates[c.stateId] ? (
+                      <div className="flex items-center gap-2">
+                        <code className="rounded bg-neutral-100 px-2 py-1 font-mono tracking-wide">
+                          {revealedStates[c.stateId]}
+                        </code>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => navigator.clipboard.writeText(revealedStates[c.stateId]!)}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-neutral-500">
+                        {c.hasCode ? "Hidden (rotate to reveal a new code)" : "Not generated yet"}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-h-[40px]"
+                        disabled={!!busy}
+                        onClick={() => rotateState(c.stateId)}
+                      >
+                        {busy === `state-rotate-${c.stateId}` ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4" />
+                        )}
+                        {c.hasCode ? "Rotate" : "Generate"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-h-[40px] border-red-200 text-red-700 hover:bg-red-50"
+                        disabled={!!busy || c.status === "revoked"}
+                        onClick={() => revokeState(c.stateId)}
+                      >
+                        {busy === `state-revoke-${c.stateId}` ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Ban className="h-4 w-4" />
+                        )}
+                        Revoke
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
@@ -323,148 +483,6 @@ export function AdminAgentRecruitmentClient({
                         onClick={() => revoke(o.officerNumber)}
                       >
                         {busy === `revoke-${o.officerNumber}` ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Ban className="h-4 w-4" />
-                        )}
-                        Revoke
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
-
-      <section className="space-y-4">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-neutral-900">State codes</h2>
-            <p className="text-sm text-neutral-600">
-              Independent of ARO. Unlocking a state code locks that state and blocks National Agent.
-            </p>
-          </div>
-          {missingStateCodes > 0 ? (
-            <Button
-              type="button"
-              className="min-h-[44px] bg-sdp-primary text-white hover:bg-sdp-primary/90"
-              disabled={!!busy}
-              onClick={generateMissingStates}
-            >
-              {busy === "state-batch" ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <KeyRound className="h-4 w-4" />
-              )}
-              Generate missing state codes ({missingStateCodes})
-            </Button>
-          ) : null}
-        </div>
-
-        {stateBatchCodes && stateBatchCodes.length > 0 ? (
-          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
-            <p className="font-semibold text-emerald-950">New state codes (copy now — shown once):</p>
-            <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto">
-              {stateBatchCodes.map((c) => (
-                <li key={c.stateId} className="flex items-center gap-2">
-                  <span className="w-40 shrink-0 font-medium text-emerald-900">
-                    {titleCaseStateName(c.stateName)}
-                  </span>
-                  <code className="flex-1 rounded border border-emerald-200 bg-white px-3 py-2 font-mono tracking-wide">
-                    {c.plainCode}
-                  </code>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="icon"
-                    aria-label={`Copy ${c.stateName} code`}
-                    onClick={() => navigator.clipboard.writeText(c.plainCode)}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-
-        <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
-          <table className="w-full min-w-[720px] text-left text-sm">
-            <thead className="border-b border-neutral-200 bg-neutral-50">
-              <tr>
-                <th className="px-4 py-3 font-semibold text-neutral-700">State</th>
-                <th className="px-4 py-3 font-semibold text-neutral-700">Status</th>
-                <th className="px-4 py-3 font-semibold text-neutral-700">Registrations</th>
-                <th className="px-4 py-3 font-semibold text-neutral-700">Current code</th>
-                <th className="px-4 py-3 font-semibold text-neutral-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-neutral-100">
-              {stateCodes.map((c) => (
-                <tr key={c.stateId}>
-                  <td className="px-4 py-3 font-medium text-neutral-900">
-                    {titleCaseStateName(c.stateName)}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={
-                        c.status === "active"
-                          ? "rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800"
-                          : "rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600"
-                      }
-                    >
-                      {c.status === "active" ? "Active" : "Revoked"}
-                    </span>
-                  </td>
-                  <td className="px-4 py-3 font-mono text-neutral-800">{c.registrationCount}</td>
-                  <td className="px-4 py-3">
-                    {revealedStates[c.stateId] ? (
-                      <div className="flex items-center gap-2">
-                        <code className="rounded bg-neutral-100 px-2 py-1 font-mono tracking-wide">
-                          {revealedStates[c.stateId]}
-                        </code>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => navigator.clipboard.writeText(revealedStates[c.stateId]!)}
-                        >
-                          <Copy className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <span className="text-xs text-neutral-500">
-                        {c.hasCode ? "Hidden (rotate to reveal a new code)" : "Not generated yet"}
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="min-h-[40px]"
-                        disabled={!!busy}
-                        onClick={() => rotateState(c.stateId)}
-                      >
-                        {busy === `state-rotate-${c.stateId}` ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <RefreshCw className="h-4 w-4" />
-                        )}
-                        {c.hasCode ? "Rotate" : "Generate"}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="min-h-[40px] border-red-200 text-red-700 hover:bg-red-50"
-                        disabled={!!busy || c.status === "revoked"}
-                        onClick={() => revokeState(c.stateId)}
-                      >
-                        {busy === `state-revoke-${c.stateId}` ? (
                           <Loader2 className="h-4 w-4 animate-spin" />
                         ) : (
                           <Ban className="h-4 w-4" />

@@ -66,7 +66,7 @@ const SECTIONS: NavSection[] = [
       },
       {
         href: "/admin/agent-recruitment",
-        label: "ARO codes",
+        label: "Recruitment codes",
         icon: <KeyRound className="h-4 w-4 shrink-0" />,
       },
       {

@@ -307,7 +307,7 @@ export function AdminAgentRegistrationsClient({
         </div>
         <div className="flex shrink-0 flex-wrap gap-2">
           <Button asChild variant="outline" className="min-h-[44px]">
-            <Link href="/admin/agent-recruitment">ARO codes & monitoring</Link>
+            <Link href="/admin/agent-recruitment">Recruitment codes</Link>
           </Button>
           <Button asChild variant="outline" className="min-h-[44px]">
             <Link href="/admin/agent-coverage">

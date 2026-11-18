@@ -44,9 +44,23 @@ function toCode(r: StateCodeRow, registrationCount = 0): AgentStateRecruitmentCo
   };
 }
 
+function emptyStateRows(): AgentStateRecruitmentCode[] {
+  return INEC_STATES.map((s) => ({
+    id: "",
+    stateId: s.id,
+    stateName: s.name,
+    status: "revoked" as const,
+    hasCode: false,
+    codeGeneratedAt: null,
+    updatedAt: "",
+    createdAt: "",
+    registrationCount: 0,
+  }));
+}
+
 export async function listStateRecruitmentCodes(): Promise<AgentStateRecruitmentCode[]> {
   const supabase = createAdminClient();
-  if (!supabase) return [];
+  if (!supabase) return emptyStateRows();
 
   const { data, error } = await supabase
     .from("agent_state_recruitment_codes")
@@ -54,7 +68,8 @@ export async function listStateRecruitmentCodes(): Promise<AgentStateRecruitment
     .order("state_name", { ascending: true });
   if (error || !data) {
     console.error("[state codes] list failed:", error);
-    return [];
+    // Still show all 37 states in admin so Generate is available (after migration 024).
+    return emptyStateRows();
   }
 
   const rows = data as StateCodeRow[];
@@ -74,7 +89,7 @@ export async function listStateRecruitmentCodes(): Promise<AgentStateRecruitment
 
   // Ensure all INEC states appear even if seed missed one.
   const byState = new Map(rows.map((r) => [r.state_id, r]));
-  const ordered = INEC_STATES.map((s) => {
+  return INEC_STATES.map((s) => {
     const row = byState.get(s.id);
     if (row) return toCode(row, counts.get(row.id) ?? 0);
     return {
@@ -89,7 +104,6 @@ export async function listStateRecruitmentCodes(): Promise<AgentStateRecruitment
       registrationCount: 0,
     };
   });
-  return ordered;
 }
 
 export async function findActiveStateCodeByPlain(
