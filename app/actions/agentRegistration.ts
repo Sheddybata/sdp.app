@@ -13,9 +13,11 @@ import {
 } from "@/lib/agent-registration-schema";
 import { agentPostTaken, createAgentRegistration } from "@/lib/db/agent-registrations";
 import { findActiveAroByCode } from "@/lib/db/agent-recruitment";
+import { findActiveStateCodeByPlain } from "@/lib/db/agent-state-recruitment";
 import { lookupLocationCode } from "@/app/actions/locationCodes";
 import { verifyConstituencyAssignment } from "@/app/actions/constituencies";
 import { nationalAgentPost } from "@/lib/constituency-data";
+import { titleCaseStateName } from "@/lib/inec-states";
 import { normalizePhone } from "@/lib/otp/termii";
 
 export type AgentRegistrationResult =
@@ -60,7 +62,8 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
   const v = parsed.data;
 
   const aro = await findActiveAroByCode(v.recruitmentCode);
-  if (!aro) {
+  const stateCode = aro ? null : await findActiveStateCodeByPlain(v.recruitmentCode);
+  if (!aro && !stateCode) {
     return { ok: false, error: CODE_INVALID, fieldErrors: { recruitmentCode: CODE_INVALID } };
   }
 
@@ -72,6 +75,21 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
   let assignment = v.assignment;
   let constituencyCode: string | null = null;
   let constituencyName: string | null = null;
+
+  if (stateCode && level === "national") {
+    return {
+      ok: false,
+      error: "State recruitment codes cannot register a National Agent.",
+      fieldErrors: { agentLevel: "State recruitment codes cannot register a National Agent." },
+    };
+  }
+
+  if (stateCode) {
+    if (assignment.stateId !== stateCode.stateId) {
+      const msg = `This code is locked to ${titleCaseStateName(stateCode.stateName)}. Choose an assignment in that state.`;
+      return { ok: false, error: msg, fieldErrors: { assignment: msg } };
+    }
+  }
 
   if (level === "national") {
     const nat = nationalAgentPost();
@@ -141,8 +159,9 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
     passwordHash,
     registration: {
       member_id: null,
-      aro_id: aro.id,
-      aro_officer_number: aro.officerNumber,
+      aro_id: aro?.id ?? null,
+      aro_officer_number: aro?.officerNumber ?? null,
+      state_recruitment_code_id: stateCode?.id ?? null,
       agent_level: level,
       assigned_state_id: assignment.stateId,
       assigned_state_name: assignment.stateName,

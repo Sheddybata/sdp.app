@@ -35,12 +35,16 @@ export function LocationPicker({
   value,
   onChange,
   error,
+  lockedStateId,
+  lockedStateName,
 }: {
   idPrefix: string;
   level: AgentLevel;
   value: LocationPick;
   onChange: (next: LocationPick) => void;
   error?: string;
+  lockedStateId?: string;
+  lockedStateName?: string;
 }) {
   const depth = DEPTH[level] ?? 1;
   const { states, loading, stateData, stateDataLoading } = useInecGeo(value.stateId || undefined);
@@ -49,6 +53,7 @@ export function LocationPicker({
   const pollingUnits = wards.find((w) => w.id === value.wardId)?.pollingUnits ?? [];
   const complete = isLocationComplete(value, level);
   const [lookingUp, setLookingUp] = useState(false);
+  const stateLocked = !!lockedStateId;
 
   useEffect(() => {
     if (!complete) {
@@ -86,21 +91,30 @@ export function LocationPicker({
           <Label htmlFor={`${idPrefix}-state`}>State</Label>
           <Select
             value={value.stateId || undefined}
-            onValueChange={(id) =>
+            onValueChange={(id) => {
+              if (stateLocked) return;
               onChange({
                 ...EMPTY_LOCATION,
                 stateId: id,
                 stateName: states.find((s) => s.id === id)?.name ?? id,
-              })
-            }
-            disabled={loading}
+              });
+            }}
+            disabled={loading || stateLocked}
           >
             <SelectTrigger
               id={`${idPrefix}-state`}
               className={cn("min-h-[44px]", error && !value.stateId && "border-red-500")}
               aria-invalid={!!error && !value.stateId}
             >
-              <SelectValue placeholder={loading ? "Loading…" : "Select state"} />
+              <SelectValue
+                placeholder={
+                  stateLocked
+                    ? lockedStateName || "Locked state"
+                    : loading
+                      ? "Loading…"
+                      : "Select state"
+                }
+              />
             </SelectTrigger>
             <SelectContent className="max-h-[min(60vh,20rem)]">
               {states.map((s) => (

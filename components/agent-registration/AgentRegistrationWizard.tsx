@@ -7,12 +7,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   EMPTY_AGENT_DRAFT,
+  EMPTY_LOCATION,
   agentRegistrationSchema,
   zodFieldErrors,
   type AgentRegistrationDraft,
 } from "@/lib/agent-registration-schema";
 import { submitAgentRegistration } from "@/app/actions/agentRegistration";
 import { verifyAgentRecruitmentCode } from "@/app/actions/agentRecruitment";
+import { titleCaseStateName } from "@/lib/inec-states";
 import { AgentStep1Assignment } from "./AgentStep1Assignment";
 import { AgentStep2Personal } from "./AgentStep2Personal";
 import { AgentReviewDialog } from "./AgentReviewDialog";
@@ -92,12 +94,39 @@ export function AgentRegistrationWizard() {
     setIsUnlocking(false);
     if (!result.ok) {
       setErrors((e) => ({ ...e, recruitmentCode: result.error }));
-      update({ codeUnlocked: false, unlockedAroLabel: "" });
+      update({
+        codeUnlocked: false,
+        unlockKind: "",
+        unlockedAroLabel: "",
+        lockedStateId: "",
+        lockedStateName: "",
+      });
+      return;
+    }
+    if (result.kind === "state") {
+      const stateName = titleCaseStateName(result.stateName);
+      update({
+        codeUnlocked: true,
+        unlockKind: "state",
+        unlockedAroLabel: result.label,
+        lockedStateId: result.stateId,
+        lockedStateName: stateName,
+        recruitmentCode: draft.recruitmentCode.trim(),
+        agentLevel: draft.agentLevel === "national" ? null : draft.agentLevel,
+        assignment: {
+          ...EMPTY_LOCATION,
+          stateId: result.stateId,
+          stateName,
+        },
+      });
       return;
     }
     update({
       codeUnlocked: true,
+      unlockKind: "aro",
       unlockedAroLabel: result.label,
+      lockedStateId: "",
+      lockedStateName: "",
       recruitmentCode: draft.recruitmentCode.trim(),
     });
   };
@@ -105,6 +134,26 @@ export function AgentRegistrationWizard() {
   const handleReview = () => {
     if (!draft.codeUnlocked) {
       const next = { recruitmentCode: "Enter a valid recruitment code to continue." };
+      setErrors(next);
+      scrollToFirstError(next);
+      return;
+    }
+    if (draft.lockedStateId && draft.agentLevel === "national") {
+      const next = {
+        agentLevel: "State recruitment codes cannot register a National Agent.",
+      };
+      setErrors(next);
+      scrollToFirstError(next);
+      return;
+    }
+    if (
+      draft.lockedStateId &&
+      draft.assignment.stateId &&
+      draft.assignment.stateId !== draft.lockedStateId
+    ) {
+      const next = {
+        assignment: `This code is locked to ${draft.lockedStateName}. Choose an assignment in that state.`,
+      };
       setErrors(next);
       scrollToFirstError(next);
       return;
@@ -132,12 +181,22 @@ export function AgentRegistrationWizard() {
     if (result.ok) {
       const name = draft.firstName.trim();
       setReviewOpen(false);
-      // Keep ARO code unlocked so field officers can register the next person without re-entering it.
+      // Keep code unlocked so field officers can register the next person without re-entering it.
       setDraft({
         ...EMPTY_AGENT_DRAFT,
         recruitmentCode: draft.recruitmentCode,
         codeUnlocked: true,
+        unlockKind: draft.unlockKind,
         unlockedAroLabel: draft.unlockedAroLabel,
+        lockedStateId: draft.lockedStateId,
+        lockedStateName: draft.lockedStateName,
+        assignment: draft.lockedStateId
+          ? {
+              ...EMPTY_LOCATION,
+              stateId: draft.lockedStateId,
+              stateName: draft.lockedStateName,
+            }
+          : EMPTY_LOCATION,
       });
       setErrors({});
       setSubmitError(null);
@@ -150,7 +209,13 @@ export function AgentRegistrationWizard() {
       setErrors(result.fieldErrors);
       setReviewOpen(false);
       if (result.fieldErrors.recruitmentCode) {
-        update({ codeUnlocked: false, unlockedAroLabel: "" });
+        update({
+          codeUnlocked: false,
+          unlockKind: "",
+          unlockedAroLabel: "",
+          lockedStateId: "",
+          lockedStateName: "",
+        });
       }
       scrollToFirstError(result.fieldErrors);
     }
@@ -162,7 +227,7 @@ export function AgentRegistrationWizard() {
         <div className="mx-auto max-w-xl">
           <h1 className="text-xl font-semibold text-neutral-900">Register as an agent</h1>
           <p className="mt-1 text-sm text-neutral-600">
-            You need a recruitment code from an Agent Registration Officer before you can apply.
+            Enter a recruitment code from an Agent Registration Officer or your state team to apply.
           </p>
         </div>
       </header>
@@ -219,7 +284,10 @@ export function AgentRegistrationWizard() {
                     update({
                       recruitmentCode: e.target.value,
                       codeUnlocked: false,
+                      unlockKind: "",
                       unlockedAroLabel: "",
+                      lockedStateId: "",
+                      lockedStateName: "",
                     })
                   }
                   onKeyDown={(e) => {
@@ -251,7 +319,11 @@ export function AgentRegistrationWizard() {
             ) : null}
             {draft.codeUnlocked ? (
               <p className="text-sm text-emerald-700">
-                Code accepted — {draft.unlockedAroLabel}. Complete the form below.
+                Code accepted — {draft.unlockedAroLabel}
+                {draft.lockedStateId
+                  ? `. Assignments are locked to ${draft.lockedStateName}.`
+                  : "."}{" "}
+                Complete the form below.
               </p>
             ) : null}
           </div>

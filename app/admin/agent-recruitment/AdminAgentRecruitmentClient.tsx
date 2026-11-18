@@ -6,37 +6,61 @@ import { Copy, KeyRound, Loader2, RefreshCw, Ban } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   adminGenerateMissingAroCodes,
+  adminGenerateMissingStateCodes,
   adminRevokeAroCode,
+  adminRevokeStateCode,
   adminRotateAroCode,
+  adminRotateStateCode,
 } from "@/app/actions/agentRecruitment";
 import type { AgentRecruitmentOfficer } from "@/lib/db/agent-recruitment";
+import type { AgentStateRecruitmentCode } from "@/lib/db/agent-state-recruitment";
+import { titleCaseStateName } from "@/lib/inec-states";
 
 type Stats = Awaited<ReturnType<typeof import("@/lib/db/agent-recruitment").getAroRegistrationStats>>;
 
 export function AdminAgentRecruitmentClient({
   initialOfficers,
+  initialStateCodes,
   initialStats,
 }: {
   initialOfficers: AgentRecruitmentOfficer[];
+  initialStateCodes: AgentStateRecruitmentCode[];
   initialStats: Stats;
 }) {
   const [officers, setOfficers] = useState(initialOfficers);
+  const [stateCodes, setStateCodes] = useState(initialStateCodes);
   const [stats] = useState(initialStats);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [revealed, setRevealed] = useState<Record<number, string>>({});
+  const [revealedStates, setRevealedStates] = useState<Record<string, string>>({});
   const [batchCodes, setBatchCodes] = useState<{ officerNumber: number; plainCode: string }[] | null>(
     null
   );
+  const [stateBatchCodes, setStateBatchCodes] = useState<
+    { stateId: string; stateName: string; plainCode: string }[] | null
+  >(null);
 
   const missingCodes = useMemo(
     () => officers.filter((o) => !o.hasCode || o.status !== "active").length,
     [officers]
   );
+  const missingStateCodes = useMemo(
+    () => stateCodes.filter((c) => !c.hasCode || c.status !== "active").length,
+    [stateCodes]
+  );
 
   const refreshOfficers = (patch: Partial<AgentRecruitmentOfficer> & { officerNumber: number }) => {
     setOfficers((prev) =>
       prev.map((o) => (o.officerNumber === patch.officerNumber ? { ...o, ...patch } : o))
+    );
+  };
+
+  const refreshStateCode = (
+    patch: Partial<AgentStateRecruitmentCode> & { stateId: string }
+  ) => {
+    setStateCodes((prev) =>
+      prev.map((c) => (c.stateId === patch.stateId ? { ...c, ...patch } : c))
     );
   };
 
@@ -62,6 +86,30 @@ export function AdminAgentRecruitmentClient({
       });
     }
     setRevealed((r) => ({ ...r, ...map }));
+  };
+
+  const generateMissingStates = async () => {
+    setBusy("state-batch");
+    setError(null);
+    setStateBatchCodes(null);
+    const result = await adminGenerateMissingStateCodes();
+    setBusy(null);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setStateBatchCodes(result.codes);
+    const map: Record<string, string> = {};
+    for (const c of result.codes) {
+      map[c.stateId] = c.plainCode;
+      refreshStateCode({
+        stateId: c.stateId,
+        hasCode: true,
+        status: "active",
+        codeGeneratedAt: new Date().toISOString(),
+      });
+    }
+    setRevealedStates((r) => ({ ...r, ...map }));
   };
 
   const rotate = async (officerNumber: number) => {
@@ -99,20 +147,68 @@ export function AdminAgentRecruitmentClient({
     refreshOfficers({ officerNumber, status: "revoked" });
   };
 
+  const rotateState = async (stateId: string) => {
+    setBusy(`state-rotate-${stateId}`);
+    setError(null);
+    const result = await adminRotateStateCode(stateId);
+    setBusy(null);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setRevealedStates((r) => ({ ...r, [stateId]: result.plainCode }));
+    refreshStateCode({
+      stateId,
+      hasCode: true,
+      status: "active",
+      codeGeneratedAt: new Date().toISOString(),
+    });
+  };
+
+  const revokeState = async (stateId: string) => {
+    setBusy(`state-revoke-${stateId}`);
+    setError(null);
+    const result = await adminRevokeStateCode(stateId);
+    setBusy(null);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setRevealedStates((r) => {
+      const next = { ...r };
+      delete next[stateId];
+      return next;
+    });
+    refreshStateCode({ stateId, status: "revoked" });
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Agent recruitment (ARO)</h1>
+          <h1 className="text-2xl font-bold text-neutral-900">Agent recruitment</h1>
           <p className="mt-1 max-w-2xl text-sm text-neutral-600">
-            Five Agent Registration Officers. Each has a short multi-use code that unlocks agent
-            registration. Codes are not stored in plain text — copy them when generated or rotated.
+            ARO 1–5 codes (nationwide) and independent state codes (lock the applicant to that
+            state). Codes are not stored in plain text — copy them when generated or rotated.
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          <Button asChild variant="outline" className="min-h-[44px]">
-            <Link href="/admin/agent-registrations">Agent registrations</Link>
-          </Button>
+        <Button asChild variant="outline" className="min-h-[44px]">
+          <Link href="/admin/agent-registrations">Agent registrations</Link>
+        </Button>
+      </div>
+
+      {error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
+      ) : null}
+
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-neutral-900">ARO 1–5</h2>
+            <p className="text-sm text-neutral-600">
+              National Agent Registration Officers. Codes are not tied to a state.
+            </p>
+          </div>
           {missingCodes > 0 ? (
             <Button
               type="button"
@@ -121,130 +217,268 @@ export function AdminAgentRecruitmentClient({
               onClick={generateMissing}
             >
               {busy === "batch" ? <Loader2 className="h-4 w-4 animate-spin" /> : <KeyRound className="h-4 w-4" />}
-              Generate missing codes ({missingCodes})
+              Generate missing ARO codes ({missingCodes})
             </Button>
           ) : null}
         </div>
-      </div>
 
-      {error ? (
-        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
-      ) : null}
-
-      {batchCodes && batchCodes.length > 0 ? (
-        <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
-          <p className="font-semibold text-emerald-950">New codes (copy now — shown once):</p>
-          <ul className="mt-3 space-y-2">
-            {batchCodes.map((c) => (
-              <li key={c.officerNumber} className="flex items-center gap-2">
-                <span className="w-16 font-medium text-emerald-900">ARO {c.officerNumber}</span>
-                <code className="flex-1 rounded border border-emerald-200 bg-white px-3 py-2 font-mono tracking-wide">
-                  {c.plainCode}
-                </code>
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="icon"
-                  aria-label={`Copy ARO ${c.officerNumber} code`}
-                  onClick={() => navigator.clipboard.writeText(c.plainCode)}
-                >
-                  <Copy className="h-4 w-4" />
-                </Button>
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
-        <table className="w-full min-w-[720px] text-left text-sm">
-          <thead className="border-b border-neutral-200 bg-neutral-50">
-            <tr>
-              <th className="px-4 py-3 font-semibold text-neutral-700">Officer</th>
-              <th className="px-4 py-3 font-semibold text-neutral-700">Status</th>
-              <th className="px-4 py-3 font-semibold text-neutral-700">Registrations</th>
-              <th className="px-4 py-3 font-semibold text-neutral-700">Current code</th>
-              <th className="px-4 py-3 font-semibold text-neutral-700">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-neutral-100">
-            {officers.map((o) => (
-              <tr key={o.id}>
-                <td className="px-4 py-3">
-                  <div className="font-medium text-neutral-900">ARO {o.officerNumber}</div>
-                  <div className="text-xs text-neutral-500">{o.label}</div>
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={
-                      o.status === "active"
-                        ? "rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800"
-                        : "rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600"
-                    }
+        {batchCodes && batchCodes.length > 0 ? (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
+            <p className="font-semibold text-emerald-950">New ARO codes (copy now — shown once):</p>
+            <ul className="mt-3 space-y-2">
+              {batchCodes.map((c) => (
+                <li key={c.officerNumber} className="flex items-center gap-2">
+                  <span className="w-16 font-medium text-emerald-900">ARO {c.officerNumber}</span>
+                  <code className="flex-1 rounded border border-emerald-200 bg-white px-3 py-2 font-mono tracking-wide">
+                    {c.plainCode}
+                  </code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label={`Copy ARO ${c.officerNumber} code`}
+                    onClick={() => navigator.clipboard.writeText(c.plainCode)}
                   >
-                    {o.status === "active" ? "Active" : "Revoked"}
-                  </span>
-                </td>
-                <td className="px-4 py-3 font-mono text-neutral-800">{o.registrationCount}</td>
-                <td className="px-4 py-3">
-                  {revealed[o.officerNumber] ? (
-                    <div className="flex items-center gap-2">
-                      <code className="rounded bg-neutral-100 px-2 py-1 font-mono tracking-wide">
-                        {revealed[o.officerNumber]}
-                      </code>
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+          <table className="w-full min-w-[720px] text-left text-sm">
+            <thead className="border-b border-neutral-200 bg-neutral-50">
+              <tr>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Officer</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Status</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Registrations</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Current code</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {officers.map((o) => (
+                <tr key={o.id}>
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-neutral-900">ARO {o.officerNumber}</div>
+                    <div className="text-xs text-neutral-500">{o.label}</div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={
+                        o.status === "active"
+                          ? "rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800"
+                          : "rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600"
+                      }
+                    >
+                      {o.status === "active" ? "Active" : "Revoked"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-neutral-800">{o.registrationCount}</td>
+                  <td className="px-4 py-3">
+                    {revealed[o.officerNumber] ? (
+                      <div className="flex items-center gap-2">
+                        <code className="rounded bg-neutral-100 px-2 py-1 font-mono tracking-wide">
+                          {revealed[o.officerNumber]}
+                        </code>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => navigator.clipboard.writeText(revealed[o.officerNumber]!)}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-neutral-500">
+                        {o.hasCode ? "Hidden (rotate to reveal a new code)" : "Not generated yet"}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-2">
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8"
-                        onClick={() => navigator.clipboard.writeText(revealed[o.officerNumber]!)}
+                        variant="outline"
+                        className="min-h-[40px]"
+                        disabled={!!busy}
+                        onClick={() => rotate(o.officerNumber)}
                       >
-                        <Copy className="h-3.5 w-3.5" />
+                        {busy === `rotate-${o.officerNumber}` ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4" />
+                        )}
+                        {o.hasCode ? "Rotate" : "Generate"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-h-[40px] border-red-200 text-red-700 hover:bg-red-50"
+                        disabled={!!busy || o.status === "revoked"}
+                        onClick={() => revoke(o.officerNumber)}
+                      >
+                        {busy === `revoke-${o.officerNumber}` ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Ban className="h-4 w-4" />
+                        )}
+                        Revoke
                       </Button>
                     </div>
-                  ) : (
-                    <span className="text-xs text-neutral-500">
-                      {o.hasCode ? "Hidden (rotate to reveal a new code)" : "Not generated yet"}
-                    </span>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="min-h-[40px]"
-                      disabled={!!busy}
-                      onClick={() => rotate(o.officerNumber)}
-                    >
-                      {busy === `rotate-${o.officerNumber}` ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <RefreshCw className="h-4 w-4" />
-                      )}
-                      {o.hasCode ? "Rotate" : "Generate"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      className="min-h-[40px] border-red-200 text-red-700 hover:bg-red-50"
-                      disabled={!!busy || o.status === "revoked"}
-                      onClick={() => revoke(o.officerNumber)}
-                    >
-                      {busy === `revoke-${o.officerNumber}` ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Ban className="h-4 w-4" />
-                      )}
-                      Revoke
-                    </Button>
-                  </div>
-                </td>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-neutral-900">State codes</h2>
+            <p className="text-sm text-neutral-600">
+              Independent of ARO. Unlocking a state code locks that state and blocks National Agent.
+            </p>
+          </div>
+          {missingStateCodes > 0 ? (
+            <Button
+              type="button"
+              className="min-h-[44px] bg-sdp-primary text-white hover:bg-sdp-primary/90"
+              disabled={!!busy}
+              onClick={generateMissingStates}
+            >
+              {busy === "state-batch" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <KeyRound className="h-4 w-4" />
+              )}
+              Generate missing state codes ({missingStateCodes})
+            </Button>
+          ) : null}
+        </div>
+
+        {stateBatchCodes && stateBatchCodes.length > 0 ? (
+          <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm">
+            <p className="font-semibold text-emerald-950">New state codes (copy now — shown once):</p>
+            <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto">
+              {stateBatchCodes.map((c) => (
+                <li key={c.stateId} className="flex items-center gap-2">
+                  <span className="w-40 shrink-0 font-medium text-emerald-900">
+                    {titleCaseStateName(c.stateName)}
+                  </span>
+                  <code className="flex-1 rounded border border-emerald-200 bg-white px-3 py-2 font-mono tracking-wide">
+                    {c.plainCode}
+                  </code>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    aria-label={`Copy ${c.stateName} code`}
+                    onClick={() => navigator.clipboard.writeText(c.plainCode)}
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
+        <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+          <table className="w-full min-w-[720px] text-left text-sm">
+            <thead className="border-b border-neutral-200 bg-neutral-50">
+              <tr>
+                <th className="px-4 py-3 font-semibold text-neutral-700">State</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Status</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Registrations</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Current code</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {stateCodes.map((c) => (
+                <tr key={c.stateId}>
+                  <td className="px-4 py-3 font-medium text-neutral-900">
+                    {titleCaseStateName(c.stateName)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={
+                        c.status === "active"
+                          ? "rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800"
+                          : "rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600"
+                      }
+                    >
+                      {c.status === "active" ? "Active" : "Revoked"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 font-mono text-neutral-800">{c.registrationCount}</td>
+                  <td className="px-4 py-3">
+                    {revealedStates[c.stateId] ? (
+                      <div className="flex items-center gap-2">
+                        <code className="rounded bg-neutral-100 px-2 py-1 font-mono tracking-wide">
+                          {revealedStates[c.stateId]}
+                        </code>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={() => navigator.clipboard.writeText(revealedStates[c.stateId]!)}
+                        >
+                          <Copy className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <span className="text-xs text-neutral-500">
+                        {c.hasCode ? "Hidden (rotate to reveal a new code)" : "Not generated yet"}
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-h-[40px]"
+                        disabled={!!busy}
+                        onClick={() => rotateState(c.stateId)}
+                      >
+                        {busy === `state-rotate-${c.stateId}` ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <RefreshCw className="h-4 w-4" />
+                        )}
+                        {c.hasCode ? "Rotate" : "Generate"}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="min-h-[40px] border-red-200 text-red-700 hover:bg-red-50"
+                        disabled={!!busy || c.status === "revoked"}
+                        onClick={() => revokeState(c.stateId)}
+                      >
+                        {busy === `state-revoke-${c.stateId}` ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Ban className="h-4 w-4" />
+                        )}
+                        Revoke
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section className="space-y-4">
         <h2 className="text-lg font-semibold text-neutral-900">By Agent Registration Officer</h2>

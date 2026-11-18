@@ -67,15 +67,20 @@ function ConstituencyAssignmentPicker({
   value,
   onChange,
   error,
+  lockedStateId,
+  lockedStateName,
 }: {
   level: AgentLevel;
   value: LocationPick;
   onChange: (next: LocationPick) => void;
   error?: string;
+  lockedStateId?: string;
+  lockedStateName?: string;
 }) {
   const { states, loading } = useInecGeo(undefined);
   const [seats, setSeats] = useState<ConstituencySeat[]>([]);
   const [pending, startTransition] = useTransition();
+  const stateLocked = !!lockedStateId;
 
   useEffect(() => {
     if (!value.stateId || !isConstituencyAgentLevel(level)) {
@@ -101,7 +106,7 @@ function ConstituencyAssignmentPicker({
           <Select
             value={value.stateId || "_none"}
             onValueChange={(stateId) => {
-              if (stateId === "_none") return;
+              if (stateLocked || stateId === "_none") return;
               const st = states.find((s) => s.id === stateId);
               onChange({
                 ...EMPTY_LOCATION,
@@ -109,13 +114,21 @@ function ConstituencyAssignmentPicker({
                 stateName: st?.name ?? "",
               });
             }}
-            disabled={loading}
+            disabled={loading || stateLocked}
           >
             <SelectTrigger
               className={cn(error && !value.stateId && "border-red-500")}
               aria-invalid={!!error && !value.stateId}
             >
-              <SelectValue placeholder={loading ? "Loading…" : "Select state"} />
+              <SelectValue
+                placeholder={
+                  stateLocked
+                    ? lockedStateName || "Locked state"
+                    : loading
+                      ? "Loading…"
+                      : "Select state"
+                }
+              />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="_none" disabled className="hidden">
@@ -128,6 +141,9 @@ function ConstituencyAssignmentPicker({
               ))}
             </SelectContent>
           </Select>
+          {stateLocked ? (
+            <p className="text-xs text-neutral-500">Locked by your state recruitment code.</p>
+          ) : null}
         </div>
         <div className="space-y-1.5">
           <Label>{AGENT_LEVEL_NAME_LABELS[level]}</Label>
@@ -196,12 +212,23 @@ function ConstituencyAssignmentPicker({
 
 export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) {
   const level = draft.agentLevel;
+  const stateLocked = !!draft.lockedStateId;
+  const lockedAssignmentBase = stateLocked
+    ? {
+        ...EMPTY_LOCATION,
+        stateId: draft.lockedStateId,
+        stateName: draft.lockedStateName,
+      }
+    : null;
 
   return (
     <div className="space-y-6">
       <div id="agent-level-group" className="space-y-2">
         <h2 className="text-base font-semibold text-neutral-900">What type of agent are you?</h2>
-        <p className="text-sm text-neutral-600">Tick only one box. One person may hold only one post.</p>
+        <p className="text-sm text-neutral-600">
+          Tick only one box. One person may hold only one post.
+          {stateLocked ? " National Agent is not available with a state recruitment code." : ""}
+        </p>
         <div
           className={cn(
             "space-y-5 rounded-xl p-1",
@@ -211,13 +238,16 @@ export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) 
           aria-label="Agent type"
           aria-invalid={!!errors.agentLevel}
         >
-          {AGENT_LEVEL_GROUPS.map((group) => (
+          {AGENT_LEVEL_GROUPS.map((group) => {
+            const levels = group.levels.filter((l) => !(stateLocked && l === "national"));
+            if (levels.length === 0) return null;
+            return (
             <div key={group.id} className="space-y-2">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
                 {group.title}
               </h3>
               <div className="grid gap-3 sm:grid-cols-2">
-                {group.levels.map((l) => {
+                {levels.map((l) => {
                   const selected = level === l;
                   return (
                     <button
@@ -229,7 +259,11 @@ export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) 
                         update({
                           agentLevel: l,
                           assignment: trimToLevel(
-                            l === "national" ? EMPTY_LOCATION : draft.assignment,
+                            l === "national"
+                              ? EMPTY_LOCATION
+                              : lockedAssignmentBase
+                                ? { ...draft.assignment, ...lockedAssignmentBase }
+                                : draft.assignment,
                             l
                           ),
                         })
@@ -262,7 +296,8 @@ export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) 
                 })}
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
         {errors.agentLevel ? (
           <p className="text-sm text-red-600" role="alert">
@@ -313,8 +348,20 @@ export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) 
             idPrefix="assignment"
             level={level}
             value={draft.assignment}
-            onChange={(assignment) => update({ assignment })}
+            onChange={(assignment) =>
+              update({
+                assignment: stateLocked
+                  ? {
+                      ...assignment,
+                      stateId: draft.lockedStateId,
+                      stateName: draft.lockedStateName,
+                    }
+                  : assignment,
+              })
+            }
             error={errors.assignment}
+            lockedStateId={draft.lockedStateId || undefined}
+            lockedStateName={draft.lockedStateName || undefined}
           />
         </div>
       ) : null}
@@ -338,8 +385,20 @@ export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) 
           <ConstituencyAssignmentPicker
             level={level}
             value={draft.assignment}
-            onChange={(assignment) => update({ assignment })}
+            onChange={(assignment) =>
+              update({
+                assignment: stateLocked
+                  ? {
+                      ...assignment,
+                      stateId: draft.lockedStateId,
+                      stateName: draft.lockedStateName,
+                    }
+                  : assignment,
+              })
+            }
             error={errors.assignment}
+            lockedStateId={draft.lockedStateId || undefined}
+            lockedStateName={draft.lockedStateName || undefined}
           />
         </div>
       ) : null}

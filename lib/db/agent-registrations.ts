@@ -9,6 +9,7 @@ export interface AgentRegistrationInsert {
   member_id: string | null;
   aro_id: string | null;
   aro_officer_number: number | null;
+  state_recruitment_code_id?: string | null;
   agent_level: AgentLevel;
   assigned_state_id: string;
   assigned_state_name: string;

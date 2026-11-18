@@ -213,7 +213,12 @@ export type AgentRegistrationDraft = {
   /** Unlocks the form; stamped to the registration on submit. */
   recruitmentCode: string;
   codeUnlocked: boolean;
+  /** How the form was unlocked. */
+  unlockKind: "aro" | "state" | "";
   unlockedAroLabel: string;
+  /** Set when unlocked with an independent state code — assignment state is locked. */
+  lockedStateId: string;
+  lockedStateName: string;
   agentLevel: AgentLevel | null;
   assignment: LocationPick;
   firstName: string;
@@ -227,7 +232,10 @@ export type AgentRegistrationDraft = {
 export const EMPTY_AGENT_DRAFT: AgentRegistrationDraft = {
   recruitmentCode: "",
   codeUnlocked: false,
+  unlockKind: "",
   unlockedAroLabel: "",
+  lockedStateId: "",
+  lockedStateName: "",
   agentLevel: null,
   assignment: EMPTY_LOCATION,
   firstName: "",
