@@ -19,6 +19,7 @@ import {
   type AgentLevel,
   type LocationPick,
 } from "@/lib/agent-registration-schema";
+import { cn } from "@/lib/utils";
 
 /** Classic admin ladder only — constituency / national levels use a different picker. */
 const DEPTH: Partial<Record<AgentLevel, number>> = {
@@ -94,7 +95,11 @@ export function LocationPicker({
             }
             disabled={loading}
           >
-            <SelectTrigger id={`${idPrefix}-state`} className="min-h-[44px]">
+            <SelectTrigger
+              id={`${idPrefix}-state`}
+              className={cn("min-h-[44px]", error && !value.stateId && "border-red-500")}
+              aria-invalid={!!error && !value.stateId}
+            >
               <SelectValue placeholder={loading ? "Loading…" : "Select state"} />
             </SelectTrigger>
             <SelectContent className="max-h-[min(60vh,20rem)]">
@@ -124,7 +129,11 @@ export function LocationPicker({
               }
               disabled={!value.stateId || stateDataLoading}
             >
-              <SelectTrigger id={`${idPrefix}-lga`} className="min-h-[44px]">
+              <SelectTrigger
+                id={`${idPrefix}-lga`}
+                className={cn("min-h-[44px]", error && value.stateId && !value.lgaId && "border-red-500")}
+                aria-invalid={!!error && value.stateId !== "" && !value.lgaId}
+              >
                 <SelectValue
                   placeholder={value.stateId && stateDataLoading ? "Loading…" : "Select LGA"}
                 />
@@ -158,7 +167,11 @@ export function LocationPicker({
               }
               disabled={!value.lgaId}
             >
-              <SelectTrigger id={`${idPrefix}-ward`} className="min-h-[44px]">
+              <SelectTrigger
+                id={`${idPrefix}-ward`}
+                className={cn("min-h-[44px]", error && value.lgaId && !value.wardId && "border-red-500")}
+                aria-invalid={!!error && value.lgaId !== "" && !value.wardId}
+              >
                 <SelectValue placeholder="Select ward" />
               </SelectTrigger>
               <SelectContent className="max-h-[min(60vh,20rem)]">
@@ -187,7 +200,14 @@ export function LocationPicker({
               }
               disabled={!value.wardId || pollingUnits.length === 0}
             >
-              <SelectTrigger id={`${idPrefix}-pu`} className="min-h-[44px]">
+              <SelectTrigger
+                id={`${idPrefix}-pu`}
+                className={cn(
+                  "min-h-[44px]",
+                  error && value.wardId && !value.pollingUnitId && "border-red-500"
+                )}
+                aria-invalid={!!error && value.wardId !== "" && !value.pollingUnitId}
+              >
                 <SelectValue
                   placeholder={
                     value.wardId && pollingUnits.length === 0

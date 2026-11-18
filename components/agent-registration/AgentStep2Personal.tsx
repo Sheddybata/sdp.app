@@ -63,7 +63,7 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
               onChange={(e) => update({ firstName: e.target.value })}
               className="min-h-[44px]"
               autoComplete="given-name"
-              aria-invalid={!!errors.firstName}
+              valid={errors.firstName ? false : undefined}
             />
           </Field>
           <Field id="agent-surname" label="Surname" error={errors.surname}>
@@ -73,7 +73,7 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
               onChange={(e) => update({ surname: e.target.value })}
               className="min-h-[44px]"
               autoComplete="family-name"
-              aria-invalid={!!errors.surname}
+              valid={errors.surname ? false : undefined}
             />
           </Field>
         </div>
@@ -85,7 +85,11 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
                 update({ gender: gender as AgentRegistrationDraft["gender"] })
               }
             >
-              <SelectTrigger id="agent-gender" className="min-h-[44px]" aria-invalid={!!errors.gender}>
+              <SelectTrigger
+                id="agent-gender"
+                className={`min-h-[44px]${errors.gender ? " border-red-500" : ""}`}
+                aria-invalid={!!errors.gender}
+              >
                 <SelectValue placeholder="Select gender" />
               </SelectTrigger>
               <SelectContent>
@@ -107,7 +111,7 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
               placeholder="08012345678"
               autoComplete="tel"
               className="min-h-[44px]"
-              aria-invalid={!!errors.phone}
+              valid={errors.phone ? false : undefined}
             />
           </Field>
         </div>
@@ -118,7 +122,7 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
         <DocumentImageField
           id="agent-photo"
           label="Passport photo"
-          hint="A clear, front-facing photo of your face."
+          hint="Please use a clear photo against a plain white background or wall, free from distractions."
           value={draft.photoDataUrl}
           onChange={(photoDataUrl) => update({ photoDataUrl })}
           error={errors.photoDataUrl}
@@ -127,14 +131,22 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
         />
       </div>
 
-      <div className="space-y-2 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+      <div
+        className={`space-y-2 rounded-xl border bg-white p-4 shadow-sm${
+          errors.acknowledged ? " border-red-500" : " border-neutral-200"
+        }`}
+      >
         <h2 className="text-sm font-semibold text-neutral-900">Acknowledgment</h2>
         <label className="flex cursor-pointer items-start gap-3">
           <input
+            id="agent-acknowledged"
             type="checkbox"
             checked={draft.acknowledged}
             onChange={(e) => update({ acknowledged: e.target.checked })}
-            className="mt-1 h-5 w-5 rounded border-neutral-300 text-sdp-primary focus:ring-sdp-primary"
+            className={`mt-1 h-5 w-5 rounded text-sdp-primary focus:ring-sdp-primary${
+              errors.acknowledged ? " border-red-500" : " border-neutral-300"
+            }`}
+            aria-invalid={!!errors.acknowledged}
           />
           <span className="text-sm text-neutral-800">{AGENT_DECLARATION_TEXT}</span>
         </label>

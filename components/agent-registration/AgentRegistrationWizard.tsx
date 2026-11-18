@@ -18,6 +18,49 @@ import { AgentStep1Assignment } from "./AgentStep1Assignment";
 import { AgentStep2Personal } from "./AgentStep2Personal";
 import { AgentReviewDialog } from "./AgentReviewDialog";
 
+const FIELD_SCROLL_ORDER = [
+  "recruitmentCode",
+  "agentLevel",
+  "assignment",
+  "firstName",
+  "surname",
+  "gender",
+  "phone",
+  "photoDataUrl",
+  "acknowledged",
+] as const;
+
+const FIELD_ELEMENT_IDS: Record<(typeof FIELD_SCROLL_ORDER)[number], string> = {
+  recruitmentCode: "agent-recruitment-code",
+  agentLevel: "agent-level-group",
+  assignment: "agent-assignment-section",
+  firstName: "agent-firstName",
+  surname: "agent-surname",
+  gender: "agent-gender",
+  phone: "agent-phone",
+  photoDataUrl: "agent-photo-upload",
+  acknowledged: "agent-acknowledged",
+};
+
+function scrollToFirstError(errs: Record<string, string>) {
+  for (const key of FIELD_SCROLL_ORDER) {
+    if (!errs[key]) continue;
+    const el = document.getElementById(FIELD_ELEMENT_IDS[key]);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (typeof (el as HTMLElement).focus === "function") {
+        try {
+          (el as HTMLElement).focus({ preventScroll: true });
+        } catch {
+          /* ignore */
+        }
+      }
+      return;
+    }
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 export function AgentRegistrationWizard() {
   const [draft, setDraft] = useState<AgentRegistrationDraft>(EMPTY_AGENT_DRAFT);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -25,7 +68,7 @@ export function AgentRegistrationWizard() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+  const [successName, setSuccessName] = useState<string | null>(null);
 
   const update = (patch: Partial<AgentRegistrationDraft>) => {
     setDraft((d) => ({ ...d, ...patch }));
@@ -62,15 +105,16 @@ export function AgentRegistrationWizard() {
 
   const handleReview = () => {
     if (!draft.codeUnlocked) {
-      setErrors({ recruitmentCode: "Enter a valid recruitment code to continue." });
-      window.scrollTo(0, 0);
+      const next = { recruitmentCode: "Enter a valid recruitment code to continue." };
+      setErrors(next);
+      scrollToFirstError(next);
       return;
     }
     const result = agentRegistrationSchema.safeParse(draft);
     const next = result.success ? {} : zodFieldErrors(result.error);
     setErrors(next);
     if (Object.keys(next).length > 0) {
-      window.scrollTo(0, 0);
+      scrollToFirstError(next);
       return;
     }
     setSubmitError(null);
@@ -87,9 +131,19 @@ export function AgentRegistrationWizard() {
     }));
     setIsSubmitting(false);
     if (result.ok) {
+      const name = draft.firstName.trim();
       setReviewOpen(false);
-      setSubmitted(true);
-      window.scrollTo(0, 0);
+      // Keep ARO code unlocked so field officers can register the next person without re-entering it.
+      setDraft({
+        ...EMPTY_AGENT_DRAFT,
+        recruitmentCode: draft.recruitmentCode,
+        codeUnlocked: true,
+        unlockedAroLabel: draft.unlockedAroLabel,
+      });
+      setErrors({});
+      setSubmitError(null);
+      setSuccessName(name || "Applicant");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
     setSubmitError(result.error);
@@ -99,28 +153,9 @@ export function AgentRegistrationWizard() {
       if (result.fieldErrors.recruitmentCode) {
         update({ codeUnlocked: false, unlockedAroLabel: "" });
       }
-      window.scrollTo(0, 0);
+      scrollToFirstError(result.fieldErrors);
     }
   };
-
-  if (submitted) {
-    return (
-      <main className="min-h-screen bg-neutral-50 px-4 py-10">
-        <div className="mx-auto max-w-md rounded-xl border border-neutral-200 bg-white p-6 text-center shadow-sm ring-2 ring-sdp-primary/20 sm:p-8">
-          <CheckCircle2 className="mx-auto h-12 w-12 text-sdp-accent" aria-hidden />
-          <h1 className="mt-4 text-2xl font-semibold text-neutral-900">Registration submitted</h1>
-          <p className="mt-2 text-sm text-neutral-600">
-            Thank you, {draft.firstName}. Your application has been received and is{" "}
-            <strong>subject to party endorsement</strong>. The national secretariat will review your
-            details. You do not need to sign in.
-          </p>
-          <Button asChild className="mt-6 min-h-[44px] w-full bg-sdp-primary text-white hover:bg-sdp-primary/90">
-            <Link href="/">Back to homepage</Link>
-          </Button>
-        </div>
-      </main>
-    );
-  }
 
   return (
     <main className="min-h-screen bg-neutral-50">
@@ -141,6 +176,32 @@ export function AgentRegistrationWizard() {
       </header>
 
       <div className="mx-auto max-w-xl space-y-6 px-4 py-6 pb-24">
+        {successName ? (
+          <div
+            className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"
+            role="status"
+          >
+            <div className="flex items-start gap-3">
+              <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" aria-hidden />
+              <div className="flex-1">
+                <p className="font-semibold">Registration submitted</p>
+                <p className="mt-1 text-emerald-800">
+                  Thank you, {successName}. The application has been received and is subject to
+                  party endorsement. Enter the next agent’s details below — your recruitment code
+                  stays unlocked.
+                </p>
+              </div>
+              <button
+                type="button"
+                className="text-xs font-medium text-emerald-800 underline"
+                onClick={() => setSuccessName(null)}
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        ) : null}
+
         {Object.keys(errors).length > 0 ? (
           <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">
             Please fix the highlighted fields below.
@@ -175,10 +236,9 @@ export function AgentRegistrationWizard() {
                       void unlock();
                     }
                   }}
-                  placeholder="e.g. A3-7K2M"
                   autoCapitalize="characters"
                   className="min-h-[44px] pl-10 font-mono uppercase tracking-wide"
-                  aria-invalid={!!errors.recruitmentCode}
+                  valid={errors.recruitmentCode ? false : undefined}
                   disabled={isUnlocking}
                 />
               </div>

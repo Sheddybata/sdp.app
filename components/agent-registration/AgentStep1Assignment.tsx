@@ -111,7 +111,10 @@ function ConstituencyAssignmentPicker({
             }}
             disabled={loading}
           >
-            <SelectTrigger>
+            <SelectTrigger
+              className={cn(error && !value.stateId && "border-red-500")}
+              aria-invalid={!!error && !value.stateId}
+            >
               <SelectValue placeholder={loading ? "Loading…" : "Select state"} />
             </SelectTrigger>
             <SelectContent>
@@ -146,7 +149,10 @@ function ConstituencyAssignmentPicker({
             }}
             disabled={!value.stateId || pending}
           >
-            <SelectTrigger>
+            <SelectTrigger
+              className={cn(error && !value.code && "border-red-500")}
+              aria-invalid={!!error && !value.code}
+            >
               <SelectValue
                 placeholder={
                   !value.stateId
@@ -193,10 +199,18 @@ export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) 
 
   return (
     <div className="space-y-6">
-      <div className="space-y-2">
+      <div id="agent-level-group" className="space-y-2">
         <h2 className="text-base font-semibold text-neutral-900">What type of agent are you?</h2>
         <p className="text-sm text-neutral-600">Tick only one box. One person may hold only one post.</p>
-        <div className="space-y-5" role="radiogroup" aria-label="Agent type">
+        <div
+          className={cn(
+            "space-y-5 rounded-xl p-1",
+            errors.agentLevel && "ring-2 ring-red-500 ring-offset-2"
+          )}
+          role="radiogroup"
+          aria-label="Agent type"
+          aria-invalid={!!errors.agentLevel}
+        >
           {AGENT_LEVEL_GROUPS.map((group) => (
             <div key={group.id} className="space-y-2">
               <h3 className="text-xs font-semibold uppercase tracking-wide text-neutral-500">
@@ -224,7 +238,9 @@ export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) 
                         "flex min-h-[56px] items-center gap-3 rounded-xl border-2 bg-white px-4 py-3 text-left transition-colors",
                         selected
                           ? "border-sdp-primary bg-sdp-primary/5"
-                          : "border-neutral-200 hover:border-sdp-primary/40"
+                          : errors.agentLevel
+                            ? "border-red-300 hover:border-red-400"
+                            : "border-neutral-200 hover:border-sdp-primary/40"
                       )}
                     >
                       <span
@@ -256,7 +272,13 @@ export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) 
       </div>
 
       {level === "national" ? (
-        <div className="space-y-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+        <div
+          id="agent-assignment-section"
+          className={cn(
+            "space-y-3 rounded-xl border bg-white p-4 shadow-sm",
+            errors.assignment ? "border-red-500" : "border-neutral-200"
+          )}
+        >
           <h3 className="text-sm font-semibold text-neutral-900">Nationwide post</h3>
           <p className="text-sm text-neutral-600">
             There is only one National Agent post. Code:{" "}
@@ -271,7 +293,13 @@ export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) 
       ) : null}
 
       {level && usesAdminLocationPicker(level) ? (
-        <div className="space-y-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+        <div
+          id="agent-assignment-section"
+          className={cn(
+            "space-y-3 rounded-xl border bg-white p-4 shadow-sm",
+            errors.assignment ? "border-red-500" : "border-neutral-200"
+          )}
+        >
           <div>
             <h3 className="text-sm font-semibold text-neutral-900">
               {AGENT_LEVEL_LABELS[level]}: {AGENT_LEVEL_NAME_LABELS[level]} and code
@@ -292,7 +320,13 @@ export function AgentStep1Assignment({ draft, update, errors }: AgentStepProps) 
       ) : null}
 
       {level && isConstituencyAgentLevel(level) ? (
-        <div className="space-y-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
+        <div
+          id="agent-assignment-section"
+          className={cn(
+            "space-y-3 rounded-xl border bg-white p-4 shadow-sm",
+            errors.assignment ? "border-red-500" : "border-neutral-200"
+          )}
+        >
           <div>
             <h3 className="text-sm font-semibold text-neutral-900">
               {AGENT_LEVEL_LABELS[level]}: {AGENT_LEVEL_NAME_LABELS[level]} and code
