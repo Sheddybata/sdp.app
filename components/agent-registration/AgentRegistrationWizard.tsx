@@ -279,6 +279,11 @@ export function AgentRegistrationWizard() {
                 <KeyRound className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
                 <Input
                   id="agent-recruitment-code"
+                  type="password"
+                  inputMode="text"
+                  autoComplete="new-password"
+                  autoCorrect="off"
+                  spellCheck={false}
                   value={draft.recruitmentCode}
                   onChange={(e) =>
                     update({
@@ -296,10 +301,10 @@ export function AgentRegistrationWizard() {
                       void unlock();
                     }
                   }}
-                  autoCapitalize="characters"
-                  className="min-h-[44px] pl-10 font-mono uppercase tracking-wide"
+                  className="min-h-[44px] pl-10 font-mono tracking-wide"
                   valid={errors.recruitmentCode ? false : undefined}
-                  disabled={isUnlocking}
+                  disabled={isUnlocking || draft.codeUnlocked}
+                  aria-label="Access code (hidden while typing)"
                 />
               </div>
               <Button
