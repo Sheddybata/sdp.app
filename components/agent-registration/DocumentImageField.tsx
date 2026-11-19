@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Camera, Loader2, RefreshCw, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -26,7 +26,7 @@ export function DocumentImageField({
 }: {
   id: string;
   label: string;
-  hint?: string;
+  hint?: ReactNode;
   value: string;
   onChange: (dataUrl: string) => void;
   error?: string;

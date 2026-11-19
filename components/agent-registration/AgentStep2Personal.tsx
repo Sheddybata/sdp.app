@@ -122,7 +122,13 @@ export function AgentStep2Personal({ draft, update, errors }: AgentStepProps) {
         <DocumentImageField
           id="agent-photo"
           label="Passport photo"
-          hint="Please use a clear photo against a plain background, free from distractions."
+          hint={
+            <>
+              Please use a clear photo against a{" "}
+              <strong className="font-bold text-neutral-900">PLAIN</strong> background, free from
+              distractions.
+            </>
+          }
           value={draft.photoDataUrl}
           onChange={(photoDataUrl) => update({ photoDataUrl })}
           error={errors.photoDataUrl}
