@@ -14,8 +14,29 @@ const ChunkErrorHandler = dynamic(() => import("./chunk-error-handler").then(mod
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.socialdemocraticparty.app"),
   title: "Official SDP Registration Gateway",
   description: "Social Democratic Party - Registration gateway, enrollment & admin",
+  openGraph: {
+    type: "website",
+    siteName: "Social Democratic Party",
+    title: "Official SDP Registration Gateway",
+    description: "Social Democratic Party - Registration gateway, enrollment & admin",
+    images: [
+      {
+        url: "/og-agent.jpg",
+        width: 1200,
+        height: 630,
+        alt: "Social Democratic Party",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Official SDP Registration Gateway",
+    description: "Social Democratic Party - Registration gateway, enrollment & admin",
+    images: ["/og-agent.jpg"],
+  },
   icons: {
     icon: [
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
