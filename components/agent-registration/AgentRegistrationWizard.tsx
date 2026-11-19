@@ -227,7 +227,7 @@ export function AgentRegistrationWizard() {
         <div className="mx-auto max-w-xl">
           <h1 className="text-xl font-semibold text-neutral-900">Register as an agent</h1>
           <p className="mt-1 text-sm text-neutral-600">
-            Enter a recruitment code from an Agent Registration Officer or your state team to apply.
+            Collect an access code from your state chair or any SDP Agent Recruitment Officer to apply.
           </p>
         </div>
       </header>
@@ -269,7 +269,7 @@ export function AgentRegistrationWizard() {
           <div>
             <h2 className="text-sm font-semibold text-neutral-900">Recruitment code</h2>
             <p className="mt-0.5 text-xs text-neutral-500">
-              Get this code from your Agent Registration Officer (ARO 1–5).
+              Collect access code from your state chair or any SDP Agent Recruitment Officer
             </p>
           </div>
           <div className="space-y-1.5">
