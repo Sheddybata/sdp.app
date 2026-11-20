@@ -265,46 +265,6 @@ export function AgentRegistrationWizard() {
           </div>
         ) : null}
 
-        <div
-          className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 shadow-sm"
-          role="note"
-        >
-          <p>
-            Please note agent registration is <strong className="font-bold">free</strong>. Please
-            disregard or report anyone requesting for a fee. For enquiries or more information,
-            contact:
-          </p>
-          <ul className="mt-3 space-y-2">
-            <li className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
-              <a
-                href="tel:+2347043979165"
-                className="font-semibold text-amber-950 underline-offset-2 hover:underline"
-              >
-                +234 704 397 9165
-              </a>
-              <span className="text-amber-900">Front Desk</span>
-            </li>
-            <li className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
-              <a
-                href="tel:+2348066524457"
-                className="font-semibold text-amber-950 underline-offset-2 hover:underline"
-              >
-                +234 806 652 4457
-              </a>
-              <span className="text-amber-900">Organisation</span>
-            </li>
-            <li className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
-              <a
-                href="tel:+2348033022578"
-                className="font-semibold text-amber-950 underline-offset-2 hover:underline"
-              >
-                +234 803 302 2578
-              </a>
-              <span className="text-amber-900">Administration</span>
-            </li>
-          </ul>
-        </div>
-
         <div className="space-y-3 rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
           <div>
             <h2 className="text-sm font-semibold text-neutral-900">Recruitment code</h2>
@@ -372,6 +332,46 @@ export function AgentRegistrationWizard() {
               </p>
             ) : null}
           </div>
+        </div>
+
+        <div
+          className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-950 shadow-sm"
+          role="note"
+        >
+          <p>
+            Please note agent registration is <strong className="font-bold">free</strong>. Please
+            disregard or report anyone requesting for a fee. For enquiries or more information,
+            contact:
+          </p>
+          <ul className="mt-3 space-y-2">
+            <li className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
+              <a
+                href="tel:+2347043979165"
+                className="font-semibold text-amber-950 underline-offset-2 hover:underline"
+              >
+                +234 704 397 9165
+              </a>
+              <span className="text-amber-900">Front Desk</span>
+            </li>
+            <li className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
+              <a
+                href="tel:+2348066524457"
+                className="font-semibold text-amber-950 underline-offset-2 hover:underline"
+              >
+                +234 806 652 4457
+              </a>
+              <span className="text-amber-900">Organisation</span>
+            </li>
+            <li className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:gap-3">
+              <a
+                href="tel:+2348033022578"
+                className="font-semibold text-amber-950 underline-offset-2 hover:underline"
+              >
+                +234 803 302 2578
+              </a>
+              <span className="text-amber-900">Administration</span>
+            </li>
+          </ul>
         </div>
 
         {draft.codeUnlocked ? (
