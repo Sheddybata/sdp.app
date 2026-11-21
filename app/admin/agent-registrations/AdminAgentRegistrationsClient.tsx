@@ -87,11 +87,18 @@ function matchesSearch(r: AgentRegistrationRecord, q: string): boolean {
     r.voterIdentificationNumber ?? "",
     assignmentText(r),
     r.assignedStateName,
+    r.registeredByLabel ?? "",
     r.aroOfficerNumber != null ? `aro ${r.aroOfficerNumber}` : "",
   ]
     .join(" ")
     .toLowerCase()
     .includes(q);
+}
+
+function registeredByText(r: AgentRegistrationRecord): string {
+  if (r.registeredByLabel?.trim()) return r.registeredByLabel.trim();
+  if (r.aroOfficerNumber != null) return `Agent Registration Officer ${r.aroOfficerNumber}`;
+  return "—";
 }
 
 function optionalLoc(loc: LocationPick | null | undefined): string | null {
@@ -265,12 +272,7 @@ export function AdminAgentRegistrationsClient({
     ? ([
         ["Agent type", AGENT_LEVEL_LABELS[selected.agentLevel]],
         ["Assigned to", assignmentText(selected)],
-        [
-          "ARO",
-          selected.aroOfficerNumber != null
-            ? `Agent Registration Officer ${selected.aroOfficerNumber}`
-            : "—",
-        ],
+        ["Registered by", registeredByText(selected)],
         ["Phone", selected.phone],
         ["Gender", selected.gender ?? "—"],
         ...(selected.nin ? ([["NIN", selected.nin]] as [string, string][]) : []),
@@ -400,7 +402,7 @@ export function AdminAgentRegistrationsClient({
             <thead className="border-b border-neutral-200 bg-neutral-50">
               <tr>
                 <th className="px-4 py-3 font-semibold text-neutral-700">Name</th>
-                <th className="px-4 py-3 font-semibold text-neutral-700">ARO</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Registered by</th>
                 <th className="px-4 py-3 font-semibold text-neutral-700">Agent type</th>
                 <th className="px-4 py-3 font-semibold text-neutral-700">Assigned to</th>
                 <th className="px-4 py-3 font-semibold text-neutral-700">Phone</th>
@@ -441,9 +443,7 @@ export function AdminAgentRegistrationsClient({
                         <div className="mt-0.5 text-xs font-normal text-neutral-500">{r.gender}</div>
                       ) : null}
                     </td>
-                    <td className="px-4 py-3 text-neutral-600">
-                      {r.aroOfficerNumber != null ? `ARO ${r.aroOfficerNumber}` : "—"}
-                    </td>
+                    <td className="px-4 py-3 text-neutral-600">{registeredByText(r)}</td>
                     <td className="px-4 py-3 text-neutral-600">{AGENT_LEVEL_LABELS[r.agentLevel]}</td>
                     <td className="px-4 py-3 text-neutral-600">{assignmentText(r)}</td>
                     <td className="px-4 py-3 font-mono text-neutral-700">{r.phone}</td>

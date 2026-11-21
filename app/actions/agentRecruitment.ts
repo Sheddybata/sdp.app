@@ -24,6 +24,13 @@ import {
   setStateCodeHash,
   type AgentStateRecruitmentCode,
 } from "@/lib/db/agent-state-recruitment";
+import {
+  findActiveNamedCodeByPlain,
+  listNamedRecruitmentCodes,
+  revokeNamedCode,
+  setNamedCodeHash,
+  type AgentNamedRecruitmentCode,
+} from "@/lib/db/agent-named-recruitment";
 import { findInecState } from "@/lib/inec-states";
 
 export type VerifyAroResult =
@@ -35,9 +42,16 @@ export type VerifyAroResult =
       stateName: string;
       label: string;
     }
+  | {
+      ok: true;
+      kind: "named";
+      stateId: string;
+      stateName: string;
+      label: string;
+    }
   | { ok: false; error: string };
 
-/** Public: unlock agent apply with an ARO or independent state recruitment code. */
+/** Public: unlock agent apply with ARO, named (e.g. governor), or state recruitment code. */
 export async function verifyAgentRecruitmentCode(code: string): Promise<VerifyAroResult> {
   if (typeof code !== "string" || !code.trim()) {
     return { ok: false, error: "Enter the recruitment code from your Agent Registration Officer." };
@@ -45,6 +59,16 @@ export async function verifyAgentRecruitmentCode(code: string): Promise<VerifyAr
   const aro = await findActiveAroByCode(code);
   if (aro) {
     return { ok: true, kind: "aro", officerNumber: aro.officerNumber, label: aro.label };
+  }
+  const named = await findActiveNamedCodeByPlain(code);
+  if (named) {
+    return {
+      ok: true,
+      kind: "named",
+      stateId: named.stateId,
+      stateName: named.stateName,
+      label: named.label,
+    };
   }
   const state = await findActiveStateCodeByPlain(code);
   if (state) {
@@ -188,4 +212,41 @@ export async function adminGenerateMissingStateCodes(): Promise<
     codes.push({ stateId: row.stateId, stateName: row.stateName, plainCode });
   }
   return { ok: true, codes };
+}
+
+export async function adminListNamedRecruitmentCodes(): Promise<AgentNamedRecruitmentCode[]> {
+  const authed = await isAuthenticated();
+  if (!authed) return [];
+  return listNamedRecruitmentCodes();
+}
+
+export type NamedCodeResult =
+  | { ok: true; plainCode: string; slug: string; label: string }
+  | { ok: false; error: string };
+
+/** Set or rotate a named code to a specific plaintext value (shown once). */
+export async function adminSetNamedCodePlain(
+  slug: string,
+  plainCode: string
+): Promise<NamedCodeResult> {
+  const authed = await isAuthenticated();
+  if (!authed) return { ok: false, error: "Unauthorized." };
+  const normalized = normalizeStateRecruitmentCode(plainCode);
+  if (normalized.length < 6) return { ok: false, error: "Code is too short." };
+  const codeHash = hashStateRecruitmentCode(normalized);
+  const saved = await setNamedCodeHash({ slug, codeHash, status: "active" });
+  if (!saved.ok) return { ok: false, error: "Could not save the code. Try again." };
+  const rows = await listNamedRecruitmentCodes();
+  const row = rows.find((r) => r.slug === slug);
+  return { ok: true, plainCode: normalized, slug, label: row?.label ?? slug };
+}
+
+export async function adminRevokeNamedCode(
+  slug: string
+): Promise<{ ok: true } | { ok: false; error: string }> {
+  const authed = await isAuthenticated();
+  if (!authed) return { ok: false, error: "Unauthorized." };
+  const ok = await revokeNamedCode(slug);
+  if (!ok) return { ok: false, error: "Could not revoke the code. Try again." };
+  return { ok: true };
 }

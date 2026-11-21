@@ -8,12 +8,15 @@ import {
   adminGenerateMissingAroCodes,
   adminGenerateMissingStateCodes,
   adminRevokeAroCode,
+  adminRevokeNamedCode,
   adminRevokeStateCode,
   adminRotateAroCode,
   adminRotateStateCode,
+  adminSetNamedCodePlain,
 } from "@/app/actions/agentRecruitment";
 import type { AgentRecruitmentOfficer } from "@/lib/db/agent-recruitment";
 import type { AgentStateRecruitmentCode } from "@/lib/db/agent-state-recruitment";
+import type { AgentNamedRecruitmentCode } from "@/lib/db/agent-named-recruitment";
 import { titleCaseStateName } from "@/lib/inec-states";
 
 type Stats = Awaited<ReturnType<typeof import("@/lib/db/agent-recruitment").getAroRegistrationStats>>;
@@ -21,19 +24,23 @@ type Stats = Awaited<ReturnType<typeof import("@/lib/db/agent-recruitment").getA
 export function AdminAgentRecruitmentClient({
   initialOfficers,
   initialStateCodes,
+  initialNamedCodes,
   initialStats,
 }: {
   initialOfficers: AgentRecruitmentOfficer[];
   initialStateCodes: AgentStateRecruitmentCode[];
+  initialNamedCodes: AgentNamedRecruitmentCode[];
   initialStats: Stats;
 }) {
   const [officers, setOfficers] = useState(initialOfficers);
   const [stateCodes, setStateCodes] = useState(initialStateCodes);
+  const [namedCodes, setNamedCodes] = useState(initialNamedCodes);
   const [stats] = useState(initialStats);
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [revealed, setRevealed] = useState<Record<number, string>>({});
   const [revealedStates, setRevealedStates] = useState<Record<string, string>>({});
+  const [revealedNamed, setRevealedNamed] = useState<Record<string, string>>({});
   const [batchCodes, setBatchCodes] = useState<{ officerNumber: number; plainCode: string }[] | null>(
     null
   );
@@ -182,14 +189,52 @@ export function AdminAgentRecruitmentClient({
     refreshStateCode({ stateId, status: "revoked" });
   };
 
+  const reactivateNamed = async (slug: string, plainCode: string) => {
+    setBusy(`named-${slug}`);
+    setError(null);
+    const result = await adminSetNamedCodePlain(slug, plainCode);
+    setBusy(null);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setRevealedNamed((r) => ({ ...r, [slug]: result.plainCode }));
+    setNamedCodes((prev) =>
+      prev.map((c) =>
+        c.slug === slug
+          ? { ...c, hasCode: true, status: "active", codeGeneratedAt: new Date().toISOString() }
+          : c
+      )
+    );
+  };
+
+  const revokeNamed = async (slug: string) => {
+    setBusy(`named-revoke-${slug}`);
+    setError(null);
+    const result = await adminRevokeNamedCode(slug);
+    setBusy(null);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    setRevealedNamed((r) => {
+      const next = { ...r };
+      delete next[slug];
+      return next;
+    });
+    setNamedCodes((prev) =>
+      prev.map((c) => (c.slug === slug ? { ...c, status: "revoked" } : c))
+    );
+  };
+
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-neutral-900">Agent recruitment codes</h1>
           <p className="mt-1 max-w-2xl text-sm text-neutral-600">
-            Generate independent codes for all 37 states (locks each state on apply), plus ARO 1–5
-            nationwide codes. Copy codes when generated — they are shown once.
+            Named sponsors (e.g. governors), independent state codes, and ARO 1–5. State-locked codes
+            block National Agent. Copy codes when revealed — they are shown once.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -217,6 +262,124 @@ export function AdminAgentRecruitmentClient({
       {error ? (
         <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800">{error}</div>
       ) : null}
+
+      <section id="named-codes" className="space-y-4">
+        <div>
+          <h2 className="text-lg font-semibold text-neutral-900">Named codes (governors & sponsors)</h2>
+          <p className="text-sm text-neutral-600">
+            Each code locks to one state and appears as <strong>Registered by</strong> on agent
+            applications. Nasarawa governor code: <span className="font-mono">GOV-IG754</span>.
+          </p>
+        </div>
+        <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
+          <table className="w-full min-w-[720px] text-left text-sm">
+            <thead className="border-b border-neutral-200 bg-neutral-50">
+              <tr>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Sponsor</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Locked state</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Status</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Registrations</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Current code</th>
+                <th className="px-4 py-3 font-semibold text-neutral-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {namedCodes.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-neutral-600">
+                    No named codes yet. Run migration 025, then refresh.
+                  </td>
+                </tr>
+              ) : (
+                namedCodes.map((c) => (
+                  <tr key={c.slug}>
+                    <td className="px-4 py-3 font-medium text-neutral-900">{c.label}</td>
+                    <td className="px-4 py-3 text-neutral-700">
+                      {titleCaseStateName(c.stateName)}
+                    </td>
+                    <td className="px-4 py-3">
+                      <span
+                        className={
+                          c.status === "active"
+                            ? "rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800"
+                            : "rounded-full bg-neutral-100 px-2 py-0.5 text-xs font-semibold text-neutral-600"
+                        }
+                      >
+                        {c.status === "active" ? "Active" : "Revoked"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 font-mono text-neutral-800">{c.registrationCount}</td>
+                    <td className="px-4 py-3">
+                      {revealedNamed[c.slug] ? (
+                        <div className="flex items-center gap-2">
+                          <code className="rounded bg-neutral-100 px-2 py-1 font-mono tracking-wide">
+                            {revealedNamed[c.slug]}
+                          </code>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={() => navigator.clipboard.writeText(revealedNamed[c.slug]!)}
+                          >
+                            <Copy className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-neutral-500">
+                          {c.hasCode
+                            ? "Active (hidden — re-activate to reveal)"
+                            : "Not set"}
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="min-h-[40px]"
+                          disabled={!!busy}
+                          onClick={() => {
+                            const known =
+                              c.slug === "governor-nasarawa" ? "GOV-IG754" : "";
+                            const entered =
+                              known ||
+                              window.prompt(`Enter plaintext code for ${c.label}`) ||
+                              "";
+                            if (entered.trim()) void reactivateNamed(c.slug, entered.trim());
+                          }}
+                        >
+                          {busy === `named-${c.slug}` ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <RefreshCw className="h-4 w-4" />
+                          )}
+                          {c.hasCode ? "Re-activate / reveal" : "Set code"}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className="min-h-[40px] border-red-200 text-red-700 hover:bg-red-50"
+                          disabled={!!busy || c.status === "revoked"}
+                          onClick={() => revokeNamed(c.slug)}
+                        >
+                          {busy === `named-revoke-${c.slug}` ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Ban className="h-4 w-4" />
+                          )}
+                          Revoke
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
 
       <section id="state-codes" className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

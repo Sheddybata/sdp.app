@@ -14,6 +14,10 @@ import {
 import { agentPostTaken, createAgentRegistration } from "@/lib/db/agent-registrations";
 import { findActiveAroByCode } from "@/lib/db/agent-recruitment";
 import { findActiveStateCodeByPlain } from "@/lib/db/agent-state-recruitment";
+import {
+  findActiveNamedCodeByPlain,
+  formatStateCodeLabel,
+} from "@/lib/db/agent-named-recruitment";
 import { lookupLocationCode } from "@/app/actions/locationCodes";
 import { verifyConstituencyAssignment } from "@/app/actions/constituencies";
 import { nationalAgentPost } from "@/lib/constituency-data";
@@ -62,10 +66,26 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
   const v = parsed.data;
 
   const aro = await findActiveAroByCode(v.recruitmentCode);
-  const stateCode = aro ? null : await findActiveStateCodeByPlain(v.recruitmentCode);
-  if (!aro && !stateCode) {
+  const namedCode = aro ? null : await findActiveNamedCodeByPlain(v.recruitmentCode);
+  const stateCode =
+    aro || namedCode ? null : await findActiveStateCodeByPlain(v.recruitmentCode);
+  if (!aro && !namedCode && !stateCode) {
     return { ok: false, error: CODE_INVALID, fieldErrors: { recruitmentCode: CODE_INVALID } };
   }
+
+  const lockedState = namedCode
+    ? { stateId: namedCode.stateId, stateName: namedCode.stateName }
+    : stateCode
+      ? { stateId: stateCode.stateId, stateName: stateCode.stateName }
+      : null;
+
+  const registeredByLabel = aro
+    ? `Agent Registration Officer ${aro.officerNumber}`
+    : namedCode
+      ? namedCode.label
+      : stateCode
+        ? formatStateCodeLabel(stateCode.stateName)
+        : null;
 
   const firstName = v.firstName.trim();
   const surname = v.surname.trim();
@@ -76,17 +96,17 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
   let constituencyCode: string | null = null;
   let constituencyName: string | null = null;
 
-  if (stateCode && level === "national") {
+  if (lockedState && level === "national") {
     return {
       ok: false,
-      error: "State recruitment codes cannot register a National Agent.",
-      fieldErrors: { agentLevel: "State recruitment codes cannot register a National Agent." },
+      error: "This recruitment code cannot register a National Agent.",
+      fieldErrors: { agentLevel: "This recruitment code cannot register a National Agent." },
     };
   }
 
-  if (stateCode) {
-    if (assignment.stateId !== stateCode.stateId) {
-      const msg = `This code is locked to ${titleCaseStateName(stateCode.stateName)}. Choose an assignment in that state.`;
+  if (lockedState) {
+    if (assignment.stateId !== lockedState.stateId) {
+      const msg = `This code is locked to ${titleCaseStateName(lockedState.stateName)}. Choose an assignment in that state.`;
       return { ok: false, error: msg, fieldErrors: { assignment: msg } };
     }
   }
@@ -162,6 +182,8 @@ export async function submitAgentRegistration(raw: unknown): Promise<AgentRegist
       aro_id: aro?.id ?? null,
       aro_officer_number: aro?.officerNumber ?? null,
       state_recruitment_code_id: stateCode?.id ?? null,
+      named_recruitment_code_id: namedCode?.id ?? null,
+      registered_by_label: registeredByLabel,
       agent_level: level,
       assigned_state_id: assignment.stateId,
       assigned_state_name: assignment.stateName,

@@ -103,11 +103,11 @@ export function AgentRegistrationWizard() {
       });
       return;
     }
-    if (result.kind === "state") {
+    if (result.kind === "state" || result.kind === "named") {
       const stateName = titleCaseStateName(result.stateName);
       update({
         codeUnlocked: true,
-        unlockKind: "state",
+        unlockKind: result.kind,
         unlockedAroLabel: result.label,
         lockedStateId: result.stateId,
         lockedStateName: stateName,

@@ -214,7 +214,7 @@ export type AgentRegistrationDraft = {
   recruitmentCode: string;
   codeUnlocked: boolean;
   /** How the form was unlocked. */
-  unlockKind: "aro" | "state" | "";
+  unlockKind: "aro" | "state" | "named" | "";
   unlockedAroLabel: string;
   /** Set when unlocked with an independent state code — assignment state is locked. */
   lockedStateId: string;
