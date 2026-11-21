@@ -233,6 +233,11 @@ export function AgentRegistrationWizard() {
       </header>
 
       <div className="mx-auto max-w-xl space-y-6 px-4 py-6 pb-24">
+        <p className="rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-800 shadow-sm">
+          Please note that all agent registrations are subject to review by the Social Democratic
+          Party.
+        </p>
+
         {successName ? (
           <div
             className="rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900"
@@ -243,9 +248,9 @@ export function AgentRegistrationWizard() {
               <div className="flex-1">
                 <p className="font-semibold">Registration submitted</p>
                 <p className="mt-1 text-emerald-800">
-                  Thank you, {successName}. The application has been received and is subject to
-                  party endorsement. Enter the next agent’s details below — your recruitment code
-                  stays unlocked.
+                  Thank you, {successName}. The application has been received. Please note that all
+                  agent registrations are subject to review by the Social Democratic Party. Enter
+                  the next agent’s details below — your recruitment code stays unlocked.
                 </p>
               </div>
               <button
@@ -378,6 +383,11 @@ export function AgentRegistrationWizard() {
           <>
             <AgentStep1Assignment draft={draft} update={update} errors={errors} />
             <AgentStep2Personal draft={draft} update={update} errors={errors} />
+
+            <p className="rounded-lg border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-800 shadow-sm">
+              Please note that all agent registrations are subject to review by the Social Democratic
+              Party.
+            </p>
 
             <Button type="button" className="min-h-[48px] w-full" onClick={handleReview} disabled={isSubmitting}>
               {isSubmitting ? (

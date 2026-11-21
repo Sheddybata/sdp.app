@@ -88,6 +88,10 @@ export function AgentReviewDialog({
             )}
             <Row label="Declaration" value={draft.acknowledged ? "Accepted" : "Not accepted"} />
           </dl>
+          <p className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-800">
+            Please note that all agent registrations are subject to review by the Social Democratic
+            Party.
+          </p>
         </div>
 
         <DialogFooter className="shrink-0 flex-col gap-3 border-t border-neutral-200 bg-neutral-50/80 px-4 py-4 sm:flex-row sm:px-6">
