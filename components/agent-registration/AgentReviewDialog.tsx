@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -88,10 +88,13 @@ export function AgentReviewDialog({
             )}
             <Row label="Declaration" value={draft.acknowledged ? "Accepted" : "Not accepted"} />
           </dl>
-          <p className="mt-4 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2.5 text-sm text-neutral-800">
-            Please note that all agent registrations are subject to review by the Social Democratic
-            Party.
-          </p>
+          <div className="mt-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5 text-sm text-amber-950">
+            <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" aria-hidden />
+            <p>
+              Please note that all agent registrations are subject to review and final approval by
+              the Social Democratic Party.
+            </p>
+          </div>
         </div>
 
         <DialogFooter className="shrink-0 flex-col gap-3 border-t border-neutral-200 bg-neutral-50/80 px-4 py-4 sm:flex-row sm:px-6">
